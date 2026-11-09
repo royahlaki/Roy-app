@@ -16,12 +16,12 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html,body{margin:0;height:100%;background:#0b0f1e;color:#EEF2FF;font-family:Heebo,system-ui,sans-serif;overflow:hidden;overscroll-behavior:none}
+html,body{margin:0;height:var(--app-h,100%);background:#0b0f1e;color:#EEF2FF;font-family:Heebo,system-ui,sans-serif;overflow:hidden;overscroll-behavior:none}
 #probe{position:fixed;visibility:hidden;pointer-events:none;top:0;left:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
-#frames{position:fixed;inset:0}
+#frames{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%)}
 #frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:transparent;opacity:0;visibility:hidden;transition:opacity .28s ease,visibility 0s linear .28s}
 #frames iframe.on{opacity:1;visibility:visible;transition:opacity .28s ease,visibility 0s}
-nav{position:fixed;left:10px;right:10px;bottom:max(6px,calc(env(safe-area-inset-bottom) - 14px));height:52px;
+nav{position:fixed;left:10px;right:10px;--gap:max(6px,calc(env(safe-area-inset-bottom) - 12px));top:calc(var(--app-h,100vh) - 52px - var(--gap));height:52px;
   display:flex;border-radius:22px;z-index:3;overflow:hidden;
   background:var(--nav-bg);border:1px solid var(--nav-line);box-shadow:0 8px 28px rgba(0,0,0,.18);
   -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
@@ -86,9 +86,21 @@ body.t-finance{background:#05120e;--nav-bg:rgba(6,40,32,.5);--nav-line:rgba(255,
   };
 
   var NAV_H = 52;
+  var standalone = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  function sizeApp() {
+    /* iOS home-screen apps can report a viewport shorter than the screen; use the real screen height there */
+    var h = window.innerHeight;
+    if (standalone && screen && screen.height) {
+      var land = window.innerWidth > window.innerHeight;
+      h = land ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
+    }
+    document.documentElement.style.setProperty('--app-h', h + 'px');
+  }
+  sizeApp();
+  window.addEventListener('orientationchange', function () { setTimeout(function () { sizeApp(); insets(); }, 300); });
   function insets(f) {
     var cs = getComputedStyle($('probe')), top = parseFloat(cs.paddingTop) || 0, bot = parseFloat(cs.paddingBottom) || 0;
-    var navBottom = Math.max(6, bot - 14), list = f ? [f] : TABS.map(function (t) { return frames[t]; }).filter(Boolean);
+    var navBottom = Math.max(6, bot - 12), list = f ? [f] : TABS.map(function (t) { return frames[t]; }).filter(Boolean);
     list.forEach(function (fr) {
       try {
         var de = fr.contentDocument && fr.contentDocument.documentElement; if (!de) return;
@@ -97,7 +109,7 @@ body.t-finance{background:#05120e;--nav-bg:rgba(6,40,32,.5);--nav-line:rgba(255,
       } catch (e) {}
     });
   }
-  window.addEventListener('resize', function () { insets(); });
+  window.addEventListener('resize', function () { sizeApp(); insets(); });
   function frame(tab, hash) {
     var f = frames[tab];
     if (!f) { f = document.createElement('iframe'); f.title = tab; frames[tab] = f; f.addEventListener('load', function () { insets(f); }); $('frames').appendChild(f); }
