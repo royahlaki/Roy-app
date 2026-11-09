@@ -8,9 +8,13 @@
 <style>
 :root{--bg:#F3F4F6;--card:#FFFFFF;--line:#E5E7EB;--fg:#111827;--mut:#6B7280;--blu:#2563EB;--blu-bg:#EFF6FF}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:Heebo,system-ui,sans-serif}
-.wrap{max-width:1400px;margin:0 auto;padding:22px 16px 32px}
-@media(min-width:900px){.wrap{padding:36px 40px 48px}.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}.grid.small{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}a.t{min-height:110px;padding:18px}.t .n{font-size:17px}.t .d{font-size:13px}h1{font-size:32px}}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Heebo,system-ui,sans-serif;padding-bottom:var(--nav-h,0px)}
+.hero{background:linear-gradient(155deg,#1E3A8A 0%,#2563EB 55%,#22D3EE 130%);color:#fff;padding:calc(var(--top-h,0px) + 18px) 20px 58px;border-radius:0 0 28px 28px}
+.hero .in{max-width:1400px;margin:0 auto}
+.hero h1{color:#fff}.hero .sub{color:rgba(255,255,255,.82)}
+@media(min-width:900px){.hero{padding:calc(var(--top-h,0px) + 30px) 40px 64px}}
+.wrap{max-width:1400px;margin:0 auto;padding:0 16px 32px}
+@media(min-width:900px){.wrap{padding:0 40px 48px}.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}.grid.small{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}a.t{min-height:110px;padding:18px}.t .n{font-size:17px}.t .d{font-size:13px}h1{font-size:32px}}
 h1{margin:0;font-size:26px;font-weight:800}
 .sub{color:var(--mut);font-size:13px;margin-top:4px}
 h2{font-size:13px;font-weight:600;color:var(--mut);margin:26px 4px 10px}
@@ -26,7 +30,7 @@ a.t:active{transform:scale(.98)}
 .grid.small .n{font-size:14px}
 .feat a.t{background:var(--blu-bg);border-color:#BFDBFE}
 footer{text-align:center;font-size:11px;color:var(--mut);margin-top:30px}
-.tasks{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:18px}
+.tasks{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:-38px;position:relative;box-shadow:0 10px 30px rgba(30,58,138,.12)}
 .tasks .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .tasks .hd b{font-size:16px}
 .tasks .cnt{font-size:12px;color:var(--mut)}
@@ -46,10 +50,11 @@ ul.tl .del{border:0;background:none;color:#9CA3AF;font-size:18px;line-height:1;c
 </style>
 </head>
 <body data-tab="home">
-<div class="wrap">
+<header class="hero"><div class="in">
   <h1>דף הבית</h1>
   <div class="sub">כל הכלים, המסמכים והתיקיות במקום אחד</div>
-
+</div></header>
+<div class="wrap">
   <section class="tasks">
     <div class="hd"><b>משימות</b><span class="cnt" id="cnt"></span></div>
     <form class="add" id="add"><input id="newt" placeholder="משימה חדשה" autocomplete="off"><button type="submit">הוסף</button></form>

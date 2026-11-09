@@ -4,8 +4,8 @@
 html,body{margin:0;padding:0}
 body{font-family:Heebo,system-ui,sans-serif;color:#ece8ff;min-height:100vh;
 background:radial-gradient(1200px 700px at 80% -10%,#3b2a7a 0%,transparent 60%),radial-gradient(900px 600px at 0% 100%,#22164f 0%,transparent 60%),#0d0a1c;background-attachment:fixed}
-#app{max-width:1400px;margin:0 auto;padding:16px 14px 40px}
-@media(min-width:900px){#app{padding:24px 32px 80px}}
+#app{max-width:1400px;margin:0 auto;padding:calc(var(--top-h,0px) + 14px) 14px calc(var(--nav-h,0px) + 24px)}
+@media(min-width:900px){#app{padding:calc(var(--top-h,0px) + 24px) 32px calc(var(--nav-h,0px) + 40px)}}
 button{font-family:inherit;cursor:pointer}
 input,textarea{font-family:inherit}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 16px}
