@@ -4,7 +4,7 @@ const ils = v => (v < 0 ? '−' : '') + '₪' + d3.format(',.0f')(Math.abs(v));
 const pct = v => d3.format('.1f')(v) + '%';
 const num = (v, f) => (v === null || v === undefined || v === '') ? '—' : d3.format(f)(v);
 const dmy = s => { const [y, m, d] = s.split('-'); return `${+d}/${+m}`; };
-const TOP3 = ['TASE','ESLT','NXSN'];
+const CFG = window.PF_CFG || {}; const TOP3 = CFG.top3 || []; const DEF = CFG.defense || []; const ISR = CFG.israel || [];
 const C = { red: '#FF4D6D', grn: '#2BC985', blu: '#4C9DFF', gry: '#7C88A8', fg: '#EEF2FF', mut: '#8C97BA', line: 'rgba(255,255,255,.22)', soft: 'rgba(255,255,255,.07)', band: 'rgba(76,157,255,.15)' };
 const riskCol = v => v >= 7 ? C.red : v >= 4 ? C.blu : C.grn;
 const riskCls = v => v === null || v === undefined ? '' : v >= 7 ? 't-red' : v >= 4 ? 't-blu' : 't-grn';
@@ -30,7 +30,7 @@ dash.calc('summary', {
     const T = Number(account[0].total_ils), Cs = Number(account[0].cash_ils);
     const sum = ks => holdings.filter(h => ks.includes(h.ticker)).reduce((s, h) => s + Number(h.value_ils), 0);
     const r1 = v => Math.round(v * 10) / 10;
-    const top3 = sum(['TASE','ESLT','NXSN']), def = sum(['ESLT','NXSN']), isr = sum(['TASE','ESLT','NXSN','LUMI','POLI','KSM125']);
+    const top3 = sum(TOP3), def = sum(DEF), isr = sum(ISR);
     const ai = holdings.filter(h => h.sector === 'תשתיות AI').reduce((s, h) => s + Number(h.value_ils), 0);
     const top3_pct = r1(top3 / T * 100), excess = Math.round(top3 - 0.30 * T);
     return [{
@@ -114,7 +114,7 @@ dash.calc('progress', {
   fn: (holdings, account, theses) => {
     const T = Number(account[0].total_ils);
     const r1 = v => Math.round(v * 10) / 10, clamp = v => Math.max(0, Math.min(100, v));
-    const top = holdings.filter(h => ['TASE', 'ESLT', 'NXSN'].includes(h.ticker)).reduce((s, h) => s + Number(h.value_ils), 0) / T * 100;
+    const top = holdings.filter(h => TOP3.includes(h.ticker)).reduce((s, h) => s + Number(h.value_ils), 0) / T * 100;
     const rows = [
       { goal: 'ריכוזיות', now: r1(top), target: 30, progress: Math.round(clamp((53.8 - top) / (53.8 - 30) * 100)) }
     ];
@@ -434,8 +434,11 @@ const drawThesis = () => {
       t.append(el('span', 'w', r.window), el('span', 'pill ' + cls, r.status));
       pls.appendChild(t);
     });
-    const r0 = rows[0], sum = Number(r0.eslt) + Number(r0.tase) + Number(r0.nxsn);
-    each.textContent = `כל מנה ${ils(sum)}: אלביט ${ils(r0.eslt)} · הבורסה ${ils(r0.tase)} · נקסט ויז'ן ${ils(r0.nxsn)}`;
+    const r0 = rows[0], HS = dash.data('holdings').data || [];
+    const nm = tk => { const h = HS.find(x => x.ticker === tk); return h ? h.name : tk; };
+    const parts = TOP3.filter(tk => r0[tk.toLowerCase()] !== undefined);
+    const sum = parts.reduce((s, tk) => s + Number(r0[tk.toLowerCase()]), 0);
+    each.textContent = `כל מנה ${ils(sum)}: ` + parts.map(tk => `${nm(tk)} ${ils(r0[tk.toLowerCase()])}`).join(' · ');
   } else cnt.textContent = '—';
   const dl = document.getElementById('dlog'); dl.innerHTML = '';
   if (DC.status === 'ok') {

@@ -518,6 +518,7 @@ html,body{margin:0;padding:0;background:#070b18}
 <script src="js/portfolio-page.js"></script>
 <script>
 Roy.data().then(function (d) {
+  window.PF_CFG = d.config || {};
   dash._load(d.datasets);
   document.getElementById('boot').hidden = true;
   document.getElementById('dash-root').hidden = false;

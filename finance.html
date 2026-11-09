@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>הכספים שלי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font-anthropic-sans:Heebo,system-ui,sans-serif;--font-anthropic-serif:Heebo,system-ui,sans-serif;
+  --color-fg:#ECFDF5;--color-fg-muted:#8FB5A8;--color-panel:rgba(255,255,255,.05);--color-border-line:rgba(255,255,255,.10);
+  --color-bg:rgba(0,0,0,.28);--color-ok:#34D399;--color-bad:#FF4D6D;
+  --cds-gap-sm:8px;--cds-gap-md:12px;--cds-pad-xs:4px;--cds-pad-sm:8px;--cds-pad-md:16px;--cds-radius:14px;
+  --cds-font-size-title:30px;--cds-font-size-heading:22px;--cds-font-size-body:14px;--cds-font-size-caption:12px;
+  --cds-chart-axis:rgba(255,255,255,.22);--cds-chart-muted:rgba(255,255,255,.18);--cds-chart-status-critical:#FF4D6D;--cds-chart-reference:#F5D46B;
+  --cds-surface-popover:#0c1f1a;--cds-border:rgba(255,255,255,.14);--cds-shadow-popover:0 8px 24px rgba(0,0,0,.45);--cds-text-secondary:#8FB5A8;--cds-dur-slow:.3s
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100vh;
+  background:radial-gradient(1100px 650px at 85% -10%,#0f6b52 0%,transparent 60%),radial-gradient(900px 600px at 0% 105%,#0e3b5c 0%,transparent 60%),#05120e;background-attachment:fixed}
+#dash-root{padding:calc(var(--top-h,0px) + 14px) 14px calc(var(--nav-h,0px) + 24px)}
+#boot{color:var(--color-fg-muted);text-align:center;padding:calc(var(--top-h,0px) + 60px) 20px}
+.km-title{font-weight:800!important;font-size:28px!important;background:linear-gradient(90deg,#fff,#a7f3d0 60%,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.km-big,.km-total{font-weight:800!important}
+.km-card{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
+</style>
+</head>
+<body data-tab="finance">
+<div id="boot">טוען…</div>
+<div id="dash-root" hidden>
+<div class="km" dir="rtl">
+  <header class="km-head">
+    <h1 class="km-title">הכספים שלי</h1>
+  </header>
+
+  <section class="km-card" id="bank">
+    <div class="km-row">
+      <div>
+        <div class="km-label" id="bank-label">בנק</div>
+        <div class="km-big" id="bank-now">—</div>
+      </div>
+      <div class="km-seg" role="group" aria-label="תרחיש"><button type="button" data-s="n">רגיל</button><button type="button" data-s="c">זהיר</button></div>
+    </div>
+    <div class="km-sub">יתרה אחרי החיוב ב-15 בכל חודש</div>
+    <div class="km-chart" id="chart-bank"></div>
+    <div class="km-whatif">
+      <label class="km-field"><span>העברה מהתיק</span><span class="km-inp"><input id="w-transfer" type="text" inputmode="numeric" placeholder="0" aria-label="העברה מהתיק"><i>₪</i></span></label>
+      <label class="km-field"><span>חופשה 15.11</span><span class="km-inp"><input id="w-vacation" type="text" inputmode="numeric" placeholder="0" aria-label="חופשה 15.11"><i>₪</i></span></label>
+    </div>
+  </section>
+
+  <section class="km-card" id="goals">
+    <div class="km-label">יעדים</div>
+    <div class="km-goals" id="goal-list"></div>
+  </section>
+
+  <section class="km-card" id="networth">
+    <div class="km-label">שווי נקי</div>
+    <div class="km-big" data-field="net">—</div>
+    <div class="km-lines">
+      <div class="km-line" id="row-bank"><span>עו״ש</span><span data-field="bank">—</span></div>
+      <div class="km-line"><span>תיק</span><span data-field="portfolio">—</span></div>
+      <div class="km-line"><span>פנסיה</span><span data-field="pension">—</span></div>
+      <div class="km-line"><span>רכב</span><span data-field="car">—</span></div>
+      <div class="km-line"><span>יתרת הלוואה</span><span data-field="loan">—</span></div>
+    </div>
+    <div class="km-hist-head"><span class="km-label">לאורך זמן</span><span class="km-rate" id="rate"></span></div>
+    <div class="km-chart km-chart-sm" id="chart-hist"></div>
+  </section>
+
+  <section class="km-card" id="free">
+    <div class="km-row">
+      <div class="km-label">פנוי בכל חודש</div>
+      <div class="km-legend"><span class="km-sw km-sw-exp"></span>הוצאות<span class="km-sw km-sw-free"></span>נשאר</div>
+    </div>
+    <div class="km-chart" id="chart-free"></div>
+    <div class="km-releases" id="releases"></div>
+  </section>
+
+  <section class="km-card" id="expenses">
+    <div class="km-row">
+      <div class="km-label">יוצא בנובמבר</div>
+      <div class="km-total" id="total">—</div>
+    </div>
+    <div class="km-list" id="exp-list"></div>
+  </section>
+</div>
+
+<style>
+.km { max-width: 640px; margin-inline: auto; font-family: var(--font-anthropic-sans); color: var(--color-fg); display: flex; flex-direction: column; gap: var(--cds-gap-md); font-variant-numeric: tabular-nums; }
+.km-head { padding: var(--cds-pad-sm) 2px 0; }
+@media (min-width: 1000px) { .km { max-width: 1400px; display: grid; grid-template-columns: 1fr 1fr; align-items: start; padding: 12px 20px; } .km-head { grid-column: 1 / -1; } }
+.km-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+.km-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); min-width: 0; overflow: hidden; }
+.km-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--cds-gap-md); }
+.km-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.km-big { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); line-height: 1.2; margin-top: 2px; }
+.km { --km-red: #ff4d63; }
+.km-neg { color: var(--km-red); font-weight: 500; }
+.km-line.km-alert { border: 1.5px solid var(--km-red); border-radius: var(--cds-radius); padding: 6px 10px; margin: 4px 0 6px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--km-red) 15%, transparent); }
+.km-line.km-alert + .km-line { border-top: 0; }
+.km-line.km-alert span:first-child { color: var(--km-red); }
+.km-ok { color: var(--color-ok); }
+.km-chart { position: relative; margin-top: var(--cds-gap-sm); min-height: 180px; }
+.km-chart svg { display: block; }
+.km-whatif { display: grid; grid-template-columns: 1fr 1fr; gap: var(--cds-gap-sm); margin-top: var(--cds-gap-md); }
+.km-field { min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.km-inp { display: flex; align-items: center; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); padding: 0 10px; }
+.km-inp input { flex: 1; min-width: 0; width: 100%; border: 0; background: transparent; color: var(--color-fg); font: inherit; font-size: 16px; padding: 9px 0; outline: none; direction: ltr; text-align: right; }
+.km-inp i { font-style: normal; color: var(--color-fg-muted); margin-inline-start: 6px; }
+.km-lines { margin-top: var(--cds-gap-sm); }
+.km-line { display: flex; justify-content: space-between; font-size: var(--cds-font-size-body); padding: 5px 0; border-top: 1px solid var(--color-border-line); }
+.km-line span:first-child { color: var(--color-fg-muted); }
+.km-legend { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; align-items: center; gap: 5px; }
+.km-sw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-inline-start: 6px; }
+.km-sw-exp { background: var(--cds-chart-muted); }
+.km-sw-free { background: var(--color-ok); }
+.km-releases { margin-top: var(--cds-gap-sm); }
+.km-rel { display: grid; grid-template-columns: 4.6rem 1fr auto; gap: 8px; font-size: var(--cds-font-size-caption); padding: 4px 0; border-top: 1px solid var(--color-border-line); }
+.km-rel b { font-weight: 400; color: var(--color-fg-muted); }
+.km-total { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); }
+.km-list { margin-top: var(--cds-gap-sm); }
+.km-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--color-border-line); font-size: var(--cds-font-size-body); }
+.km-item .n { flex: 1; }
+.km-item .a { white-space: nowrap; }
+.km-item .a small { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.km-pill { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--color-bg); color: var(--color-fg-muted); border: 1px solid var(--color-border-line); white-space: nowrap; }
+.km-pill.last { color: var(--cds-chart-reference); border-color: currentColor; }
+.km-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; direction: rtl; display: none; z-index: 2; }
+.km-tip .d { color: var(--cds-text-secondary); }
+.km-seg { display: inline-flex; border: 1px solid var(--color-border-line); border-radius: 999px; padding: 2px; background: var(--color-bg); }
+.km-seg button { font: inherit; font-size: var(--cds-font-size-caption); border: 0; background: transparent; color: var(--color-fg-muted); padding: 4px 12px; border-radius: 999px; cursor: pointer; }
+.km-seg button.on { background: rgba(52,211,153,.18); color: var(--color-fg); box-shadow: 0 0 0 1px rgba(52,211,153,.45); }
+.km-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: var(--cds-gap-sm); }
+.km-goal { padding: 8px 0; border-top: 1px solid var(--color-border-line); }
+.km-goal:first-child { border-top: 0; }
+.km-goal-top { display: flex; justify-content: space-between; gap: 8px; font-size: var(--cds-font-size-body); }
+.km-goal-top b { font-weight: 400; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); align-self: flex-end; }
+.km-goal-sub { display: flex; justify-content: space-between; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: 3px; }
+.km-bar { height: 8px; border-radius: 4px; background: var(--color-border-line); margin-top: 6px; overflow: hidden; }
+.km-bar i { display: block; height: 100%; min-width: 0; background: var(--color-ok); border-radius: 4px; box-shadow: 0 0 10px rgba(52,211,153,.45); }
+.km-hist-head { display: flex; justify-content: space-between; align-items: baseline; margin-top: var(--cds-gap-md); }
+.km-rate { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.km-chart-sm { min-height: 150px; margin-top: 4px; }
+</style>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/d3.min.js"></script>
+<script src="js/dash.js"></script>
+<script src="js/finance-page.js"></script>
+<script>
+Roy.data().then(function (d) {
+  var f = d.finance || {};
+  dash._load({ expenses: f.expenses || [], history: f.history || [], inputs: f.inputs || [], portfolio: (d.datasets && d.datasets.account) || [] });
+  document.getElementById('boot').hidden = true;
+  document.getElementById('dash-root').hidden = false;
+  financeMain();
+}, function () { document.getElementById('boot').textContent = 'הכספים לא נטענו. נסה לרענן.'; });
+</script>
+</body>
+</html>

@@ -26,13 +26,15 @@ nav{position:fixed;left:10px;right:10px;bottom:max(6px,calc(env(safe-area-inset-
   background:var(--nav-bg);border:1px solid var(--nav-line);box-shadow:0 8px 28px rgba(0,0,0,.18);
   -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
   transition:background-color .35s ease,border-color .35s ease}
-nav button{flex:1;border:0;background:none;color:var(--nav-fg);font:inherit;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:color .35s ease}
+nav button{flex:1;min-width:0;border:0;background:none;color:var(--nav-fg);font:inherit;font-size:10px;white-space:nowrap;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:color .35s ease}
 nav button svg{width:21px;height:21px}
 nav button[aria-current=page]{color:var(--nav-on)}
 body{--nav-bg:rgba(255,255,255,.62);--nav-line:rgba(15,23,42,.08);--nav-fg:#64748B;--nav-on:#2563EB;transition:background-color .35s ease}
 body.t-home{background:#F3F4F6;--nav-bg:rgba(255,255,255,.62);--nav-line:rgba(15,23,42,.08);--nav-fg:#64748B;--nav-on:#2563EB}
 body.t-portfolio{background:#070b18;--nav-bg:rgba(14,20,48,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#8C97BA;--nav-on:#7CB8FF}
-body.t-lab{background:#0d0a1c;--nav-bg:rgba(24,16,52,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#9a92c4;--nav-on:#39ff88}
+body.t-lab{background:#0d0a1c;--nav-bg:rgba(24,16,52,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#9a92c4;--nav-on:#C9A8FF}
+body.t-sectors{background:#0b0f0c;--nav-bg:rgba(20,34,16,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#93A198;--nav-on:#C3F53C}
+body.t-finance{background:#05120e;--nav-bg:rgba(6,40,32,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#8FB5A8;--nav-on:#34D399}
 #lock{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:24px;
   background:radial-gradient(900px 600px at 80% -10%,#1d3b8a 0%,transparent 60%),radial-gradient(800px 500px at 0% 110%,#3b1d72 0%,transparent 60%),#0b0f1e}
 #lock[hidden]{display:none}
@@ -55,6 +57,8 @@ body.t-lab{background:#0d0a1c;--nav-bg:rgba(24,16,52,.5);--nav-line:rgba(255,255
   <button type="button" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>בית</button>
   <button type="button" data-tab="portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>התיק שלי</button>
   <button type="button" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7.5 15h9"/></svg>המעבדה</button>
+  <button type="button" data-tab="sectors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>סקטורים</button>
+  <button type="button" data-tab="finance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/><path d="M16 15h2.5"/></svg>כספים</button>
 </nav>
 
 <div id="lock" hidden>
@@ -71,8 +75,8 @@ body.t-lab{background:#0d0a1c;--nav-bg:rgba(24,16,52,.5);--nav-line:rgba(255,255
 <script src="js/core.js"></script>
 <script>
 (function () {
-  var TABS = ['home', 'portfolio', 'lab'];
-  var PAGES = { home: 'home.html', portfolio: 'portfolio.html', lab: 'lab.html' };
+  var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance'];
+  var PAGES = { home: 'home.html', portfolio: 'portfolio.html', lab: 'lab.html', sectors: 'sectors.html', finance: 'finance.html' };
   var frames = {}, current = null, dataP = null;
   var $ = function (id) { return document.getElementById(id); };
 

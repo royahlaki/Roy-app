@@ -67,7 +67,7 @@
   };
 
   /* Links: Roy's own artifacts open inside the app, everything else in Safari. */
-  var INTERNAL = { 'WsmNu2GFyLHWb6BBd25Say': 'portfolio', 'UYAXtgDzYJbvNJLVkYaQsG': 'lab', 'YRXM4eesemUpAKwaWQXgcj': 'home' };
+  var INTERNAL = { 'WsmNu2GFyLHWb6BBd25Say': 'portfolio', 'UYAXtgDzYJbvNJLVkYaQsG': 'lab', 'YRXM4eesemUpAKwaWQXgcj': 'home', 'P3RAHWhxDbk2EDNaK2VshQ': 'sectors', 'WxeRRWehPX8TT22HB3TWHW': 'finance' };
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[href]');
     if (!a) return;

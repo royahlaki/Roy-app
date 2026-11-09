@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מפת סקטורים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#101412; --card:#1E2622; --tile:#29332D; --line:#2F3A34; --line2:#3F4C44; --star:#C77DFF;
+  --neon:#C3F53C; --neon-dim:#86AD2A; --txt:#F2F6F2; --mut:#93A198;
+  --hot:#FFB020; --il:#4DA3FF; --own:#B5F23D; --spec:#FF5C7A;
+  --s0:#C77DFF;--s1:#FFB020;--s2:#3DDCC0;--s3:#6B7A70
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{color:var(--txt);font-family:Heebo,system-ui,sans-serif;font-size:14px;line-height:1.45;min-height:100vh;
+  background:radial-gradient(1200px 700px at 80% -10%,#2c5a1c 0%,transparent 60%),radial-gradient(900px 600px at 0% 100%,#0f3d36 0%,transparent 60%),#0b0f0c;background-attachment:fixed}
+h1 span{text-shadow:0 0 18px rgba(195,245,60,.35)}
+.wrap{max-width:1400px;margin:0 auto;padding:calc(var(--top-h,0px) + 6px) 14px calc(var(--nav-h,0px) + 24px)}
+@media(min-width:900px){.wrap{padding:calc(var(--top-h,0px) + 16px) 36px calc(var(--nav-h,0px) + 40px)}.row{grid-template-columns:240px 1fr}.tiles{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}}
+header{text-align:center;padding:10px 0 16px}
+.kick{font-family:Oswald;letter-spacing:.3em;color:var(--neon-dim);font-size:12px}
+h1{font-weight:900;font-size:34px;line-height:1.1;margin-top:4px}
+h1 span{color:var(--neon)}
+.sub{color:var(--mut);margin-top:6px;font-size:13px}
+.bar{position:sticky;top:calc(var(--top-h,0px) + 6px);z-index:5;background:rgba(30,38,34,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:10px 12px;margin-bottom:6px;border:1px solid var(--line);border-radius:16px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.f{background:transparent;border:1px solid var(--line2);color:var(--txt);padding:4px 12px;border-radius:999px;font:600 12px Heebo;cursor:pointer;transition:background .15s,border-color .15s}
+.f.on{background:var(--neon);color:#0a0d08;border-color:var(--neon)}
+#q{flex:1;min-width:140px;background:var(--bg);border:1px solid var(--line2);color:var(--txt);border-radius:999px;padding:5px 14px;font:16px Heebo;outline:none}
+#q:focus{border-color:var(--neon)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--mut);font-size:11px;margin-top:8px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;vertical-align:middle}
+.sec{margin-top:24px}
+.sec-h{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
+.sec-h h2{font-weight:900;font-size:18px;color:var(--neon)}
+.sec-h .en{font-family:Oswald;letter-spacing:.15em;font-size:11px;color:var(--mut)}
+.row{display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 10px;margin-bottom:6px}
+.row.hot{border-color:rgba(255,176,32,.35)}
+.lbl{min-width:0}
+.lbl h3{font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.lbl .num{font-family:Oswald;color:var(--neon);font-size:14px;font-weight:500}
+.lbl p{color:var(--mut);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font:700 10px Heebo;border-radius:999px;padding:1px 8px}
+.badge.hot{background:rgba(255,176,32,.14);color:var(--hot);border:1px solid rgba(255,176,32,.5)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;align-content:start}
+.t{position:relative;background:var(--tile);border:1px solid var(--line2);border-radius:9px;padding:6px 9px;cursor:pointer;text-align:right;color:inherit;font:inherit;transition:border-color .15s,transform .15s}
+.t:active{transform:scale(.97)}
+.t.own{border-color:var(--own);box-shadow:0 0 0 1px rgba(181,242,61,.35) inset}
+.t .tk{font-family:Oswald;font-weight:700;font-size:15px;letter-spacing:.03em;direction:ltr;text-align:right;line-height:1.25}
+.t .nm{font-size:11px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{position:absolute;top:8px;left:8px;display:flex;gap:3px}
+.dots i{width:7px;height:7px;border-radius:50%}
+.d-il{background:var(--il)} .d-own{background:var(--own)} .d-spec{background:var(--spec)}
+.d-s0{background:var(--s0)} .d-s1{background:var(--s1)} .d-s2{background:var(--s2)} .d-s3{background:var(--s3)}
+.t.w.s0{border-color:var(--s0)} .t.w.s1{border-color:var(--s1)} .t.w.s2{border-color:var(--s2)} .t.w.s3{opacity:.45}
+.empty{color:var(--mut);text-align:center;padding:30px}
+.sync{margin-inline-start:auto;color:var(--mut);font:600 11px Heebo}
+.stt{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.sb{border:1px solid var(--line2);background:transparent;color:var(--txt);border-radius:999px;padding:4px 12px;font:600 12px Heebo;cursor:pointer}
+.sb.on.s0{background:var(--s0);border-color:var(--s0);color:#14051f} .sb.on.s1{background:var(--s1);border-color:var(--s1);color:#1f1400}
+.sb.on.s2{background:var(--s2);border-color:var(--s2);color:#04201b} .sb.on.s3{background:var(--s3);border-color:var(--s3);color:#fff}
+.sb.rm{color:var(--mut);border-style:dashed}
+#note{width:100%;margin-top:10px;min-height:72px;background:var(--bg);border:1px solid var(--line2);border-radius:10px;color:var(--txt);font:16px/1.5 Heebo;padding:8px 10px;resize:vertical;outline:none}
+#note:focus{border-color:var(--neon-dim)}
+footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.on{display:flex}
+.sheet{background:var(--card);border:1px solid var(--line2);border-bottom:0;border-radius:18px 18px 0 0;width:100%;max-width:560px;padding:18px 18px calc(var(--nav-h,0px) + 16px);animation:up .2s ease}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.sh-top{display:flex;align-items:center;gap:10px}
+.sh-top .tk{font-family:Oswald;font-weight:700;font-size:28px;color:var(--neon);direction:ltr}
+.sh-top .x{margin-inline-start:auto;background:none;border:1px solid var(--line2);color:var(--txt);border-radius:999px;width:30px;height:30px;cursor:pointer;font-size:15px}
+.sh-nm{font-weight:800;font-size:16px}
+.sh-row{color:var(--mut);font-size:12px;margin-top:2px}
+.sh-d{margin-top:10px;font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.tag{font:600 11px Heebo;border-radius:999px;padding:2px 9px;border:1px solid}
+.tag.il{color:var(--il);border-color:rgba(77,163,255,.5)}
+.tag.own{color:var(--own);border-color:rgba(181,242,61,.5)}
+.tag.spec{color:var(--spec);border-color:rgba(255,92,122,.5)}
+.tag.etf{color:var(--txt);border-color:var(--line2)}
+.acts{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.btn{flex:1;min-width:120px;text-align:center;text-decoration:none;font:700 13px Heebo;border-radius:10px;padding:10px;cursor:pointer;border:1px solid var(--neon);background:transparent;color:var(--neon)}
+.btn.pri{background:var(--neon);color:#0a0d08}
+@media (max-width:640px){
+  h1{font-size:28px}
+  .row{grid-template-columns:1fr;gap:6px}
+  .tiles{grid-template-columns:repeat(3,1fr)}
+  .t .tk{font-size:14px}
+}
+</style>
+</head>
+<body data-tab="sectors">
+<div class="wrap">
+<header>
+  <div class="kick">SECTOR MAP · 2026</div>
+  <h1>מפת <span>סקטורים</span></h1>
+  <div class="sub">המניות החזקות בכל תחום. מפה לחקירה ולבניית תזות, לא רשימת קנייה.</div>
+</header>
+
+<div class="bar">
+  <div class="filters">
+    <button class="f on" data-f="all">הכל</button>
+    <button class="f" data-f="hot">תחומים חמים</button>
+    <button class="f" data-f="il">ישראליות</button>
+    <button class="f" data-f="own">בתיק</button>
+    <button class="f" data-f="watch">במעקב</button>
+    <input id="q" placeholder="חיפוש טיקר או חברה" autocomplete="off">
+  </div>
+  <div class="legend">
+    <span><i class="d-own"></i>בתיק</span>
+    <span><i class="d-il"></i>ישראלית</span>
+    <span><i class="d-spec"></i>ספקולטיבית</span>
+    <span><i class="d-s0"></i>לחקור</span>
+    <span><i class="d-s1"></i>בבדיקה</span>
+    <span><i class="d-s2"></i>מתאימה</span>
+    <span><i class="d-s3"></i>נפסלה</span>
+    <span class="sync">נשמר במכשיר</span>
+  </div>
+</div>
+
+<main id="app"></main>
+
+<footer>נבנה 06.11.2026 · רשימת חברות, בלי מחירים · זה כלי מיון, לא ייעוץ השקעות</footer>
+</div>
+
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+
+<script src="js/core.js"></script>
+<script>
+const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
+// tags: il = ישראלית, spec = ספקולטיבית, etf = קרן סל. "בתיק" comes from the encrypted data.
+const S = [
+ {h:"תשתיות AI", en:"AI INFRASTRUCTURE", rows:[
+  {t:"שבבי AI ומעבדים", p:"המוח של הדאטה סנטר. מרוויחים מכל דולר של השקעה ב-AI.", s:[
+   ["NVDA","Nvidia","מובילת המעבדים הגרפיים לאימון והרצת AI, כולל תוכנה ורשתות."],
+   ["AMD","AMD","מתחרה עיקרית ל-Nvidia במאיצי AI ומעבדי שרתים."],
+   ["AVGO","Broadcom","שבבים מותאמים אישית להייפרסקיילרים ושבבי רשת."],
+   ["MRVL","Marvell","שבבים מותאמים ושבבי תקשורת אופטית לדאטה סנטרים."],
+   ["ARM","Arm Holdings","ארכיטקטורת השבבים שעליה בנויים רוב המעבדים החדשים."],
+   ["QCOM","Qualcomm","שבבי סמארטפון, ו-AI על המכשיר עצמו."]]},
+  {t:"ייצור שבבים", p:"מי שמייצר בפועל את השבבים של כולם.", s:[
+   ["TSM","TSMC","היצרנית הגדולה בעולם. מייצרת כמעט את כל שבבי ה-AI המתקדמים."],
+   ["TSEM","Tower Semiconductor","פאב ישראלי. שחקנית מרכזית בסיליקון פוטוניקה לתקשורת אופטית.",["il"]],
+   ["INTC","Intel","מנסה לחזור כיצרנית שבבים לאחרים (Foundry)."],
+   ["GFS","GlobalFoundries","פאב לשבבים בטכנולוגיות בוגרות, רכב ותעשייה."]]},
+  {t:"ציוד ובקרה לייצור שבבים", p:"מוכרים את \"האתים\" לכל מי שבונה פאב.", s:[
+   ["ASML","ASML","מונופול על מכונות הליתוגרפיה EUV. בלעדיה אין שבבים מתקדמים."],
+   ["AMAT","Applied Materials","ציוד שיקוע וחריטה, הספקית הגדולה בתחום."],
+   ["LRCX","Lam Research","ציוד חריטה, חזקה במיוחד בשבבי זיכרון."],
+   ["KLAC","KLA","בקרת איכות ומדידה בתהליך הייצור."],
+   ["NVMI","Nova","ישראלית. מערכות מדידה לייצור שבבים מתקדמים.",["il"]],
+   ["CAMT","Camtek","ישראלית. בדיקה ומדידה, חזקה באריזה מתקדמת ו-HBM.",["il"]]]},
+  {t:"זיכרון ואחסון", hot:1, p:"מודלי AI זוללים זיכרון. מחסור ב-HBM ובאחסון דוחף מחירים.", s:[
+   ["MU","Micron","יצרנית הזיכרון האמריקאית היחידה, כולל HBM לשבבי AI."],
+   ["SNDK","SanDisk","זיכרון פלאש ו-SSD לדאטה סנטרים."],
+   ["WDC","Western Digital","דיסקים קשיחים בנפח גבוה לאחסון ענן."],
+   ["STX","Seagate","דיסקים קשיחים בנפח גבוה, מתחרה ישירה ל-WDC."]]},
+  {t:"פוטוניקה ותקשורת אופטית", hot:1, p:"מעבר מנחושת לאור בין השרתים. אחד התחומים החמים של 2026.", s:[
+   ["COHR","Coherent","מקמ\"שים, לייזרים ופוטוניקה. שותפות עם Nvidia."],
+   ["LITE","Lumentum","לייזרים ורכיבים אופטיים לחיבורי AI."],
+   ["FN","Fabrinet","קבלנית ייצור לרכיבים אופטיים מתקדמים."],
+   ["CIEN","Ciena","תקשורת אופטית למרחקים ארוכים בין דאטה סנטרים."],
+   ["GLW","Corning","סיבים אופטיים וזכוכית מתקדמת."],
+   ["AAOI","Applied Optoelectronics","מקמ\"שים אופטיים. תנודתית מאוד.",["spec"]]]},
+  {t:"רשתות וחיבוריות", p:"מחברים אלפי שבבים לאשכול אחד.", s:[
+   ["ANET","Arista Networks","מתגים מהירים לדאטה סנטרים של AI."],
+   ["CSCO","Cisco","ענקית התקשורת, נכנסת לרשתות AI ואבטחה."],
+   ["CRDO","Credo","כבלים ושבבי חיבור מהירים בתוך הדאטה סנטר."],
+   ["ALAB","Astera Labs","שבבי קישוריות בין מעבדים, זיכרון ושרתים."]]},
+  {t:"שרתים וחומרה", p:"מרכיבים את מכונות ה-AI עצמן.", s:[
+   ["DELL","Dell","שרתי AI לארגונים ולענן."],
+   ["CLS","Celestica","ייצור חומרת רשת ושרתים להייפרסקיילרים."],
+   ["SMCI","Supermicro","שרתי AI מהירים. היסטוריה של בעיות דיווח.",["spec"]],
+   ["HPE","HP Enterprise","שרתים ורשתות, רכשה את Juniper."]]},
+  {t:"ענן והייפרסקיילרים", p:"הלקוחות הגדולים. שם הדאטה חי ושם מוציאים את הכסף.", s:[
+   ["MSFT","Microsoft","Azure, שותפה של OpenAI ו-Copilot."],
+   ["AMZN","Amazon","AWS, ספקית הענן הגדולה בעולם."],
+   ["GOOGL","Alphabet","Google Cloud, שבבי TPU ו-Gemini."],
+   ["META","Meta","משקיעה מאסיבית בתשתיות AI לשימוש עצמי."],
+   ["ORCL","Oracle","צומחת מהר בענן AI, עם חוב גבוה."]]},
+  {t:"ענן AI ייעודי", hot:1, p:"משכירים כוח מחשוב של GPU. צמיחה מהירה וחוב כבד.", s:[
+   ["CRWV","CoreWeave","ספקית ענן GPU הגדולה, לקוחות כמו Microsoft ו-OpenAI.",["spec"]],
+   ["NBIS","Nebius","ענן AI אירופאי, יצאה מ-Yandex.",["spec"]],
+   ["IREN","IREN","כורת ביטקוין שהפכה לענן AI.",["spec"]]]},
+  {t:"נדל\"ן דאטה סנטרים", p:"בעלי הבית של האינטרנט. מחלקים דיבידנד.", s:[
+   ["EQIX","Equinix","רשת הדאטה סנטרים הגדולה בעולם."],
+   ["DLR","Digital Realty","דאטה סנטרים גדולים להייפרסקיילרים."],
+   ["IRM","Iron Mountain","אחסון מסמכים שהתרחב לדאטה סנטרים."]]},
+  {t:"חשמל וקירור", hot:1, p:"החשמל הוא צוואר הבקבוק של AI. מי שמזין ומקרר את השרתים.", s:[
+   ["VRT","Vertiv","קירור וניהול חשמל לדאטה סנטרים."],
+   ["ETN","Eaton","ציוד חשמל, שנאים ומערכות הספק."],
+   ["GEV","GE Vernova","טורבינות גז ותשתיות רשת חשמל."],
+   ["PWR","Quanta Services","בונה רשתות חשמל ותשתיות."],
+   ["TT","Trane","מערכות קירור ומיזוג."]]},
+  {t:"תוכנת AI ודאטה", p:"מי שהופך את ה-AI למוצר שארגונים קונים.", s:[
+   ["PLTR","Palantir","פלטפורמת AI לממשלות וארגונים. מכפיל גבוה מאוד."],
+   ["NOW","ServiceNow","אוטומציה ארגונית עם סוכני AI."],
+   ["SNOW","Snowflake","מחסני נתונים בענן."],
+   ["DDOG","Datadog","ניטור מערכות ענן."]]}
+ ]},
+ {h:"אנרגיה", en:"ENERGY", rows:[
+  {t:"גרעין ואורניום", hot:1, p:"חשמל נקי ויציב 24/7 לדאטה סנטרים.", s:[
+   ["CEG","Constellation","מפעילת הכורים הגדולה בארה\"ב. חוזים עם ענקיות טק."],
+   ["CCJ","Cameco","כריית אורניום ודלק גרעיני."],
+   ["BWXT","BWX Technologies","כורים לצי האמריקאי ודלק גרעיני."],
+   ["LEU","Centrus","העשרת אורניום.",["spec"]],
+   ["OKLO","Oklo","כורים קטנים. עוד אין הכנסות.",["spec"]],
+   ["SMR","NuScale","כורים מודולריים קטנים.",["spec"]]]},
+  {t:"יצרני חשמל", p:"ביקוש לחשמל עולה לראשונה מזה עשורים.", s:[
+   ["VST","Vistra","מפעילת תחנות גז וגרעין בטקסס."],
+   ["NEE","NextEra","הגדולה בעולם באנרגיה מתחדשת."],
+   ["NRG","NRG Energy","ייצור ומכירת חשמל."],
+   ["ORA","Ormat","ישראלית. אנרגיה גיאותרמית.",["il"]],
+   ["ENLT","Enlight","ישראלית. פרויקטי סולאר ורוח.",["il"]]]},
+  {t:"נפט וגז", p:"גידור לאינפלציה ולמשברים גאופוליטיים.", s:[
+   ["XOM","ExxonMobil","חברת הנפט הגדולה בארה\"ב."],
+   ["CVX","Chevron","נפט וגז משולבת, דיבידנד יציב."],
+   ["COP","ConocoPhillips","הפקת נפט וגז."],
+   ["NWMD","NewMed Energy","ישראלית. שותפה במאגר לווייתן.",["il"]]]}
+ ]},
+ {h:"ביטחון וחלל", en:"DEFENSE & SPACE", rows:[
+  {t:"ביטחון", p:"תקציבי ביטחון עולים בעולם.", s:[
+   ["ESLT","Elbit Systems","ישראלית. מערכות ביטחוניות, ייצוא לאירופה.",["il"]],
+   ["NXSN","Nextvision","ישראלית. מצלמות מיוצבות לרחפנים.",["il"]],
+   ["LMT","Lockheed Martin","F-35 וטילים."],
+   ["RTX","RTX","מנועי מטוסים ומערכות הגנה אווירית."],
+   ["NOC","Northrop Grumman","מפציצים, חלל וטילים."],
+   ["LHX","L3Harris","תקשורת, חיישנים ומנועי רקטות."],
+   ["RHM","Rheinmetall","גרמנית. מרוויחה מחימוש אירופה."]]},
+  {t:"רחפנים ונשק אוטונומי", hot:1, p:"שדה הקרב עובר לכלים בלתי מאוישים.", s:[
+   ["AVAV","AeroVironment","רחפנים ותחמושת משוטטת."],
+   ["KTOS","Kratos","מל\"טים מבצעיים ומערכות היפרסוניות.",["spec"]]]},
+  {t:"חלל", hot:1, p:"שיגורים, לוויינים ואינטרנט מהחלל.", s:[
+   ["SPCX","SpaceX","הנפקה ביוני 2026. Starlink, שיגורים ו-xAI. שווי עצום."],
+   ["RKLB","Rocket Lab","שיגורים ולוויינים. המתחרה הקטנה של SpaceX."],
+   ["ASTS","AST SpaceMobile","סלולר ישירות מהחלל לטלפון.",["spec"]],
+   ["PL","Planet Labs","צילום לוויין יומי של כדור הארץ.",["spec"]],
+   ["IRDM","Iridium","תקשורת לוויינית ותיקה ורווחית."]]}
+ ]},
+ {h:"טכנולוגיה מתקדמת", en:"DEEP TECH", rows:[
+  {t:"סייבר", p:"הוצאה קבועה שלא נחתכת גם במיתון.", s:[
+   ["CRWD","CrowdStrike","הגנה על מחשבים ושרתים בענן."],
+   ["PANW","Palo Alto Networks","פלטפורמת אבטחה רחבה, רכשה את CyberArk."],
+   ["ZS","Zscaler","אבטחת גישה לענן."],
+   ["FTNT","Fortinet","חומות אש ואבטחת רשת."],
+   ["NET","Cloudflare","רשת, אבטחה ותשתית לאתרים."],
+   ["CHKP","Check Point","ישראלית. חומות אש ותיקה, רווחית מאוד.",["il"]]]},
+  {t:"מחשוב קוונטי", hot:1, p:"טכנולוגיה עתידית. תנודתיות קיצונית ומעט הכנסות.", s:[
+   ["IBM","IBM","מובילה בחומרת קוונטים, עסק יציב מסביב."],
+   ["QNT","Quantinuum","הונפקה ב-2026 מ-Honeywell. מובילה טכנולוגית.",["spec"]],
+   ["IONQ","IonQ","הגדולה מבין החברות הטהורות.",["spec"]],
+   ["RGTI","Rigetti","מחשבים קוונטיים מוליכי-על.",["spec"]],
+   ["QBTS","D-Wave","מחשבי Annealing קוונטיים.",["spec"]]]},
+  {t:"רובוטיקה ואוטומציה", hot:1, p:"AI יוצא לעולם הפיזי: מפעלים, מחסנים ורובוטים דמויי אדם.", s:[
+   ["TSLA","Tesla","רכב אוטונומי ורובוט Optimus. מכפיל גבוה מאוד."],
+   ["ROK","Rockwell Automation","אוטומציה למפעלים."],
+   ["SYM","Symbotic","רובוטיקה למחסנים, לקוח עיקרי Walmart.",["spec"]],
+   ["TER","Teradyne","רובוטים שיתופיים ובדיקת שבבים."]]}
+ ]},
+ {h:"פיננסים", en:"FINANCE", rows:[
+  {t:"בורסות ותשתיות שוק", p:"מרוויחות מכל עסקה. אוהבות תנודתיות.", s:[
+   ["TASE","הבורסה לני\"ע","ישראלית. מחזורי מסחר שיא.",["il"]],
+   ["ICE","Intercontinental Exchange","בעלת הבורסה של ניו יורק."],
+   ["CME","CME Group","בורסת החוזים העתידיים הגדולה."],
+   ["NDAQ","Nasdaq","בורסה ותוכנה למוסדות פיננסיים."]]},
+  {t:"בנקים", p:"מרוויחים מריבית גבוהה. בישראל: חשיפה כפולה לשוק המקומי.", s:[
+   ["POLI","בנק הפועלים","ישראלית.",["il"]],
+   ["LUMI","בנק לאומי","ישראלית.",["il"]],
+   ["DSCT","בנק דיסקונט","ישראלית.",["il"]],
+   ["MZTF","מזרחי טפחות","ישראלית. חזקה במשכנתאות.",["il"]],
+   ["JPM","JPMorgan","הבנק הגדול בארה\"ב."],
+   ["GS","Goldman Sachs","בנקאות השקעות ומסחר."]]},
+  {t:"פינטק ותשלומים", p:"כסף עובר לדיגיטל.", s:[
+   ["V","Visa","רשת התשלומים הגדולה בעולם."],
+   ["MA","Mastercard","רשת תשלומים, מתחרה ל-Visa."],
+   ["HOOD","Robinhood","אפליקציית מסחר וקריפטו לצעירים."],
+   ["NU","Nu Holdings","בנק דיגיטלי בברזיל ובאמריקה הלטינית."],
+   ["ETOR","eToro","ישראלית. פלטפורמת מסחר חברתי.",["il","spec"]]]}
+ ]},
+ {h:"סחורות וקריפטו", en:"COMMODITIES & CRYPTO", rows:[
+  {t:"זהב", p:"מקלט במשברים. גידור לסיכון בתיק.", s:[
+   ["GLD","SPDR Gold","קרן סל שמחזיקה זהב פיזי.",["etf"]],
+   ["NEM","Newmont","כורת הזהב הגדולה בעולם."],
+   ["AEM","Agnico Eagle","כריית זהב, נחשבת יעילה."],
+   ["WPM","Wheaton Precious Metals","מימון מכרות בתמורה לזהב וכסף. סיכון נמוך יותר."]]},
+  {t:"נחושת ומתכות קריטיות", hot:1, p:"חשמול, דאטה סנטרים ומלחמת סחר עם סין.", s:[
+   ["FCX","Freeport-McMoRan","כורת הנחושת הגדולה הנסחרת בארה\"ב."],
+   ["SCCO","Southern Copper","מכרות נחושת בדרום אמריקה."],
+   ["MP","MP Materials","מתכות נדירות. הממשל האמריקאי שותף.",["spec"]]]},
+  {t:"קריפטו", p:"ספקולטיבי. פסיכולוגיית עדר לטווח ארוך.", s:[
+   ["IBIT","iShares Bitcoin","קרן סל על ביטקוין של BlackRock.",["etf"]],
+   ["COIN","Coinbase","בורסת הקריפטו הגדולה בארה\"ב."],
+   ["CRCL","Circle","מנפיקת המטבע היציב USDC.",["spec"]],
+   ["MSTR","Strategy","מחזיקה ביטקוין במינוף. תנודתית מאוד.",["spec"]]]}
+ ]},
+ {h:"בריאות", en:"HEALTHCARE", rows:[
+  {t:"פארמה והשמנה", p:"תרופות ההשמנה הן שוק של מאות מיליארדים.", s:[
+   ["LLY","Eli Lilly","מובילת תרופות ההשמנה (Zepbound, Mounjaro)."],
+   ["NVO","Novo Nordisk","Ozempic ו-Wegovy. בלחץ תחרותי."],
+   ["ABBV","AbbVie","תרופות אימונולוגיה, דיבידנד."],
+   ["TEVA","Teva","ישראלית. גנריקה ותרופות חדשות.",["il"]]]},
+  {t:"ציוד רפואי", p:"אוכלוסייה מזדקנת. עסקים יציבים.", s:[
+   ["ISRG","Intuitive Surgical","רובוטים לניתוחים (da Vinci)."],
+   ["BSX","Boston Scientific","ציוד לב וכלי דם."],
+   ["SYK","Stryker","שתלים אורתופדיים ורובוטיקה."],
+   ["ABT","Abbott","מכשור, אבחון וחיישני סוכר."]]}
+ ]},
+ {h:"צריכה ותוכנה ישראלית", en:"CONSUMER & IL TECH", rows:[
+  {t:"מותגים וצריכה", p:"עסקים ש-AI לא מחליף. הגנתיים יחסית.", s:[
+   ["NKE","Nike","מותג הספורט הגדול, בתהליך הבראה."],
+   ["COST","Costco","רשת מועדוני קנייה, נאמנות לקוחות גבוהה."],
+   ["KO","Coca-Cola","מותג משקאות, דיבידנד יציב."],
+   ["MCD","McDonald's","רשת מזון מהיר, נדל\"ן ותזרים יציב."]]},
+  {t:"טק ישראלי", p:"חברות תוכנה ישראליות שנסחרות בנאסד\"ק.", s:[
+   ["MNDY","monday.com","תוכנה לניהול עבודה.",["il"]],
+   ["WIX","Wix","בניית אתרים.",["il"]],
+   ["NICE","NICE","תוכנה למוקדי שירות עם AI.",["il"]],
+   ["GLBE","Global-e","תשתית למסחר מקוון בינלאומי.",["il"]]]}
+ ]}
+];
+
+const YAHOO_TA = {TASE:"TASE.TA",POLI:"POLI.TA",LUMI:"LUMI.TA",DSCT:"DSCT.TA",MZTF:"MZTF.TA",NXSN:"NXSN.TA",NWMD:"NWMD.TA",RHM:"RHM.DE"};
+const STATUS=["לחקור","בבדיקה","מתאימה","נפסלה"];
+const SCLS={"לחקור":"s0","בבדיקה":"s1","מתאימה":"s2","נפסלה":"s3"};
+let filter="all", query="", watch=new Map(), ownSet=new Set();
+try{ const o=JSON.parse(localStorage.getItem("themeWatch")||"null"); if(o) watch=new Map(o); }catch(e){}
+function saveLocal(){ try{ localStorage.setItem("themeWatch",JSON.stringify([...watch])); }catch(e){} }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function today(){ const d=new Date(); return d.getDate()+"."+(d.getMonth()+1)+"."+d.getFullYear(); }
+function isOwn(st){ return ownSet.has(st[0]); }
+
+function match(st,row){
+  const tags=st[3]||[];
+  if(filter==="hot" && !row.hot) return false;
+  if(filter==="il" && !tags.includes("il")) return false;
+  if(filter==="own" && !isOwn(st)) return false;
+  if(filter==="watch" && !watch.has(st[0])) return false;
+  if(query){ const q=query.toLowerCase(); if(!(st[0].toLowerCase().includes(q)||st[1].toLowerCase().includes(q)||st[2].includes(query))) return false; }
+  return true;
+}
+
+function render(){
+  const app=document.getElementById("app"); let html="", n=0, any=false;
+  S.forEach(sec=>{
+    let rows="";
+    sec.rows.forEach(r=>{
+      n++;
+      const items=r.s.filter(st=>match(st,r));
+      if(!items.length) return;
+      any=true;
+      rows+=`<div class="row${r.hot?" hot":""}">
+        <div class="lbl">
+          <h3><span class="num">${String(n).padStart(2,"0")}</span>${r.t}${r.hot?'<span class="badge hot">חם</span>':""}</h3>
+          <p>${r.p}</p></div>
+        <div class="tiles">${items.map(st=>{
+          const tg=st[3]||[], own=isOwn(st), w=watch.get(st[0]), sc=w?SCLS[w.s]:"";
+          const dots=(own?'<i class="d-own"></i>':"")+(tg.includes("il")?'<i class="d-il"></i>':"")+(tg.includes("spec")?'<i class="d-spec"></i>':"")+(w?`<i class="d-${sc}"></i>`:"");
+          return `<button class="t${own?" own":""}${w?" w "+sc:""}" data-k="${st[0]}"><div class="dots">${dots}</div><div class="tk">${st[0]}</div><div class="nm">${st[1]}</div></button>`;
+        }).join("")}</div></div>`;
+    });
+    if(rows) html+=`<section class="sec"><div class="sec-h"><h2>${sec.h}</h2><span class="en">${sec.en}</span></div>${rows}</section>`;
+  });
+  app.innerHTML=any?html:`<div class="empty">${filter==="watch"?"עוד אין מניות במעקב. לחץ על מניה ותן לה סטטוס.":"לא נמצאו מניות."}</div>`;
+}
+
+function find(k){ for(const sec of S) for(const r of sec.rows) for(const st of r.s) if(st[0]===k) return {st,r,sec}; }
+function openSheet(k){
+  const {st,r}=find(k), tg=st[3]||[], w=watch.get(k);
+  const tags=[isOwn(st)?'<span class="tag own">בתיק</span>':"",tg.includes("il")?'<span class="tag il">ישראלית: מוסיפה לחשיפה לישראל</span>':"",tg.includes("spec")?'<span class="tag spec">ספקולטיבית</span>':"",tg.includes("etf")?'<span class="tag etf">קרן סל</span>':""].join("");
+  const y=YAHOO_TA[k]||k;
+  document.getElementById("sheet").innerHTML=`
+    <div class="sh-top"><div class="tk">${k}</div><div><div class="sh-nm">${st[1]}</div><div class="sh-row">${r.t}</div></div><button class="x" id="x">✕</button></div>
+    <div class="sh-d">${st[2]}</div>
+    ${tags?`<div class="tags">${tags}</div>`:""}
+    <div class="stt">${STATUS.map(s=>`<button class="sb ${SCLS[s]}${w&&w.s===s?" on":""}" data-s="${s}">${s}</button>`).join("")}${w?'<button class="sb rm" data-s="">הסר ממעקב</button>':""}</div>
+    <textarea id="note" placeholder="למה היא מעניינת אותך? מה התזה ומה צריך לבדוק">${esc(w?w.n:"")}</textarea>
+    ${w&&w.u?`<div class="sh-row">עודכן ${esc(w.u)}</div>`:""}
+    <div class="acts">
+      <a class="btn pri" href="${LAB}#${isOwn(st)?"h":"t"}-${k}">למעבדה</a>
+      <a class="btn" href="https://finance.yahoo.com/quote/${y}">גרף ונתונים</a>
+    </div>`;
+  document.getElementById("ov").classList.add("on");
+  document.getElementById("x").onclick=closeSheet;
+  document.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{
+    const s=b.dataset.s, cur=watch.get(k);
+    if(!s) watch.delete(k); else watch.set(k,{s,n:cur?cur.n:"",u:today()});
+    saveLocal(); render(); openSheet(k); });
+  document.getElementById("note").addEventListener("input",e=>{
+    const v=e.target.value, cur=watch.get(k);
+    if(!cur && !v.trim()) return;
+    watch.set(k,{s:cur?cur.s:"לחקור",n:v,u:today()});
+    saveLocal(); render(); });
+}
+function closeSheet(){ document.getElementById("ov").classList.remove("on"); }
+document.getElementById("ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeSheet(); });
+document.getElementById("app").addEventListener("click",e=>{ const b=e.target.closest(".t"); if(b) openSheet(b.dataset.k); });
+document.querySelectorAll(".f").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".f").forEach(x=>x.classList.remove("on")); b.classList.add("on"); filter=b.dataset.f; render(); });
+document.getElementById("q").addEventListener("input",e=>{ query=e.target.value.trim(); render(); });
+render();
+Roy.data().then(d=>{
+  ownSet=new Set(((d.datasets&&d.datasets.holdings)||[]).map(h=>String(h.ticker).toUpperCase()));
+  render();
+},()=>{});
+</script>
+</body>
+</html>
