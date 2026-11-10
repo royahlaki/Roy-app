@@ -248,7 +248,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 
 <div class="top hero">
   <h1 id="title">התיק שלי</h1>
-  <div class="dt" data-today></div>
+  <div class="dt"><span data-source="account" data-field="as_of" data-row="0">—</span></div>
   <div class="tabs" role="tablist">
     <button id="tab-portfolio" role="tab" aria-selected="true" type="button">תיק</button>
     <button id="tab-research" role="tab" aria-selected="false" type="button">מחקר</button>
@@ -270,9 +270,9 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 </section>
 
 <div class="kpis">
-  <div class="kpi"><span class="pill red">חריגה</span><div class="v t-red" data-source="summary" data-field="top3_pct" data-row="0">—</div><div class="l">3 הגדולות · כלל 30%</div></div>
-  <div class="kpi"><span class="pill red">גבוה</span><div class="v t-red" data-source="summary" data-field="defense_pct" data-row="0">—</div><div class="l">ביטחון</div></div>
-  <div class="kpi"><span class="pill blu">מידע</span><div class="v t-blu" data-source="summary" data-field="israel_pct" data-row="0">—</div><div class="l">ישראל, כולל ת"א-125</div></div>
+  <div class="kpi" title="שלוש הגדולות יחד. הכלל: עד 30%"><div class="v t-red" data-source="summary" data-field="top3_pct" data-row="0">—</div><div class="l">3 הגדולות</div></div>
+  <div class="kpi" title="אלביט ונקסט ויז'ן"><div class="v t-red" data-source="summary" data-field="defense_pct" data-row="0">—</div><div class="l">ביטחון</div></div>
+  <div class="kpi" title="כולל ת&quot;א-125"><div class="v t-blu" data-source="summary" data-field="israel_pct" data-row="0">—</div><div class="l">ישראל</div></div>
 </div>
 
 <section class="card" id="plan-card">
@@ -509,6 +509,25 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 .pf .total{background:linear-gradient(90deg,#14112B,#4C2F9E 60%,#8B6FE0);-webkit-background-clip:text;background-clip:text;color:transparent}
 .pf .ctile,.pf .plt,.pf .sq,.pf .tile,.pf .dv,.pf .th{background:#FAF9FD}
 .pf th,.pf tfoot td{background:#F6F4FB}
+</style>
+<style id="roy-tweaks">
+.pf .top.hero{background:radial-gradient(600px 300px at 90% -20%,rgba(76,157,255,.22),transparent 70%),radial-gradient(500px 260px at 0% 120%,rgba(139,92,246,.22),transparent 70%),linear-gradient(170deg,#25327E 0%,#1B2459 55%,#141A44 100%);box-shadow:0 16px 40px -24px #141A44}
+.pf .top h1{background:linear-gradient(90deg,#DCE7FF,#A9C6FF 50%,#C9A6FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pf .top .dt,.pf .top .dt span{color:#AEB6D9}
+.pf .top .tabs{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2)}
+.pf .top .tabs button{color:#E3E8FF}
+.pf .top .tabs button[aria-selected=true]{background:linear-gradient(135deg,#4C9DFF,#8B5CF6);color:#fff;box-shadow:0 4px 16px rgba(76,157,255,.4)}
+.pf #total-card{align-items:center;text-align:center}
+.pf #total-card .pills{justify-content:center}
+.pf .total{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#111827;-webkit-text-fill-color:#111827}
+.pf .kpis .kpi{align-items:center;text-align:center;justify-content:center;gap:2px;padding:10px 6px}
+.pf .kpis .kpi .v{font-size:26px;line-height:1.1}
+.pf .kpis .kpi .l{font-size:12px;color:var(--g-mut)}
+.pf .plt{padding:8px 6px;gap:3px}
+.pf .plt .w{font-size:14px}
+.pf .plt .amt{font-size:12px;color:var(--g-mut)}
+.pf #pl-each{display:none}
+.pf .dr{padding:8px 0}
 </style>
 <style id="app-insets">
 .pf{padding-top:0!important;padding-bottom:calc(var(--nav-h,0px) + 20px)!important}

@@ -166,7 +166,7 @@ window.pfDraw = () => {
   document.querySelectorAll('[data-source="account"][data-field]').forEach(x => {
     if (A.status !== 'ok') { x.textContent = '—'; return; }
     const f = x.dataset.field, v = A.data[0][f];
-    x.textContent = f === 'as_of' ? 'עודכן ' + v : f === 'total_ils' ? '₪' + d3.format(',.2f')(v) : f === 'cash_usd' ? d3.format(',.0f')(v) : (f === 'daily_change' || f === 'pnl_total') ? ils(Math.abs(v)) : ils(v);
+    x.textContent = f === 'as_of' ? 'מעודכן ל-' + ((String(v).match(/\d{1,2}\.\d{1,2}\.\d{4}/) || [v])[0]) : f === 'total_ils' ? '₪' + d3.format(',.2f')(v) : f === 'cash_usd' ? d3.format(',.0f')(v) : (f === 'daily_change' || f === 'pnl_total') ? ils(Math.abs(v)) : ils(v);
   });
   document.querySelectorAll('[data-source="summary"][data-field]').forEach(x => {
     if (S.status !== 'ok') { x.textContent = '—'; return; }
@@ -427,11 +427,13 @@ const drawThesis = () => {
     const rows = [...PLN.data].sort((a, b) => a.step - b.step);
     const done = rows.filter(r => r.status === 'בוצע').length;
     const nxt = rows.find(r => r.status !== 'בוצע');
-    cnt.textContent = `${done}/${rows.length}` + (nxt ? ` · הבאה ${nxt.window}` : '');
+    cnt.textContent = `${done}/${rows.length} בוצעו`; cnt.title = nxt ? 'הבאה: ' + nxt.window : '';
     rows.forEach(r => {
       const t = el('div', 'plt' + (r.status === 'בוצע' ? ' done' : ''));
-      const cls = r.status === 'בוצע' ? 'grn' : r.status === 'מחכה לתשובות' ? 'red' : 'gry';
-      t.append(el('span', 'w', r.window), el('span', 'pill ' + cls, r.status));
+      const st = r.status === 'בוצע' ? ['grn', 'בוצע'] : String(r.status).includes('בוצע') ? ['blu', 'חלקי'] : ['gry', 'מתוכנן'];
+      const sumR = (Number(r.eslt) || 0) + (Number(r.tase) || 0) + (Number(r.nxsn) || 0);
+      t.title = `${r.window} · ${r.status}\nאלביט ${ils(Number(r.eslt) || 0)} · הבורסה ${ils(Number(r.tase) || 0)} · נקסט ויז'ן ${ils(Number(r.nxsn) || 0)}`;
+      t.append(el('span', 'w', String(r.window).replace(/\s*\(.*?\)/g, '').replace(/^עד /, '')), el('span', 'amt', ils(sumR)), el('span', 'pill ' + st[0], st[1]));
       pls.appendChild(t);
     });
     const r0 = rows[0], HS = dash.data('holdings').data || [];
@@ -447,8 +449,7 @@ const drawThesis = () => {
     rows.slice(0, 3).forEach(r => {
       const d = el('div', 'dr'); d.appendChild(el('span', 'd', dmy(r.date)));
       const b = el('div'); b.appendChild(el('div', '', r.action));
-      if (txt(r.why)) b.appendChild(el('div', 'm', r.why));
-      d.title = [txt(r.expect) && 'ציפייה: ' + r.expect, txt(r.result) && 'בפועל: ' + r.result].filter(Boolean).join('\n');
+      d.title = [txt(r.why) && 'למה: ' + r.why, txt(r.expect) && 'ציפייה: ' + r.expect, txt(r.result) && 'בפועל: ' + r.result].filter(Boolean).join('\n');
       d.appendChild(b); dl.appendChild(d);
     });
   }
