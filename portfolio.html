@@ -8,10 +8,10 @@
 <style>
 :root{--font-anthropic-sans:Heebo,system-ui,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;background:#070b18}
+html,body{margin:0;padding:0;background:#F1F2FF}
 #dash-root{min-height:100vh}
 #boot{padding-top:calc(var(--top-h,0px) + 60px)}
-#boot{color:#8C97BA;text-align:center;padding:60px 20px;font-family:Heebo,system-ui,sans-serif}
+#boot{color:#7A80AE;text-align:center;padding:60px 20px;font-family:Heebo,system-ui,sans-serif}
 </style>
 </head>
 <body data-tab="portfolio">
@@ -246,11 +246,9 @@ html,body{margin:0;padding:0;background:#070b18}
 </style>
 <div class="wrap">
 
-<div class="top">
-  <div>
-    <h1 id="title">התיק שלי</h1>
-    <div class="cap mut" style="margin-top:4px">נתוני התיק כפי שמופיעים באפליקציה · <span data-source="account" data-field="as_of" data-row="0">—</span></div>
-  </div>
+<div class="top hero">
+  <h1 id="title">התיק שלי</h1>
+  <div class="dt" data-today></div>
   <div class="tabs" role="tablist">
     <button id="tab-portfolio" role="tab" aria-selected="true" type="button">תיק</button>
     <button id="tab-research" role="tab" aria-selected="false" type="button">מחקר</button>
@@ -458,55 +456,43 @@ html,body{margin:0;padding:0;background:#070b18}
 .pf .th.over{border:1.5px solid #FF4D6D;box-shadow:0 0 0 3px rgba(255,77,109,.14),0 0 22px rgba(255,77,109,.18)}
 .pf .rsr:has(.w.t-red){border-radius:12px;padding-inline:10px}
 </style>
-<style id="theme-dark">
-.pf{--g-bg:rgba(255,255,255,.07);--g-card:rgba(255,255,255,.045);--g-line:rgba(255,255,255,.10);--g-soft:rgba(255,255,255,.07);--g-fg:#EEF2FF;--g-sub:#C3CBE6;--g-mut:#8C97BA;
-  --red:#FF6B85;--red-bar:#FF4D6D;--red-bg:rgba(255,77,109,.14);--grn:#3DDC97;--grn-bar:#2BC985;--grn-bg:rgba(61,220,151,.13);--blu:#6CB4FF;--blu-bar:#4C9DFF;--blu-bg:rgba(76,157,255,.15);--gry-bar:#6B7699;
-  color:var(--g-fg);min-height:100vh;
-  background:radial-gradient(1100px 650px at 85% -10%,#2a3fa8 0%,transparent 60%),radial-gradient(900px 600px at 0% 105%,#5b1f8f 0%,transparent 60%),radial-gradient(700px 500px at 40% 55%,#0e2a4a 0%,transparent 70%),#070b18;background-attachment:fixed}
-.pf.th-mode{background:radial-gradient(1100px 650px at 85% -10%,#2a3fa8 0%,transparent 60%),radial-gradient(900px 600px at 0% 105%,#5b1f8f 0%,transparent 60%),#070b18;background-attachment:fixed}
+<style id="theme-light">
+.pf{--g-bg:#E9EDFF;--g-card:#FFFFFF;--g-line:#DCE1FA;--g-soft:#EEF0FD;--g-fg:#1A1B4B;--g-sub:#3F4478;--g-mut:#7A80AE;
+  --red:#D6294A;--red-bar:#E8435F;--red-bg:#FFEDF1;--grn:#0E9F6E;--grn-bar:#12B07B;--grn-bg:#E5F8F0;--blu:#4F46E5;--blu-bar:#6366F1;--blu-bg:#ECEBFF;--gry-bar:#A3A8CC;
+  color:var(--g-fg);min-height:100vh;background:linear-gradient(180deg,#F1F2FF 0%,#EEF0FF 50%,#F6F0FF 100%);background-attachment:fixed}
+.pf.th-mode{background:linear-gradient(180deg,#ECEEFF,#F3EEFF);background-attachment:fixed}
 .pf .wrap{max-width:none}
-@media (min-width:1000px){.pf{padding:28px 40px 48px}}
-.pf .top h1{font-size:28px;background:linear-gradient(90deg,#fff,#9fc3ff 60%,#c79bff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.pf .tabs{background:rgba(255,255,255,.06);border:1px solid var(--g-line)}
-.pf .tabs button{color:var(--g-sub)}
-.pf .tabs button[aria-selected=true]{background:linear-gradient(135deg,#4C9DFF,#8B5CF6);color:#fff;box-shadow:0 4px 16px rgba(76,157,255,.35)}
-.pf .card,.pf .kpi,.pf .stock{background:var(--g-card);border:1px solid var(--g-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.25);transition:border-color .2s}
-.pf .card:hover,.pf .stock:hover{border-color:rgba(255,255,255,.18)}
-.pf #total-card{background:linear-gradient(135deg,rgba(76,157,255,.18),rgba(139,92,246,.13) 60%,rgba(255,255,255,.03));border-color:rgba(124,160,255,.32)}
-.pf .total{font-size:44px;background:linear-gradient(90deg,#fff,#b9d4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.pf h2{color:#fff;letter-spacing:.2px}
-.pf .kpi .l{color:var(--g-sub)}
-.pf .pill.day.grn,.pf .pill.day.red{background:transparent}
-.pf .pill.rep{background:#141a33;border-color:#8B5CF6;color:var(--g-sub)}
-.pf .pill.gry{background:rgba(255,255,255,.08);color:var(--g-sub)}
-.pf .ctile,.pf .plt,.pf .sq,.pf .tile,.pf .dv,.pf .th{background:rgba(255,255,255,.04);border-color:var(--g-soft)}
-.pf .dv.tot{background:var(--grn-bg);border-color:rgba(61,220,151,.3)}
-.pf .plt.done{border-color:var(--grn-bar)}
-.pf .tgt{background:#10162c;border-color:var(--g-line);color:var(--g-fg)}
-.pf .wst-br span{background:#10162c;color:var(--red)}
-.pf .tip{background:#121933;border-color:var(--g-line);color:var(--g-fg);box-shadow:0 8px 24px rgba(0,0,0,.45)}
-.pf .stock.trade{border:1.5px solid var(--red-bar);box-shadow:0 0 0 3px var(--red-bg),0 8px 30px rgba(0,0,0,.25)}
-.pf .ctrl{background:linear-gradient(135deg,rgba(234,179,8,.10),rgba(255,255,255,.03));border:1px solid rgba(234,179,8,.45);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.pf .ctrl-h{color:#F5D46B}
-.pf .ct{background:rgba(255,255,255,.05)}
-.pf .seg{background:rgba(255,255,255,.06)}
-.pf .seg button[aria-pressed=true]{background:rgba(255,255,255,.14);color:#fff;box-shadow:none}
-.pf .pin input,.pf .inputs input{background:rgba(0,0,0,.25);color:var(--g-fg);border-color:var(--g-line)}
-.pf th,.pf tfoot td{background:#10162c}
+.pf .top.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;margin:0 -16px 4px;padding:calc(var(--top-h,0px) + 22px) 16px 18px;
+  background:linear-gradient(155deg,#312E81 0%,#4F46E5 55%,#A78BFA 130%);color:#fff;border-radius:0 0 28px 28px}
+@media (min-width:1000px){.pf .top.hero{margin:0 -40px 8px}.pf{padding:28px 40px 48px}}
+.pf .top h1{font-size:28px;font-weight:800;color:#fff;margin:0}
+.pf .top .dt{font-size:13px;color:rgba(255,255,255,.78);margin-top:4px}
+.pf .top .tabs{align-self:center;margin-top:14px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22)}
+.pf .top .tabs button{color:rgba(255,255,255,.85)}
+.pf .top .tabs button[aria-selected=true]{background:#fff;color:#4338CA;box-shadow:0 4px 14px rgba(30,27,75,.25)}
+.pf .card,.pf .kpi,.pf .stock{background:var(--g-card);border:1px solid var(--g-line);box-shadow:0 6px 22px rgba(79,70,229,.08)}
+.pf #total-card{background:linear-gradient(135deg,#FFFFFF 0%,#F1F0FF 100%);border-color:#CFCBFB}
+.pf .total{font-size:42px;color:#2E2A85}
+.pf h2{color:var(--g-fg)}
+.pf .pill.day.grn,.pf .pill.day.red{background:#fff}
+.pf .pill.rep{background:#fff;border-color:#8B5CF6}
+.pf .ctile,.pf .plt,.pf .sq,.pf .tile,.pf .dv,.pf .th{background:#F7F7FF;border-color:var(--g-soft)}
+.pf .dv.tot{background:var(--grn-bg);border-color:#BDEBD8}
+.pf .tgt{background:#fff;border-color:var(--g-line);color:var(--g-fg)}
+.pf .tip{background:#fff;border-color:var(--g-line);color:var(--g-fg);box-shadow:0 8px 24px rgba(30,27,75,.15)}
+.pf .ctrl{background:linear-gradient(135deg,#FFF8E1,#FFFFFF);border:1px solid #F3D27A}
+.pf .ctrl-h{color:#A16207}
+.pf .seg button[aria-pressed=true]{background:#fff;color:var(--blu)}
+.pf .pin input,.pf .inputs input{background:#fff;color:var(--g-fg);border-color:var(--g-line)}
+.pf th,.pf tfoot td{background:#F3F3FF}
 .pf .fin th,.pf .fin td{background:transparent}
-.pf .bz-z.z1,.pf .bz-z.z3{background:rgba(255,255,255,.08)}
-.pf .bz-z.z2{background:rgba(255,255,255,.16)}
-.pf .bz-t{box-shadow:0 0 0 1px #070b18}
-.pf .sg{border-color:var(--g-line)}
-.pf .sg .sc{border-color:var(--g-soft)}
-.pf .sg .sc.on{background:var(--red-bg)}
-.pf .hb .mk,.pf .track .mark,.pf .wst-cap{background:#fff}
-.pf .th .ln.miss,.pf .rsth .ln.miss{color:#5F6A8C}
-.pf .track .fill,.pf .pg-r .fl,.pf .hb .fl{box-shadow:0 0 10px rgba(76,157,255,.45)}
-.pf footer{color:#5F6A8C}
+.pf .bz-t{box-shadow:0 0 0 1px #fff}
+.pf .hb .mk,.pf .track .mark,.pf .wst-cap{background:var(--g-fg)}
+.pf footer{display:none}
+.pf p.note{display:none}
 </style>
 <style id="app-insets">
-.pf{padding-top:calc(var(--top-h,0px) + 16px)!important;padding-bottom:calc(var(--nav-h,0px) + 20px)!important}
+.pf{padding-top:0!important;padding-bottom:calc(var(--nav-h,0px) + 20px)!important}
 </style>
 </div>
 </div>

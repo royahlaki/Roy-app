@@ -5,7 +5,7 @@ const pct = v => d3.format('.1f')(v) + '%';
 const num = (v, f) => (v === null || v === undefined || v === '') ? '—' : d3.format(f)(v);
 const dmy = s => { const [y, m, d] = s.split('-'); return `${+d}/${+m}`; };
 const CFG = window.PF_CFG || {}; const TOP3 = CFG.top3 || []; const DEF = CFG.defense || []; const ISR = CFG.israel || [];
-const C = { red: '#FF4D6D', grn: '#2BC985', blu: '#4C9DFF', gry: '#7C88A8', fg: '#EEF2FF', mut: '#8C97BA', line: 'rgba(255,255,255,.22)', soft: 'rgba(255,255,255,.07)', band: 'rgba(76,157,255,.15)' };
+const C = { red: '#E8435F', grn: '#12B07B', blu: '#6366F1', gry: '#A3A8CC', fg: '#1A1B4B', mut: '#7A80AE', line: 'rgba(26,27,75,.18)', soft: 'rgba(26,27,75,.06)', band: 'rgba(99,102,241,.12)' };
 const riskCol = v => v >= 7 ? C.red : v >= 4 ? C.blu : C.grn;
 const riskCls = v => v === null || v === undefined ? '' : v >= 7 ? 't-red' : v >= 4 ? 't-blu' : 't-grn';
 const MAX_W = 10;
@@ -278,7 +278,7 @@ window.pfDraw = () => {
       pts.forEach(d => { const k = d.risk_price + '_' + d.risk_fund; seen[k] = (seen[k] || 0) + 1; d._n = seen[k] - 1; d._j = d._n * 30; });
       const g = svg.selectAll('g.pt').data(pts).join('g').attr('class', 'pt').style('cursor', 'pointer')
         .attr('transform', d => `translate(${x(d.risk_price) + d._j},${y(d.risk_fund)})`);
-      g.append('circle').attr('r', d => r(d.weight)).attr('fill', d => riskCol((d.risk_price + d.risk_fund) / 2)).attr('fill-opacity', .9).attr('stroke', '#070b18').attr('stroke-width', 2).style('filter', 'drop-shadow(0 0 6px rgba(255,255,255,.18))');
+      g.append('circle').attr('r', d => r(d.weight)).attr('fill', d => riskCol((d.risk_price + d.risk_fund) / 2)).attr('fill-opacity', .9).attr('stroke', '#ffffff').attr('stroke-width', 2).style('filter', 'drop-shadow(0 0 6px rgba(255,255,255,.18))');
       g.append('text').attr('y', d => r(d.weight) >= 14 ? 4 : (d._n % 2 ? r(d.weight) + 12 : -r(d.weight) - 4)).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-weight', 600)
         .attr('fill', d => r(d.weight) >= 14 ? '#FFFFFF' : C.fg).text(d => d.ticker);
       g.on('click', (e, d) => {

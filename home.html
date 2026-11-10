@@ -4,134 +4,154 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>דף הבית</title>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F3F4F6;--card:#FFFFFF;--line:#E5E7EB;--fg:#111827;--mut:#6B7280;--blu:#2563EB;--blu-bg:#EFF6FF}
+:root{--card:#FFFFFF;--line:#DCE8FB;--soft:#EEF4FD;--fg:#0F1E3D;--mut:#6A7FA3;--blu:#2563EB;--blu-bg:#EAF2FF}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:Heebo,system-ui,sans-serif;padding-bottom:var(--nav-h,0px)}
-.hero{background:linear-gradient(155deg,#1E3A8A 0%,#2563EB 55%,#22D3EE 130%);color:#fff;padding:calc(var(--top-h,0px) + 18px) 20px 58px;border-radius:0 0 28px 28px}
-.hero .in{max-width:1400px;margin:0 auto}
-.hero h1{color:#fff}.hero .sub{color:rgba(255,255,255,.82)}
-@media(min-width:900px){.hero{padding:calc(var(--top-h,0px) + 30px) 40px 64px}}
-.wrap{max-width:1400px;margin:0 auto;padding:0 16px 32px}
-@media(min-width:900px){.wrap{padding:0 40px 48px}.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}.grid.small{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}a.t{min-height:110px;padding:18px}.t .n{font-size:17px}.t .d{font-size:13px}h1{font-size:32px}}
-h1{margin:0;font-size:26px;font-weight:800}
-.sub{color:var(--mut);font-size:13px;margin-top:4px}
-h2{font-size:13px;font-weight:600;color:var(--mut);margin:26px 4px 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-a.t{display:flex;flex-direction:column;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-decoration:none;color:inherit;min-height:84px;transition:border-color .15s,transform .15s}
-a.t:hover{border-color:var(--blu);transform:translateY(-1px)}
-a.t:active{transform:scale(.98)}
-.t .ic{font-size:20px;line-height:1}
-.t .n{font-size:15px;font-weight:700}
-.t .d{font-size:12px;color:var(--mut);line-height:1.4}
-.grid.small{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
-.grid.small a.t{min-height:0;padding:10px 12px;align-items:center;text-align:center}
-.grid.small .n{font-size:14px}
-.feat a.t{background:var(--blu-bg);border-color:#BFDBFE}
-footer{text-align:center;font-size:11px;color:var(--mut);margin-top:30px}
-.tasks{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:-38px;position:relative;box-shadow:0 10px 30px rgba(30,58,138,.12)}
-.tasks .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.tasks .hd b{font-size:16px}
-.tasks .cnt{font-size:12px;color:var(--mut)}
-.add{display:flex;gap:8px;margin-bottom:6px}
-.add input{flex:1;min-width:0;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff;color:var(--fg)}
-.add button{font:inherit;font-size:14px;font-weight:600;border:0;border-radius:10px;padding:0 16px;background:var(--blu);color:#fff;cursor:pointer}
+[hidden]{display:none!important}
+body{margin:0;color:var(--fg);font-family:Heebo,system-ui,sans-serif;padding-bottom:var(--nav-h,0px);min-height:100vh;
+  background:linear-gradient(180deg,#F2F7FF 0%,#EAF3FF 45%,#F3EEFF 100%);background-attachment:fixed}
+.hero{background:linear-gradient(155deg,#1E3A8A 0%,#2563EB 55%,#22D3EE 130%);color:#fff;text-align:center;
+  padding:calc(var(--top-h,0px) + 22px) 20px 54px;border-radius:0 0 28px 28px}
+.hero h1{margin:0;font-size:28px;font-weight:800;letter-spacing:.2px}
+.hero .dt{font-size:13px;color:rgba(255,255,255,.78);margin-top:4px}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 28px}
+h2{font-size:13px;font-weight:600;color:var(--mut);margin:24px 4px 10px}
+/* lists card */
+.lists{max-width:400px;margin:-34px auto 0;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 12px 8px;position:relative;box-shadow:0 10px 28px rgba(30,58,138,.12)}
+.seg{display:flex;background:var(--soft);border-radius:999px;padding:3px;margin-bottom:8px}
+.seg button{flex:1;border:0;background:none;font:inherit;font-size:13px;font-weight:600;color:var(--mut);padding:6px 0;border-radius:999px;cursor:pointer}
+.seg button.on{background:#fff;color:var(--blu);box-shadow:0 1px 4px rgba(30,58,138,.12)}
+.seg b{font-weight:600;font-size:11px;background:var(--blu-bg);color:var(--blu);border-radius:999px;padding:0 6px;margin-inline-start:4px}
+.add{display:flex;gap:6px;margin-bottom:2px}
+.add input{flex:1;min-width:0;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff;color:var(--fg)}
+.add button{font:inherit;font-size:20px;line-height:1;font-weight:500;border:0;border-radius:10px;width:36px;background:var(--blu);color:#fff;cursor:pointer}
 ul.tl{list-style:none;margin:0;padding:0}
-ul.tl li{display:flex;align-items:flex-start;gap:10px;padding:10px 2px;border-top:1px solid #F0F1F3}
+ul.tl li{display:flex;align-items:center;gap:8px;padding:7px 2px;border-top:1px solid var(--soft)}
 ul.tl li:first-child{border-top:0}
-ul.tl input[type=checkbox]{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--blu);cursor:pointer}
-ul.tl .tx{flex:1;font-size:15px;line-height:1.4;word-break:break-word}
-ul.tl .nt{display:block;font-size:12px;color:var(--mut);margin-top:2px}
+ul.tl input[type=checkbox]{width:18px;height:18px;margin:0;flex:none;accent-color:var(--blu);cursor:pointer}
+ul.tl .tx{flex:1;font-size:14px;line-height:1.35;word-break:break-word}
 ul.tl li.done .tx{color:var(--mut);text-decoration:line-through}
-ul.tl .del{border:0;background:none;color:#9CA3AF;font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
-.tg{font:inherit;font-size:12px;color:var(--mut);background:none;border:0;padding:6px 2px;cursor:pointer}
-.msg{font-size:13px;color:var(--mut);padding:8px 2px}
+ul.tl .del{border:0;background:none;color:#A9B8D3;font-size:17px;line-height:1;cursor:pointer;padding:0 2px}
+.foot{display:flex;justify-content:center}
+.tg{font:inherit;font-size:12px;color:var(--mut);background:none;border:0;padding:4px 2px;cursor:pointer}
+.msg{font-size:13px;color:var(--mut);padding:8px 2px;text-align:center}
+/* tiles */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+a.t{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:inherit;transition:transform .15s,border-color .15s}
+a.t:active{transform:scale(.98)}
+a.t:hover{border-color:var(--blu)}
+.t .ic{font-size:19px;line-height:1}
+.t .n{font-size:14px;font-weight:600}
+.feat a.t{background:var(--blu-bg);border-color:#C9DCFB}
+/* drive strip */
+.strip{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 4px 6px;margin:0 -16px;padding-inline:16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.strip::-webkit-scrollbar{display:none}
+.strip a{flex:none;scroll-snap-align:start;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:500;color:var(--fg);text-decoration:none;white-space:nowrap}
+.strip a::before{content:"📁";font-size:14px}
+@media(min-width:900px){.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
 </style>
 </head>
 <body data-tab="home">
-<header class="hero"><div class="in">
-  <h1>דף הבית</h1>
-  <div class="sub">כל הכלים, המסמכים והתיקיות במקום אחד</div>
-</div></header>
+<header class="hero">
+  <h1 data-greet>שלום רוי</h1>
+  <div class="dt" data-today></div>
+</header>
 <div class="wrap">
-  <section class="tasks">
-    <div class="hd"><b>משימות</b><span class="cnt" id="cnt"></span></div>
-    <form class="add" id="add"><input id="newt" placeholder="משימה חדשה" autocomplete="off"><button type="submit">הוסף</button></form>
+  <section class="lists">
+    <div class="seg" role="tablist">
+      <button type="button" data-l="tasks" class="on">משימות<b id="c-tasks" hidden></b></button>
+      <button type="button" data-l="shop">לקנות<b id="c-shop" hidden></b></button>
+    </div>
+    <form class="add" id="add"><input id="newt" placeholder="משימה חדשה" autocomplete="off" enterkeyhint="done"><button type="submit" aria-label="הוסף">+</button></form>
     <ul class="tl" id="open"></ul>
     <div class="msg" id="msg">טוען...</div>
-    <button class="tg" id="tg" hidden></button>
+    <div class="foot"><button class="tg" id="tg" hidden></button></div>
     <ul class="tl" id="closed" hidden></ul>
   </section>
-
   <h2>כלים</h2>
   <div class="grid feat">
-    <a class="t" href="https://claude.ai/artifact/WsmNu2GFyLHWb6BBd25Say"><span class="ic">📈</span><span class="n">התיק שלי</span><span class="d">אחזקות, ריכוזיות, תרחישים ויומן עסקאות</span></a>
-    <a class="t" href="https://claude.ai/artifact/WxeRRWehPX8TT22HB3TWHW"><span class="ic">💰</span><span class="n">הכספים שלי</span><span class="d">בנק, הלוואה והוצאות</span></a>
-    <a class="t" href="https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG"><span class="ic">🔬</span><span class="n">המעבדה</span><span class="d">מחקר מניות</span></a>
-    <a class="t" href="https://claude.ai/artifact/P3RAHWhxDbk2EDNaK2VshQ"><span class="ic">🗺️</span><span class="n">מפת סקטורים</span><span class="d">תחומים חמים ומניות מובילות</span></a>
-    <a class="t" href="https://claude.ai/artifact/3VLNBkXgK7tXrVwp1h7ugh"><span class="ic">🧭</span><span class="n">המערכת שלי</span><span class="d">שגרה והרגלים</span></a>
+    <a class="t" href="https://claude.ai/artifact/WsmNu2GFyLHWb6BBd25Say"><span class="ic">📈</span><span class="n">התיק שלי</span></a>
+    <a class="t" href="https://claude.ai/artifact/WxeRRWehPX8TT22HB3TWHW"><span class="ic">💰</span><span class="n">הכספים שלי</span></a>
+    <a class="t" href="https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG"><span class="ic">🔬</span><span class="n">המעבדה</span></a>
+    <a class="t" href="https://claude.ai/artifact/P3RAHWhxDbk2EDNaK2VshQ"><span class="ic">🗺️</span><span class="n">מפת סקטורים</span></a>
+    <a class="t" href="https://claude.ai/artifact/3VLNBkXgK7tXrVwp1h7ugh"><span class="ic">🧭</span><span class="n">המערכת שלי</span></a>
   </div>
-
   <h2>ReadUp</h2>
   <div class="grid">
-    <a class="t" href="https://docs.google.com/document/d/1ENPRI8dql8X7vPu65kqR5UhF4Dbbo3kFHUxQIOFDys4/edit"><span class="ic">🗓️</span><span class="n">תוכנית פרסום</span><span class="d">קצב, 9 פוסטים ראשונים</span></a>
-    <a class="t" href="https://docs.google.com/document/d/1sSDmnB6Mv4_-geKEnmmQV7WMDuDV4vuwIJf-M_eAeo8/edit"><span class="ic">💡</span><span class="n">בנק רעיונות</span><span class="d">רעיונות לפוסטים לפי נושא</span></a>
-    <a class="t" href="https://docs.google.com/document/d/1Fzql9CLijZWUorQ_WayAHCCBUJSxB2oFvj3lGnR_mnc/edit"><span class="ic">🎯</span><span class="n">אסטרטגיית תוכן</span><span class="d">מטרה וקהל יעד</span></a>
-    <a class="t" href="https://docs.google.com/spreadsheets/d/1Mwvm65tJt4bWzLlWozP9hh6V1_2tiWkI7oegoHCsoXo/edit"><span class="ic">📊</span><span class="n">001</span><span class="d">ניהול עסקי</span></a>
-    <a class="t" href="https://www.instagram.com/readup.il/"><span class="ic">📷</span><span class="n">readup.il</span><span class="d">העמוד באינסטגרם</span></a>
+    <a class="t" href="https://docs.google.com/document/d/1ENPRI8dql8X7vPu65kqR5UhF4Dbbo3kFHUxQIOFDys4/edit"><span class="ic">🗓️</span><span class="n">תוכנית פרסום</span></a>
+    <a class="t" href="https://docs.google.com/document/d/1sSDmnB6Mv4_-geKEnmmQV7WMDuDV4vuwIJf-M_eAeo8/edit"><span class="ic">💡</span><span class="n">בנק רעיונות</span></a>
+    <a class="t" href="https://docs.google.com/document/d/1Fzql9CLijZWUorQ_WayAHCCBUJSxB2oFvj3lGnR_mnc/edit"><span class="ic">🎯</span><span class="n">אסטרטגיית תוכן</span></a>
+    <a class="t" href="https://docs.google.com/spreadsheets/d/1Mwvm65tJt4bWzLlWozP9hh6V1_2tiWkI7oegoHCsoXo/edit"><span class="ic">📊</span><span class="n">001</span></a>
+    <a class="t" href="https://www.instagram.com/readup.il/"><span class="ic">📷</span><span class="n">readup.il</span></a>
   </div>
-
-  <h2>תיקיות ב-Drive</h2>
-  <div class="grid small">
-    <a class="t" href="https://drive.google.com/drive/folders/15-PyVghKjT-7YtKtQvz8ar-_ozIFmz_h"><span class="n">01 אישי</span></a>
-    <a class="t" href="https://drive.google.com/drive/folders/1gJ3Mo-M0gMtMUmwqBVJgadJH8uk0Fj_g"><span class="n">02 כספים</span></a>
-    <a class="t" href="https://drive.google.com/drive/folders/1LfxdysrF6AuntbBv6hXCbH_fxMASt7wp"><span class="n">03 השקעות</span></a>
-    <a class="t" href="https://drive.google.com/drive/folders/12uZK3gndZiBA9zPnk-o8kM9NPymwYv9I"><span class="n">04 ReadUp</span></a>
-    <a class="t" href="https://drive.google.com/drive/folders/1i7So_V29yMiJzexRyHGw6HDkXO6F05wu"><span class="n">05 לימודים</span></a>
-    <a class="t" href="https://drive.google.com/drive/folders/19LUIMwbuIBbdBRhIHwGvC47nqom4di_1"><span class="n">06 שיווק</span></a>
-    <a class="t" href="https://drive.google.com/drive/folders/16RkMin2mCPJ3xnP5W9EWGUcYknGN4M4Y"><span class="n">99 ארכיון</span></a>
+  <h2>Drive</h2>
+  <div class="strip">
+    <a class="t" href="https://drive.google.com/drive/folders/15-PyVghKjT-7YtKtQvz8ar-_ozIFmz_h">01 אישי</a>
+    <a class="t" href="https://drive.google.com/drive/folders/1gJ3Mo-M0gMtMUmwqBVJgadJH8uk0Fj_g">02 כספים</a>
+    <a class="t" href="https://drive.google.com/drive/folders/1LfxdysrF6AuntbBv6hXCbH_fxMASt7wp">03 השקעות</a>
+    <a class="t" href="https://drive.google.com/drive/folders/12uZK3gndZiBA9zPnk-o8kM9NPymwYv9I">04 ReadUp</a>
+    <a class="t" href="https://drive.google.com/drive/folders/1i7So_V29yMiJzexRyHGw6HDkXO6F05wu">05 לימודים</a>
+    <a class="t" href="https://drive.google.com/drive/folders/19LUIMwbuIBbdBRhIHwGvC47nqom4di_1">06 שיווק</a>
+    <a class="t" href="https://drive.google.com/drive/folders/16RkMin2mCPJ3xnP5W9EWGUcYknGN4M4Y">99 ארכיון</a>
   </div>
-
-  <footer>מוסיפים כלי חדש? תגיד לי ואוסיף כפתור.</footer>
 </div>
 <script src="js/core.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var msg = $('msg'), open = $('open'), closed = $('closed'), tg = $('tg'), cnt = $('cnt');
-  var LK = 'roy-tasks', showDone = false, rows = [];
-  var save = function () { try { localStorage.setItem(LK, JSON.stringify(rows)); } catch (e) {} };
-  var item = function (t) {
+  var open = $('open'), closed = $('closed'), msg = $('msg'), tg = $('tg'), inp = $('newt');
+  var L = {
+    tasks: { key: 'roy-tasks', ph: 'משימה חדשה', empty: 'אין משימות פתוחות.', rows: [] },
+    shop: { key: 'roy-shop', ph: 'מה לקנות?', empty: 'הרשימה ריקה.', rows: [] }
+  };
+  var cur = 'tasks', showDone = false;
+  try { cur = localStorage.getItem('roy-list') === 'shop' ? 'shop' : 'tasks'; } catch (e) {}
+  var save = function (l) { try { localStorage.setItem(l.key, JSON.stringify(l.rows)); } catch (e) {} };
+  var item = function (l, t) {
     var li = document.createElement('li'); if (t.done) li.className = 'done';
     var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!t.done;
-    cb.addEventListener('change', function () { t.done = cb.checked; t.doneAt = cb.checked ? new Date().toISOString() : null; save(); render(); });
+    cb.addEventListener('change', function () { t.done = cb.checked; t.doneAt = cb.checked ? new Date().toISOString() : null; save(l); render(); });
     var tx = document.createElement('span'); tx.className = 'tx'; tx.textContent = t.text || '';
-    if (t.note) { var n = document.createElement('span'); n.className = 'nt'; n.textContent = t.note; tx.appendChild(n); }
     var del = document.createElement('button'); del.className = 'del'; del.type = 'button'; del.textContent = '×'; del.title = 'מחק';
-    del.addEventListener('click', function () { rows = rows.filter(function (r) { return r !== t; }); save(); render(); });
+    del.addEventListener('click', function () { l.rows = l.rows.filter(function (r) { return r !== t; }); save(l); render(); });
     li.append(cb, tx, del); return li;
   };
-  var render = function () {
-    var o = rows.filter(function (r) { return !r.done; }).sort(function (a, b) { return (a.created || '') < (b.created || '') ? -1 : 1; });
-    var c = rows.filter(function (r) { return r.done; }).sort(function (a, b) { return (a.doneAt || '') < (b.doneAt || '') ? 1 : -1; });
-    open.replaceChildren.apply(open, o.map(item)); closed.replaceChildren.apply(closed, c.map(item));
-    cnt.textContent = o.length ? o.length + ' פתוחות' : '';
-    msg.hidden = o.length > 0; msg.textContent = 'אין משימות פתוחות.';
-    tg.hidden = !c.length; tg.textContent = showDone ? 'הסתר הושלמו (' + c.length + ')' : 'הושלמו (' + c.length + ')';
-    closed.hidden = !showDone || !c.length;
+  var counts = function () {
+    ['tasks', 'shop'].forEach(function (k) {
+      var n = L[k].rows.filter(function (r) { return !r.done; }).length, b = $('c-' + k);
+      b.hidden = !n; b.textContent = n;
+    });
   };
+  var render = function () {
+    var l = L[cur];
+    document.querySelectorAll('.seg button').forEach(function (b) { b.classList.toggle('on', b.dataset.l === cur); });
+    inp.placeholder = l.ph;
+    var o = l.rows.filter(function (r) { return !r.done; }).sort(function (a, b) { return (a.created || '') < (b.created || '') ? -1 : 1; });
+    var c = l.rows.filter(function (r) { return r.done; }).sort(function (a, b) { return (a.doneAt || '') < (b.doneAt || '') ? 1 : -1; });
+    open.replaceChildren.apply(open, o.map(function (t) { return item(l, t); }));
+    closed.replaceChildren.apply(closed, c.map(function (t) { return item(l, t); }));
+    msg.hidden = o.length > 0; msg.textContent = l.empty;
+    tg.hidden = !c.length; tg.textContent = showDone ? 'הסתר שבוצעו' : 'בוצעו (' + c.length + ')';
+    closed.hidden = !showDone || !c.length;
+    counts();
+  };
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () { cur = b.dataset.l; showDone = false; try { localStorage.setItem('roy-list', cur); } catch (e) {} render(); });
+  });
   tg.addEventListener('click', function () { showDone = !showDone; render(); });
   $('add').addEventListener('submit', function (e) {
-    e.preventDefault(); var v = $('newt').value.trim(); if (!v) return;
-    $('newt').value = '';
-    rows.push({ id: 't' + Date.now(), text: v, done: false, created: new Date().toISOString(), by: 'רוי' }); save(); render();
+    e.preventDefault(); var v = inp.value.trim(); if (!v) return;
+    inp.value = ''; var l = L[cur];
+    l.rows.push({ id: 't' + Date.now(), text: v, done: false, created: new Date().toISOString(), by: 'רוי' }); save(l); render();
   });
+  var load = function (k) { try { return JSON.parse(localStorage.getItem(L[k].key) || 'null'); } catch (e) { return null; } };
+  var shop = load('shop'); L.shop.rows = Array.isArray(shop) ? shop : [];
   Roy.data().then(function (data) {
-    var local = null; try { local = JSON.parse(localStorage.getItem(LK) || 'null'); } catch (e) {}
-    rows = Array.isArray(local) ? local : (data.tasks || []).map(function (t) { return Object.assign({}, t); });
+    var t = load('tasks');
+    L.tasks.rows = Array.isArray(t) ? t : (data.tasks || []).map(function (x) { return Object.assign({}, x); });
     render();
-  }, function () { msg.textContent = 'המשימות לא נטענו. נסה לרענן.'; });
+  }, function () { msg.textContent = 'הרשימות לא נטענו. נסה לרענן.'; });
 })();
 </script>
 </body>

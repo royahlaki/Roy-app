@@ -12,6 +12,7 @@ input,textarea{font-family:inherit}
 h1{margin:0;font-size:24px;font-weight:800;color:#fff;text-shadow:0 0 18px #8f6bff88}
 .sub{color:#a99fd6;font-size:13px}
 .st{font-size:12px;color:#a99fd6;white-space:nowrap}
+.top.home{flex-direction:column;justify-content:center;text-align:center;gap:2px;margin:8px 0 18px}.top.home .dt{color:#a99fd6;font-size:13px}.top.home .st{min-height:1em;font-size:11px}
 .add{display:flex;flex-wrap:wrap;gap:8px;background:#ffffff0a;border:1px solid #ffffff1a;border-radius:14px;padding:10px;margin-bottom:16px}
 .add input{flex:1 1 140px;background:#00000040;border:1px solid #ffffff22;color:#fff;border-radius:10px;padding:10px 12px;font-size:16px;min-width:0}
 .add button,.btn{background:linear-gradient(135deg,#39ff88,#22c3a6);color:#062016;border:0;border-radius:10px;padding:10px 14px;font-weight:800;font-size:15px}
@@ -147,7 +148,7 @@ function find(id,arr){arr=arr||S.tree;for(var i=0;i<arr.length;i++){if(arr[i].id
 function isOpen(nid){return !!UI.open[UI.sid+':'+nid]}
 
 function vHome(){
- var h='<header class="top"><div><h1>המעבדה</h1><div class="sub">הצ׳קליסט שלי לפני השקעה · <a class="dl" href="https://claude.ai/artifact/WsmNu2GFyLHWb6BBd25Say#research">לדשבורד התיק ←</a></div></div><span class="st" id="st">'+esc(status)+'</span></header>';
+ var h='<header class="top home"><h1>המעבדה</h1><div class="dt">'+esc(Roy.today())+'</div><span class="st" id="st">'+esc(status)+'</span></header>';
  h+='<form class="add" data-form="add"><input name="tk" placeholder="טיקר (למשל NVDA)" maxlength="12" required autocomplete="off" value="'+esc(PRE)+'"><input name="nm" placeholder="שם החברה (לא חובה)" autocomplete="off"><button>+ מחקר חדש</button></form>';
  if(!S.stocks.length)h+='<div class="empty">עוד אין מחקרים. הוסף מניה ראשונה למעלה.</div>';
  S.stocks.slice().sort(function(a,b){return(b.u||0)-(a.u||0)}).forEach(function(s){var t=stats({k:S.tree},s);

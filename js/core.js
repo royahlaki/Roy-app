@@ -80,3 +80,22 @@
     window.open(href, '_blank', 'noopener');
   }, true);
 })();
+
+/* Centered page header: title (or greeting on home) with today's date small underneath. */
+(function () {
+  function greet() {
+    var h = new Date().getHours();
+    return h < 5 ? 'לילה טוב' : h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : h < 21 ? 'ערב טוב' : 'לילה טוב';
+  }
+  function today() {
+    try { return new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' }); }
+    catch (e) { return new Date().toLocaleDateString(); }
+  }
+  window.Roy = window.Roy || {};
+  Roy.greet = greet; Roy.today = today;
+  Roy.fillHeader = function (root) {
+    (root || document).querySelectorAll('[data-greet]').forEach(function (el) { el.textContent = greet() + ' רוי'; });
+    (root || document).querySelectorAll('[data-today]').forEach(function (el) { el.textContent = today(); });
+  };
+  if (document.readyState !== 'loading') Roy.fillHeader(); else document.addEventListener('DOMContentLoaded', function () { Roy.fillHeader(); });
+})();

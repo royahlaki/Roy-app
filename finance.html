@@ -8,22 +8,28 @@
 <style>
 :root{
   --font-anthropic-sans:Heebo,system-ui,sans-serif;--font-anthropic-serif:Heebo,system-ui,sans-serif;
-  --color-fg:#ECFDF5;--color-fg-muted:#8FB5A8;--color-panel:rgba(255,255,255,.05);--color-border-line:rgba(255,255,255,.10);
-  --color-bg:rgba(0,0,0,.28);--color-ok:#34D399;--color-bad:#FF4D6D;
+  --color-fg:#0B3B2E;--color-fg-muted:#5E8A7C;--color-panel:#FFFFFF;--color-border-line:#D3EEE4;
+  --color-bg:#F0FAF6;--color-ok:#10A37F;--color-bad:#E8435F;
   --cds-gap-sm:8px;--cds-gap-md:12px;--cds-pad-xs:4px;--cds-pad-sm:8px;--cds-pad-md:16px;--cds-radius:14px;
   --cds-font-size-title:30px;--cds-font-size-heading:22px;--cds-font-size-body:14px;--cds-font-size-caption:12px;
-  --cds-chart-axis:rgba(255,255,255,.22);--cds-chart-muted:rgba(255,255,255,.18);--cds-chart-status-critical:#FF4D6D;--cds-chart-reference:#F5D46B;
-  --cds-surface-popover:#0c1f1a;--cds-border:rgba(255,255,255,.14);--cds-shadow-popover:0 8px 24px rgba(0,0,0,.45);--cds-text-secondary:#8FB5A8;--cds-dur-slow:.3s
+  --cds-chart-axis:rgba(11,59,46,.2);--cds-chart-muted:#CFE6DE;--cds-chart-status-critical:#E8435F;--cds-chart-reference:#C08A00;
+  --cds-surface-popover:#FFFFFF;--cds-border:#D3EEE4;--cds-shadow-popover:0 8px 24px rgba(11,59,46,.15);--cds-text-secondary:#5E8A7C;--cds-dur-slow:.3s
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100vh;
-  background:radial-gradient(1100px 650px at 85% -10%,#0f6b52 0%,transparent 60%),radial-gradient(900px 600px at 0% 105%,#0e3b5c 0%,transparent 60%),#05120e;background-attachment:fixed}
-#dash-root{padding:calc(var(--top-h,0px) + 14px) 14px calc(var(--nav-h,0px) + 24px)}
+  background:linear-gradient(180deg,#EFFBF6 0%,#ECF9F5 50%,#EAF6FB 100%);background-attachment:fixed}
+#dash-root{padding:0 14px calc(var(--nav-h,0px) + 24px)}
 #boot{color:var(--color-fg-muted);text-align:center;padding:calc(var(--top-h,0px) + 60px) 20px}
-.km-title{font-weight:800!important;font-size:28px!important;background:linear-gradient(90deg,#fff,#a7f3d0 60%,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.km-head{margin:0 -14px 4px;text-align:center;padding:calc(var(--top-h,0px) + 22px) 16px 22px!important;
+  background:linear-gradient(155deg,#065F46 0%,#059669 55%,#5EEAD4 130%);border-radius:0 0 28px 28px}
+.km-title{font-weight:800!important;font-size:28px!important;color:#fff}
+.km-head .dt{font-size:13px;color:rgba(255,255,255,.8);margin-top:4px}
 .km-big,.km-total{font-weight:800!important}
-.km-card{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.km-card{box-shadow:0 6px 22px rgba(5,150,105,.08)}
+.km-sub{display:none}
+.km-seg button.on{background:#fff!important;color:#047857!important;box-shadow:0 0 0 1px #9FE3CB!important}
+.km-bar i{box-shadow:none!important}
 </style>
 </head>
 <body data-tab="finance">
@@ -32,6 +38,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <div class="km" dir="rtl">
   <header class="km-head">
     <h1 class="km-title">הכספים שלי</h1>
+    <div class="dt" data-today></div>
   </header>
 
   <section class="km-card" id="bank">
@@ -90,7 +97,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <style>
 .km { max-width: 640px; margin-inline: auto; font-family: var(--font-anthropic-sans); color: var(--color-fg); display: flex; flex-direction: column; gap: var(--cds-gap-md); font-variant-numeric: tabular-nums; }
 .km-head { padding: var(--cds-pad-sm) 2px 0; }
-@media (min-width: 1000px) { .km { max-width: 1400px; display: grid; grid-template-columns: 1fr 1fr; align-items: start; padding: 12px 20px; } .km-head { grid-column: 1 / -1; } }
+@media (min-width: 1000px) { .km { max-width: 1400px; display: grid; grid-template-columns: 1fr 1fr; align-items: start; padding: 0 20px 12px; } .km-head { grid-column: 1 / -1; } }
 .km-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
 .km-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); min-width: 0; overflow: hidden; }
 .km-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--cds-gap-md); }
