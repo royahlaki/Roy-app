@@ -5,7 +5,7 @@ const pct = v => d3.format('.1f')(v) + '%';
 const num = (v, f) => (v === null || v === undefined || v === '') ? '—' : d3.format(f)(v);
 const dmy = s => { const [y, m, d] = s.split('-'); return `${+d}/${+m}`; };
 const CFG = window.PF_CFG || {}; const TOP3 = CFG.top3 || []; const DEF = CFG.defense || []; const ISR = CFG.israel || [];
-const C = { red: '#E8435F', grn: '#12B07B', blu: '#5B9BC9', gry: '#A3A8CC', fg: '#1C3349', mut: '#7890A6', line: 'rgba(28,51,73,.16)', soft: 'rgba(28,51,73,.05)', band: 'rgba(91,155,201,.12)' };
+const C = { red: '#E8435F', grn: '#12B07B', blu: '#8B6FE0', gry: '#A3A8CC', fg: '#17142B', mut: '#7E7A96', line: 'rgba(23,20,43,.14)', soft: 'rgba(23,20,43,.05)', band: 'rgba(139,111,224,.12)' };
 const riskCol = v => v >= 7 ? C.red : v >= 4 ? C.blu : C.grn;
 const riskCls = v => v === null || v === undefined ? '' : v >= 7 ? 't-red' : v >= 4 ? 't-blu' : 't-grn';
 const MAX_W = 10;
