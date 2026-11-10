@@ -5,6 +5,9 @@ const pct = v => d3.format('.1f')(v) + '%';
 const num = (v, f) => (v === null || v === undefined || v === '') ? '—' : d3.format(f)(v);
 const dmy = s => { const [y, m, d] = s.split('-'); return `${+d}/${+m}`; };
 const CFG = window.PF_CFG || {}; const TOP3 = CFG.top3 || []; const DEF = CFG.defense || []; const ISR = CFG.israel || [];
+const CONC_MAX = 23, DEF_MAX = 19;
+/* concentration rule (10.11.2026): the two largest of the top-3 group, combined target 23% */
+const concOf = hs => CFG.conc || TOP3.map(t => hs.find(h => h.ticker === t)).filter(Boolean).sort((a, b) => Number(b.value_ils) - Number(a.value_ils)).slice(0, 2).map(h => h.ticker);
 const C = { red: '#E8435F', grn: '#12B07B', blu: '#8B6FE0', gry: '#A3A8CC', fg: '#17142B', mut: '#7E7A96', line: 'rgba(23,20,43,.14)', soft: 'rgba(23,20,43,.05)', band: 'rgba(139,111,224,.12)' };
 const riskCol = v => v >= 7 ? C.red : v >= 4 ? C.blu : C.grn;
 const riskCls = v => v === null || v === undefined ? '' : v >= 7 ? 't-red' : v >= 4 ? 't-blu' : 't-grn';
@@ -34,7 +37,7 @@ dash.calc('summary', {
     const ai = holdings.filter(h => h.sector === 'תשתיות AI').reduce((s, h) => s + Number(h.value_ils), 0);
     const top3_pct = r1(top3 / T * 100), excess = Math.round(top3 - 0.30 * T);
     return [{
-      top3_pct, defense_pct: r1(def / T * 100), israel_pct: r1(isr / T * 100),
+      top3_pct, conc_pct: r1(sum(concOf(holdings)) / T * 100), defense_pct: r1(def / T * 100), israel_pct: r1(isr / T * 100),
       cash_pct: r1(Cs / T * 100), cash_gap_ils: Math.round(Cs - 0.25 * T), top3_excess_ils: excess,
       ai_pct: r1(ai / T * 100),
       portfolio_beta: Math.round(holdings.filter(h => h.beta !== null).reduce((s, h) => s + Number(h.value_ils) * Number(h.beta), 0) / T * 100) / 100,
@@ -116,7 +119,7 @@ dash.calc('progress', {
     const r1 = v => Math.round(v * 10) / 10, clamp = v => Math.max(0, Math.min(100, v));
     const top = holdings.filter(h => TOP3.includes(h.ticker)).reduce((s, h) => s + Number(h.value_ils), 0) / T * 100;
     const rows = [
-      { goal: 'ריכוזיות', now: r1(top), target: 30, progress: Math.round(clamp((53.8 - top) / (53.8 - 30) * 100)) }
+      { goal: 'ריכוזיות', now: r1(top), target: 31, progress: Math.round(clamp((53.8 - top) / (53.8 - 31) * 100)) }
     ];
     theses.forEach(th => {
       const tk = String(th.tickers || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -182,6 +185,11 @@ window.pfDraw = () => {
     x.textContent = NW.status === 'ok' ? ils(Math.abs(NW.data[0][x.dataset.field])) : '—';
   });
 
+  if (S.status === 'ok') {
+    const kc = document.getElementById('kpi-conc'), kd = document.getElementById('kpi-def');
+    if (kc) kc.className = 'v ' + (S.data[0].conc_pct > CONC_MAX ? 't-red' : 't-grn');
+    if (kd) kd.className = 'v ' + (S.data[0].defense_pct > DEF_MAX ? 't-red' : 't-blu');
+  }
   const al = document.getElementById('alert8'), AL = D('alerts8');
   al.innerHTML = '';
   const hit = AL.status === 'ok' && AL.data.length > 0;
@@ -217,7 +225,7 @@ window.pfDraw = () => {
     wbar.innerHTML = ''; wleg.innerHTML = '';
     if (W.status === 'ok' && S.status === 'ok') {
       const REDS = ['#FF4D6D', '#FF7A90', '#FFADBB'], GRAYS = ['#A8B4D8', '#8794BC', '#6B77A0', '#535E84', '#3F4868'];
-      const top = W.data.filter(d => TOP3.includes(d.ticker)), rest = W.data.filter(d => !TOP3.includes(d.ticker));
+      const CC = H.status === 'ok' ? concOf(H.data) : TOP3; const top = W.data.filter(d => CC.includes(d.ticker)), rest = W.data.filter(d => !CC.includes(d.ticker));
       const segs = [...top.map((d, i) => ({ n: d.name, w: d.weight, c: REDS[i] })), ...rest.map((d, i) => ({ n: d.name, w: d.weight, c: GRAYS[i % GRAYS.length] })), { n: 'מזומן', w: S.data[0].cash_pct, c: C.blu }];
       segs.forEach(sg => {
         const b = el('div'); b.style.flex = `${sg.w} 1 0`; b.style.background = sg.c; b.title = `${sg.n}: ${pct(sg.w)}`; wbar.appendChild(b);
@@ -575,7 +583,7 @@ dash.calc('scenario_status', {
   inputs: ['scenarios', 'summary', 'alerts8'],
   fn: (scenarios, summary, alerts8) => {
     const s = summary[0];
-    return scenarios.map(r => ({ ...r, active: r.check === 'cash_low' ? s.cash_pct < 23 : r.check === 'loss8' ? alerts8.length > 0 : r.check === 'top3' ? s.top3_pct > 30 : null }));
+    return scenarios.map(r => ({ ...r, active: r.check === 'cash_low' ? s.cash_pct < 25 : r.check === 'loss8' ? alerts8.length > 0 : r.check === 'top3' ? s.conc_pct > CONC_MAX : null }));
   }
 });
 const drawScen = () => {
