@@ -49,6 +49,15 @@ a.t:hover{border-color:var(--blu)}
 .strip::-webkit-scrollbar{display:none}
 .strip a{flex:none;scroll-snap-align:start;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:500;color:var(--fg);text-decoration:none;white-space:nowrap}
 .strip a::before{content:"📁";font-size:14px}
+.hh{display:flex;align-items:baseline;justify-content:space-between;margin:24px 4px 10px}
+.hh h2{margin:0}
+.hh .sys{font-size:13px;font-weight:600;color:var(--blu);text-decoration:none}
+.habits{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.hb{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.hb.on{background:var(--blu);border-color:var(--blu);color:#fff}
+.hb.on::after{content:"✓";font-weight:700}
+.strip.ru a::before{content:none}
+.strip.ru a span{font-size:15px}
 @media(min-width:900px){.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
 </style>
 </head>
@@ -69,21 +78,15 @@ a.t:hover{border-color:var(--blu)}
     <div class="foot"><button class="tg" id="tg" hidden></button></div>
     <ul class="tl" id="closed" hidden></ul>
   </section>
-  <h2>כלים</h2>
-  <div class="grid feat">
-    <a class="t" href="https://claude.ai/artifact/WsmNu2GFyLHWb6BBd25Say"><span class="ic">📈</span><span class="n">התיק שלי</span></a>
-    <a class="t" href="https://claude.ai/artifact/WxeRRWehPX8TT22HB3TWHW"><span class="ic">💰</span><span class="n">הכספים שלי</span></a>
-    <a class="t" href="https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG"><span class="ic">🔬</span><span class="n">המעבדה</span></a>
-    <a class="t" href="https://claude.ai/artifact/P3RAHWhxDbk2EDNaK2VshQ"><span class="ic">🗺️</span><span class="n">מפת סקטורים</span></a>
-    <a class="t" href="https://claude.ai/artifact/3VLNBkXgK7tXrVwp1h7ugh"><span class="ic">🧭</span><span class="n">המערכת שלי</span></a>
-  </div>
+  <div class="hh"><h2>היום</h2><a class="sys" href="https://docs.google.com/document/d/114oNvKnNHfBQTZwwgLMcO-XR9J41g7PAHYYeFPj5fN0/edit">המערכת שלי ‹</a></div>
+  <div class="habits" id="habits"></div>
   <h2>ReadUp</h2>
-  <div class="grid">
-    <a class="t" href="https://docs.google.com/document/d/1ENPRI8dql8X7vPu65kqR5UhF4Dbbo3kFHUxQIOFDys4/edit"><span class="ic">🗓️</span><span class="n">תוכנית פרסום</span></a>
-    <a class="t" href="https://docs.google.com/document/d/1sSDmnB6Mv4_-geKEnmmQV7WMDuDV4vuwIJf-M_eAeo8/edit"><span class="ic">💡</span><span class="n">בנק רעיונות</span></a>
-    <a class="t" href="https://docs.google.com/document/d/1Fzql9CLijZWUorQ_WayAHCCBUJSxB2oFvj3lGnR_mnc/edit"><span class="ic">🎯</span><span class="n">אסטרטגיית תוכן</span></a>
-    <a class="t" href="https://docs.google.com/spreadsheets/d/1Mwvm65tJt4bWzLlWozP9hh6V1_2tiWkI7oegoHCsoXo/edit"><span class="ic">📊</span><span class="n">001</span></a>
-    <a class="t" href="https://www.instagram.com/readup.il/"><span class="ic">📷</span><span class="n">readup.il</span></a>
+  <div class="strip ru">
+    <a href="https://docs.google.com/document/d/1ENPRI8dql8X7vPu65kqR5UhF4Dbbo3kFHUxQIOFDys4/edit"><span>🗓️</span>תוכנית פרסום</a>
+    <a href="https://docs.google.com/document/d/1sSDmnB6Mv4_-geKEnmmQV7WMDuDV4vuwIJf-M_eAeo8/edit"><span>💡</span>בנק רעיונות</a>
+    <a href="https://docs.google.com/document/d/1Fzql9CLijZWUorQ_WayAHCCBUJSxB2oFvj3lGnR_mnc/edit"><span>🎯</span>אסטרטגיית תוכן</a>
+    <a href="https://docs.google.com/spreadsheets/d/1Mwvm65tJt4bWzLlWozP9hh6V1_2tiWkI7oegoHCsoXo/edit"><span>📊</span>001</a>
+    <a href="https://www.instagram.com/readup.il/"><span>📷</span>readup.il</a>
   </div>
   <h2>Drive</h2>
   <div class="strip">
@@ -152,6 +155,28 @@ a.t:hover{border-color:var(--blu)}
     L.tasks.rows = Array.isArray(t) ? t : (data.tasks || []).map(function (x) { return Object.assign({}, x); });
     render();
   }, function () { msg.textContent = 'הרשימות לא נטענו. נסה לרענן.'; });
+})();
+
+(function () {
+  var box = document.getElementById('habits'); if (!box) return;
+  var d = new Date(), day = d.getDay();
+  var key = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  var list = [['💧', 'מים'], ['🧘', 'מדיטציה'], ['📖', 'קריאה'], ['✍️', 'כתיבה'], ['🔤', 'אנגלית']];
+  if (day === 1 || day === 3 || day === 6) list.push(['🏋️', 'אימון']);
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem('roy-habits') || '{}') || {}; } catch (e) {}
+  var done = store[key] || [];
+  list.forEach(function (h) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'hb' + (done.indexOf(h[1]) > -1 ? ' on' : '');
+    b.textContent = h[0] + ' ' + h[1];
+    b.addEventListener('click', function () {
+      var i = done.indexOf(h[1]); if (i > -1) done.splice(i, 1); else done.push(h[1]);
+      b.classList.toggle('on', i < 0);
+      var keep = {}; keep[key] = done;
+      try { localStorage.setItem('roy-habits', JSON.stringify(keep)); } catch (e) {}
+    });
+    box.appendChild(b);
+  });
 })();
 </script>
 </body>
