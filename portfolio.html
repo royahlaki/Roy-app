@@ -306,7 +306,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
     <div class="ctile"><span class="a2" data-source="account" data-field="cash_ils_part" data-row="0">—</span><span class="y" id="cash-ils-share" data-source="account">—</span></div>
     <div class="ctile"><span class="a2">$<span data-source="account" data-field="cash_usd" data-row="0">—</span></span><span class="y" id="cash-usd-ils" data-source="account">—</span></div>
   </div>
-  <div class="track" id="cash-track" data-source="summary"><div class="fill" id="cash-fill"></div><div class="mark" id="cash-mark"></div><span class="tgt" id="cash-tgt">יעד 25%</span></div>
+  <div class="track" id="cash-track" data-source="summary"><div class="fill" id="cash-fill"></div><div class="mark" id="cash-mark"></div><span class="tgt" id="cash-tgt">מינימום 25%</span></div>
   <div class="cap mut" id="cash-gap" data-source="summary">—</div>
 </section>
 
@@ -410,7 +410,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
   .pf #page-portfolio:not([hidden]){display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:stretch;
     grid-template-areas:
       "total total total total total kpis kpis kpis kpis kpis kpis kpis"
-      "plan plan plan plan dlog dlog dlog dlog cash cash cash cash"
+      "plan plan plan plan plan plan cash cash cash cash cash cash"
       "risk risk risk risk risk risk risk wts wts wts wts wts"
       "risk risk risk risk risk risk risk beta beta beta beta beta"
       "risk risk risk risk risk risk risk prog prog prog prog prog"
@@ -528,6 +528,10 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 .pf .plt .amt{font-size:12px;color:var(--g-mut)}
 .pf #pl-each{display:none}
 .pf .dr{padding:8px 0}
+.pf #dlog-card{display:none !important}
+.pf .total{font-size:38px;font-weight:600;letter-spacing:-.5px}
+.pf #total-card .pills .pill{font-weight:500;font-size:12px}
+.pf .kpis .kpi:has(.v.t-red){border:1.5px solid #FF4D6D;box-shadow:0 0 0 3px rgba(255,77,109,.14),0 0 22px rgba(255,77,109,.18)}
 </style>
 <style id="app-insets">
 .pf{padding-top:0!important;padding-bottom:calc(var(--nav-h,0px) + 20px)!important}

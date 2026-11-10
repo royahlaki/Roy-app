@@ -243,10 +243,10 @@ window.pfDraw = () => {
       const pill = document.getElementById('cash-pill'), cf = document.getElementById('cash-fill'), cm = document.getElementById('cash-mark'), cg = document.getElementById('cash-gap');
       const cis = document.getElementById('cash-ils-share'), cus = document.getElementById('cash-usd-ils');
       if (S.status === 'ok' && A.status === 'ok') {
-        const s = S.data[0], a = A.data[0], near = Math.abs(s.cash_pct - 25) <= 2, sc = 50;
-        pill.className = 'pill ' + (near ? 'grn' : 'red'); pill.textContent = near ? 'בטווח היעד' : 'מחוץ ליעד';
+        const s = S.data[0], a = A.data[0], near = s.cash_pct >= 25, sc = 50;
+        pill.className = 'pill ' + (near ? 'grn' : 'red'); pill.textContent = near ? 'מעל המינימום' : 'מתחת למינימום';
         cf.style.width = (s.cash_pct / sc * 100) + '%'; cm.style.right = (25 / sc * 100) + '%'; document.getElementById('cash-tgt').style.right = (25 / sc * 100) + '%';
-        cg.textContent = `${s.cash_gap_ils < 0 ? 'חסר' : 'עודף'} ${ils(Math.abs(s.cash_gap_ils))} ליעד`;
+        cg.textContent = s.cash_gap_ils < 0 ? `חסר ${ils(Math.abs(s.cash_gap_ils))} למינימום` : `${ils(s.cash_gap_ils)} מעל המינימום`;
         const usdIls = a.cash_ils - a.cash_ils_part;
         cis.textContent = pct(a.cash_ils_part / a.cash_ils * 100);
         cus.textContent = pct(usdIls / a.cash_ils * 100);
@@ -347,7 +347,7 @@ window.pfDraw = () => {
       const sg = v => v === null || v === undefined ? '—' : d3.format('.1f')(Math.abs(v)) + '%';
       const sc = v => v === null || v === undefined ? 'mut' : v > 0 ? 't-grn' : v < 0 ? 't-red' : '';
       const isTrade = h => h.trade === true || h.trade === 'true' || h.tag === 'טרייד';
-      [...H.data].sort((a, b) => (isTrade(b) - isTrade(a)) || ((b.pnl_pct ?? -1e9) - (a.pnl_pct ?? -1e9))).forEach(h => {
+      [...H.data].sort((a, b) => (isTrade(b) - isTrade(a)) || ((a.pnl_pct ?? 1e9) - (b.pnl_pct ?? 1e9))).forEach(h => {
         const c = el('div', 'stock' + (isTrade(h) ? ' trade' : ''));
         c.title = h.data_date ? `${h.note} תמחור מ-${h.data_date}.` : (h.note || '');
         const hd = el('div', 'sh');
