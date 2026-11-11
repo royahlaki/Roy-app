@@ -82,7 +82,7 @@ nav button[aria-current=page]{font-weight:600}
   </form>
 </div>
 
-<script src="js/core.js"></script>
+<script src="js/core.js?v=3"></script>
 <script>
 (function () {
   var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance'];
@@ -161,11 +161,11 @@ nav button[aria-current=page]{font-weight:600}
     e.preventDefault();
     var p = $('pass').value; if (!p.trim()) return;
     $('err').textContent = 'בודק…';
-    Roy.unlock(p).then(start, function () { $('err').textContent = 'הסיסמה לא נכונה. נסה שוב.'; });
+    Roy.unlock(p).then(Roy._sync.sync).then(start, function () { $('err').textContent = 'הסיסמה לא נכונה. נסה שוב.'; });
   });
 
   if (!Roy.hasKey()) askPass();
-  else Roy.load().then(start, function (e) {
+  else Roy.load().then(Roy._sync.sync).then(start, function (e) {
     if (String(e && e.message).indexOf('bundle') === 0) { $('boot').textContent = 'אין חיבור לאינטרנט. נסה שוב בעוד רגע.'; return; }
     Roy.forget(); askPass('צריך להקליד את הסיסמה מחדש.');
   });
