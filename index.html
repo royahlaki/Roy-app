@@ -96,7 +96,8 @@ nav button[aria-current=page]{font-weight:600}
   };
 
   var NAV_H = 52;
-  var standalone = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  /* Only the iPhone home-screen app needs the screen-height workaround; on a Mac (Dock app or browser) the window height is right */
+  var standalone = navigator.standalone === true && navigator.maxTouchPoints > 0;
   function sizeApp() {
     /* iOS home-screen apps can report a viewport shorter than the screen; use the real screen height there */
     var h = window.innerHeight;
