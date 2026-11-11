@@ -31,6 +31,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-seg button.on{background:#fff!important;color:#047857!important;box-shadow:0 0 0 1px #9FE3CB!important}
 .km-bar i{box-shadow:none!important}
 </style>
+<link rel="stylesheet" href="apple.css?v=1">
 </head>
 <body data-tab="finance">
 <div id="boot">טוען…</div>
@@ -49,12 +50,22 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
       </div>
       <div class="km-seg" role="group" aria-label="תרחיש"><button type="button" data-s="n">רגיל</button><button type="button" data-s="c">זהיר</button></div>
     </div>
-    <div class="km-sub">יתרה אחרי החיוב ב-15 בכל חודש</div>
-    <div class="km-chart" id="chart-bank"></div>
-    <div class="km-whatif">
-      <label class="km-field"><span>העברה מהתיק</span><span class="km-inp"><input id="w-transfer" type="text" inputmode="numeric" placeholder="0" aria-label="העברה מהתיק"><i>₪</i></span></label>
-      <label class="km-field"><span>חופשה 15.11</span><span class="km-inp"><input id="w-vacation" type="text" inputmode="numeric" placeholder="0" aria-label="חופשה 15.11"><i>₪</i></span></label>
+    <div class="km-tablebox" id="scenario">
+      <table class="km-tbl" id="scenario-table">
+        <thead><tr><th></th><th>אחרי משכורת</th><th>ב15</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button type="button" class="km-more" id="more">עוד חודשים</button>
     </div>
+    <div class="km-whatif" id="whatif">
+      <label class="km-field"><span>הוספה לחשבון</span><span class="km-inp"><input id="w-transfer" type="text" inputmode="numeric" placeholder="0" aria-label="הוספה לחשבון"><i>₪</i></span></label>
+      <label class="km-field"><span>הוצאה חריגה</span><span class="km-inp"><input id="w-vacation" type="text" inputmode="numeric" placeholder="0" aria-label="הוצאה חריגה"><i>₪</i></span></label>
+      <label class="km-field"><span>בחודש</span><span class="km-inp"><select id="w-month" aria-label="באיזה חודש ההוצאה החריגה יורדת"></select></span></label>
+    </div>
+    <details class="km-what" id="oneoffs-box">
+      <summary>חד פעמיים</summary>
+      <div class="km-oneoffs" id="oneoff-list"></div>
+    </details>
   </section>
 
   <section class="km-card" id="goals">
@@ -150,17 +161,41 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-hist-head { display: flex; justify-content: space-between; align-items: baseline; margin-top: var(--cds-gap-md); }
 .km-rate { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 .km-chart-sm { min-height: 150px; margin-top: 4px; }
+.km-low { text-align: start; min-width: 9.5rem; }
+.km-neg-fill { fill: var(--color-bad); }
+#bank .km-whatif { grid-template-columns: 1fr 1fr 1.2fr; gap: 8px; margin-top: 10px; }
+#bank .km-inp { border-color: transparent; background: color-mix(in srgb, var(--color-fg) 5%, transparent); }
+#bank .km-inp input, .km-inp select { font-size: 16px; padding: 7px 0; }
+.km-inp select { flex: 1; min-width: 0; width: 100%; border: 0; background: transparent; color: var(--color-fg); font: inherit; outline: none; -webkit-appearance: none; appearance: none; }
+.km-tablebox { margin-top: 14px; }
+.km-tbl { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-body); }
+.km-tbl th, .km-tbl td { padding: 9px 4px; text-align: center; white-space: nowrap; }
+.km-tbl tbody tr + tr th, .km-tbl tbody tr + tr td { border-top: .5px solid var(--color-border-line); }
+.km-tbl thead th { font-weight: 400; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); padding-bottom: 4px; }
+.km-tbl tbody th { font-weight: 400; color: var(--color-fg-muted); text-align: right; width: 30%; }
+.km-tbl td.km-end span { font-weight: 600; }
+.km-tbl tr.km-x th { color: var(--color-fg); }
+.km-tbl .km-neg { font-weight: 400; }
+.km-pos { color: var(--color-fg); }
+.km-crit { color: var(--km-red); background: color-mix(in srgb, var(--km-red) 12%, transparent); border-radius: 999px; padding: 2px 8px; }
+.km-more { display: block; margin: 6px auto 0; font: inherit; font-size: 13px; font-weight: 500; color: var(--color-ok); background: none; border: 0; padding: 4px 10px; cursor: pointer; }
+.km-what { margin-top: 6px; border-top: .5px solid var(--color-border-line); padding-top: 6px; }
+.km-what summary { cursor: pointer; font-size: 13px; color: var(--color-fg-muted); list-style: none; padding: 4px 0; }
+.km-what summary::-webkit-details-marker { display: none; }
+.km-what summary::after { content: ' \203a'; }
+.km-what[open] summary::after { content: ' ⌄'; }
+.km-oneoffs .km-rel { border-top: 0; }
 </style>
 </div>
 
 <script src="js/core.js"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/finance-page.js"></script>
+<script src="js/finance-page.js?v=2"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
-  dash._load({ expenses: f.expenses || [], history: f.history || [], inputs: f.inputs || [], portfolio: (d.datasets && d.datasets.account) || [] });
+  dash._load({ expenses: f.expenses || [], history: f.history || [], inputs: f.inputs || [], oneoffs: f.oneoffs || [], portfolio: (d.datasets && d.datasets.account) || [] });
   document.getElementById('boot').hidden = true;
   document.getElementById('dash-root').hidden = false;
   financeMain();

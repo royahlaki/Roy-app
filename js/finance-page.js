@@ -1,30 +1,41 @@
-/* The finance page's own script, wrapped so it starts once the data is in. */
+/* The finance page's own script (same as the "הכספים שלי" artifact), wrapped so it starts once the data is in. */
 function financeMain() {
 dash.calc('months', {
-  inputs: ['inputs', 'expenses'],
+  inputs: ['inputs', 'expenses', 'oneoffs'],
   title: 'תזרים לפי חודש',
-  description: 'לכל חיוב ב-15: הוצאות, מה שנשאר מהמשכורת ויתרת הבנק אחרי החיוב, בתרחיש רגיל וזהיר.',
-  fn: (inputs, expenses) => {
+  description: 'לכל חודש: יתרה ב1 לחודש, אחרי המשכורת ואחרי האשראי וההלוואה, בתרחיש רגיל וזהיר. חיוב אשראי ידוע בפועל מחליף את ההערכה, וחד פעמיים נכנסים בחודש שלהם.',
+  fn: (inputs, expenses, oneoffs) => {
     const p = inputs[0];
     const [y, m] = String(p.first_charge).split('-').map(Number);
     let bn = Number(p.bank_balance), bc = bn;
     const rows = [];
     for (let i = 0; i < 13; i++) {
-      let en = 0, ec = 0; const ends = [];
+      let en = 0, ec = 0, bk = 0; const ends = [];
       for (const e of expenses) {
         const left = e.left_after_current === null || e.left_after_current === '' ? null : Number(e.left_after_current);
         let s0 = 0;
         if (e.starts) { const [sy, sm] = String(e.starts).split('-').map(Number); s0 = (sy - y) * 12 + (sm - m); }
         if (i >= s0 && (left === null || i <= s0 + left)) {
           en += Number(e.amount); ec += Number(e.amount_cautious);
+          if (/הלווא|עמלות/.test(e.name)) bk += Number(e.amount);
           if (left !== null && i === s0 + left) ends.push(e.name);
         }
       }
-      bn += Number(p.salary_normal) - en; bc += Number(p.salary_cautious) - ec;
+      const iso = new Date(Date.UTC(y, m - 1 + i, 15)).toISOString().slice(0, 10);
+      const offs = oneoffs.filter((o) => String(o.date).slice(0, 7) === iso.slice(0, 7));
+      const card = offs.find((o) => o.kind === 'card_total');
+      if (card) { en = -Number(card.amount) + bk; ec = en; }
+      const extra = offs.filter((o) => o.kind !== 'card_total').reduce((s, o) => s + Number(o.amount), 0);
+      const sn = Number(p.salary_normal), sc = Number(p.salary_cautious);
+      const b0n = bn, b0c = bc;
+      bn += sn - en + extra; bc += sc - ec + extra;
       rows.push({
-        month: new Date(Date.UTC(y, m - 1 + i, 15)).toISOString().slice(0, 10),
+        month: iso,
+        start_normal: Math.round(b0n), start_cautious: Math.round(b0c),
+        paid_normal: Math.round(b0n + sn), paid_cautious: Math.round(b0c + sc),
+        card_normal: Math.round(en - bk), card_cautious: Math.round(ec - bk), bank_debits: Math.round(bk), extra: Math.round(extra),
         exp_normal: Math.round(en), exp_cautious: Math.round(ec),
-        free_normal: Math.round(Number(p.salary_normal) - en), free_cautious: Math.round(Number(p.salary_cautious) - ec),
+        free_normal: Math.round(sn - en + extra), free_cautious: Math.round(sc - ec + extra),
         bal_normal: Math.round(bn), bal_cautious: Math.round(bc), ends: ends.join(', ')
       });
     }
@@ -53,26 +64,18 @@ dash.calc('networth', {
   const num = (s) => { const v = Number(String(s ?? '').replace(/[^\d.]/g, '')); return isFinite(v) ? v : 0; };
   const $ = (id) => document.getElementById(id);
   const css = (v) => `var(${v})`;
-  const kfmt = (v) => '₪' + Math.round(v / 1000) + 'K';
 
   // what-if inputs
-  const inT = $('w-transfer'), inV = $('w-vacation');
+  const inT = $('w-transfer'), inV = $('w-vacation'), inM = $('w-month');
   let timer;
-  const push = () => { clearTimeout(timer); timer = setTimeout(() => dash.setParams({ transfer: num(inT.value), vacation: num(inV.value) }), 250); };
-  inT.addEventListener('input', push); inV.addEventListener('input', push);
+  const push = () => { clearTimeout(timer); timer = setTimeout(() => dash.setParams({ transfer: num(inT.value), vacation: num(inV.value), extra_month: inM.value }), 250); };
+  inT.addEventListener('input', push); inV.addEventListener('input', push); inM.addEventListener('change', push);
   const showInputs = () => {
     const p = dash.params();
     if (document.activeElement !== inT) inT.value = p.transfer ? nf.format(p.transfer) : '';
     if (document.activeElement !== inV) inV.value = p.vacation ? nf.format(p.vacation) : '';
   };
   [inT, inV].forEach((el) => el.addEventListener('blur', showInputs));
-
-  const series = (months, inputs) => {
-    const p = inputs[0], prm = dash.params();
-    const T = Number(prm.transfer) || 0, V = Number(prm.vacation) || 0;
-    const start = { date: toDate(p.bank_as_of), n: Number(p.bank_balance) + T, c: Number(p.bank_balance) + T, now: true };
-    return [start, ...months.map((r) => ({ date: toDate(r.month), n: r.bal_normal + T - V, c: r.bal_cautious + T - V, row: r }))];
-  };
 
   const tip = (box) => { let t = box.querySelector('.km-tip'); if (!t) { t = document.createElement('div'); t.className = 'km-tip'; box.appendChild(t); } return t; };
   const placeTip = (box, t, x, y) => {
@@ -87,47 +90,54 @@ dash.calc('networth', {
     lines.forEach(([k, v, cls]) => { const r = document.createElement('div'); r.textContent = (k ? k + ' ' : '') + v; if (cls) r.className = cls; t.appendChild(r); });
   };
 
-  function drawBank(pts, limit, k) {
-    const box = $('chart-bank');
-    box.querySelectorAll('svg').forEach((s) => s.remove());
-    const W = Math.max(260, box.clientWidth), H = 200, m = { t: 16, r: 4, b: 24, l: 34 };
-    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('direction', 'ltr');
-    const vals = pts.map((p) => p[k]).concat([limit, 0]);
-    const lo = d3.min(vals), hi = d3.max(vals);
-    const y = d3.scaleLinear([Math.min(lo, limit) * 1.12, Math.max(hi, 0) * 1.12 || 500], [H - m.b, m.t]);
-    const x = d3.scaleBand(pts.map((p, i) => i), [m.l, W - m.r]).padding(0.3);
-    const bw = Math.min(26, x.bandwidth());
-    const kk = (v) => (Math.abs(v) >= 1000 ? (Math.abs(v) / 1000).toFixed(Math.abs(v) % 1000 ? 1 : 0).replace('.0', '') + 'K' : String(Math.abs(Math.round(v))));
-    svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', css('--cds-chart-axis'));
-    svg.append('text').attr('x', m.l - 6).attr('y', y(0) + 4).attr('text-anchor', 'end').attr('fill', css('--color-fg-muted')).style('font-size', 'var(--cds-font-size-caption)').text('0');
-    svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(limit)).attr('y2', y(limit)).attr('stroke', css('--cds-chart-status-critical')).attr('stroke-dasharray', '4 3');
-    svg.append('text').attr('x', m.l - 6).attr('y', y(limit) + 4).attr('text-anchor', 'end').attr('fill', css('--cds-chart-status-critical')).style('font-size', 'var(--cds-font-size-caption)').text(kk(limit));
-    const lowI = d3.minIndex(pts, (p) => p[k]);
-    const g = svg.append('g').selectAll('g').data(pts).join('g').attr('transform', (p, i) => `translate(${x(i) + (x.bandwidth() - bw) / 2},0)`);
-    g.append('rect').attr('width', bw).attr('rx', 3)
-      .attr('y', (p) => Math.min(y(0), y(p[k]))).attr('height', (p) => Math.max(1.5, Math.abs(y(p[k]) - y(0))))
-      .attr('fill', (p) => (p[k] < limit - 0.5 ? css('--cds-chart-status-critical') : p[k] < 0 ? 'var(--km-red)' : css('--color-ok')))
-      .attr('fill-opacity', (p) => (p[k] < limit - 0.5 ? 1 : 0.75));
-    g.filter((p, i) => i === 0 || i === lowI || i === pts.length - 1 || (i > 0 && pts[i - 1][k] < 0 && p[k] >= 0))
-      .append('text').attr('x', bw / 2).attr('text-anchor', 'middle').style('font-size', '10px')
-      .attr('y', (p) => (p[k] < 0 ? y(p[k]) + 12 : y(p[k]) - 4))
-      .attr('fill', (p) => (p[k] < 0 ? 'var(--km-red)' : css('--color-ok'))).text((p) => kk(p[k]));
-    const every = W < 520 ? 2 : 1;
-    g.filter((p, i) => i % every === 0).append('text').attr('x', bw / 2).attr('y', H - 6).attr('text-anchor', 'middle')
-      .attr('fill', css('--color-fg-muted')).style('font-size', 'var(--cds-font-size-caption)').text((p) => (p.now ? 'היום' : mon(p.date)));
-    const t = tip(box);
-    svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'transparent').on('pointermove pointerdown', (ev) => {
-      const [px] = d3.pointer(ev, svg.node());
-      const sx = px * (W / svg.node().getBoundingClientRect().width || 1);
-      const i = d3.leastIndex(pts, (p, j) => Math.abs(x(j) + x.bandwidth() / 2 - sx));
-      const p = pts[i];
-      fillTip(t, p.now ? 'היום ' + dm(p.date) : 'אחרי חיוב ' + dmy(p.date), [['', bal(p[k]), p[k] < 0 ? 'km-neg' : 'km-ok']]);
-      const scale = box.clientWidth / W;
-      placeTip(box, t, (x(i) + x.bandwidth() / 2) * scale, Math.min(y(0), y(p[k])) * scale);
-    }).on('pointerleave', () => { t.style.display = 'none'; });
+  document.querySelectorAll('.km-seg button').forEach((btn) => btn.addEventListener('click', () => dash.setParams({ scenario: btn.dataset.s })));
+
+  function drawScenario(months, inputs) {
+    const p = inputs[0], prm = dash.params(), limit = Number(p.limit);
+    const T = Number(prm.transfer) || 0, X = Number(prm.vacation) || 0;
+    const sc = prm.scenario === 'c' ? 'cautious' : 'normal';
+    const sel = $('w-month');
+    const label = (r) => mon(toDate(r.month)) + ' ' + String(toDate(r.month).getUTCFullYear()).slice(2);
+    if (sel.options.length !== months.length || sel.options[0].value !== months[0].month) {
+      sel.replaceChildren();
+      months.forEach((r) => { const o = document.createElement('option'); o.value = r.month; o.textContent = label(r); sel.appendChild(o); });
+    }
+    const want = months.some((r) => r.month === prm.extra_month) ? prm.extra_month : months[0].month;
+    if (document.activeElement !== sel) sel.value = want;
+    const xi = months.findIndex((r) => r.month === want);
+    const body = $('scenario-table').tBodies[0]; body.replaceChildren();
+    const cell = (v, cls) => {
+      const td = document.createElement('td'); if (cls) td.className = cls;
+      const s = document.createElement('span'); s.textContent = bal(v);
+      s.className = v < limit - 0.5 ? 'km-crit' : v < 0 ? 'km-neg' : 'km-pos';
+      td.appendChild(s); return td;
+    };
+    const shown = window.kmAll ? months.length : Math.min(6, months.length);
+    months.slice(0, shown).forEach((r, i) => {
+      const tr = document.createElement('tr'); if (X && i === xi) tr.className = 'km-x';
+      const paid = r['paid_' + sc] + T - (X && i > xi ? X : 0);
+      const end = r['bal_' + sc] + T - (X && i >= xi ? X : 0);
+      const th = document.createElement('th'); th.scope = 'row'; th.textContent = label(r);
+      tr.append(th, cell(paid), cell(end, 'km-end'));
+      body.appendChild(tr);
+    });
+    $('more').textContent = window.kmAll ? 'פחות' : 'עוד חודשים';
   }
 
-  document.querySelectorAll('.km-seg button').forEach((btn) => btn.addEventListener('click', () => dash.setParams({ scenario: btn.dataset.s })));
+  $('more').addEventListener('click', () => { window.kmAll = !window.kmAll; const M = dash.data('months'), I = dash.data('inputs'); if (M.status === 'ok' && I.status === 'ok') drawScenario(M.data, I.data); });
+
+  function drawOneoffs(rows) {
+    const box = $('oneoff-list'); box.replaceChildren();
+    if (!rows.length) return;
+    rows.slice().sort((a, b) => String(a.date).localeCompare(String(b.date))).forEach((o) => {
+      const v = Number(o.amount);
+      const r = document.createElement('div'); r.className = 'km-rel';
+      const a = document.createElement('b'); a.textContent = dmy(toDate(o.date));
+      const b = document.createElement('span'); b.textContent = o.name;
+      const c = document.createElement('span'); c.className = v < 0 ? 'km-neg' : 'km-ok'; c.textContent = (v < 0 ? '⁦-' : '+') + ils(v) + (v < 0 ? '⁩' : '');
+      r.append(a, b, c); box.appendChild(r);
+    });
+  }
 
   function drawFree(months) {
     const box = $('chart-free');
@@ -166,7 +176,7 @@ dash.calc('networth', {
   function drawReleases(expenses, inputs) {
     const box = $('releases'); box.replaceChildren();
     const first = inputs[0].first_charge;
-    expenses.filter((e) => !e.starts && !/הלוואה/.test(e.name) && e.left_after_current !== null && e.left_after_current !== '')
+    expenses.filter((e) => !e.starts && !/הלווא/.test(e.name) && e.left_after_current !== null && e.left_after_current !== '')
       .map((e) => ({ e, d: addMonths(first, Number(e.left_after_current)) }))
       .sort((a, b) => a.d - b.d)
       .forEach(({ e, d }) => {
@@ -229,13 +239,14 @@ dash.calc('networth', {
     const tgt = Number(p.cushion_target), saved = Number(p.cushion_saved) || 0, have = Math.max(0, bank) + saved;
     const hit = months.find((r) => r.bal_normal + saved >= tgt);
     add('כרית ביטחון', hit ? dmy(toDate(hit.month)) : 'אחרי ' + dmy(toDate(months[months.length - 1].month)), have / tgt, ils(have) + ' מתוך ' + ils(tgt));
-    const loan = expenses.find((e) => /הלוואה/.test(e.name));
+    const loan = expenses.find((e) => /הלווא/.test(e.name));
     if (loan) {
       const left = Number(loan.left_after_current) + 1, l0 = Number(p.loan_start), l = Number(p.loan_principal);
       add('סילוק הלוואה', dmy(addMonths(p.first_charge, left - 1)), l0 ? 1 - l / l0 : 0, 'נשאר ' + ils(l) + ' · נשארו ' + left + ' תשלומים');
-      add(ils(loan.amount) + ' בחודש לחיסכון', 'מ-' + dmy(addMonths(p.first_charge, left)), 0, 'התשלום של ההלוואה עובר לחיסכון אוטומטי');
     }
   }
+
+  const kfmt = (v) => '₪' + Math.round(v / 1000) + 'K';
 
   function drawHistory(rows) {
     const box = $('chart-hist');
@@ -342,14 +353,12 @@ dash.calc('networth', {
     if (ok(E) && ok(I) && ok(M)) drawGoals(M.data, E.data, I.data);
     if (ok(M)) { $('total').textContent = ils(M.data[0].exp_normal); drawFree(M.data); }
 
+    const O = dash.data('oneoffs');
+    if (O.status === 'ok' && Array.isArray(O.data)) drawOneoffs(O.data);
     if (ok(M) && ok(I)) {
-      const limit = Number(I.data[0].limit);
-      const pts = series(M.data, I.data);
       const sc = dash.params().scenario === 'c' ? 'c' : 'n';
       document.querySelectorAll('.km-seg button').forEach((b) => b.classList.toggle('on', b.dataset.s === sc));
-      drawBank(pts, limit, sc);
-    } else {
-      $('chart-bank').querySelectorAll('svg').forEach((s) => s.remove());
+      drawScenario(M.data, I.data);
     }
   });
 })();

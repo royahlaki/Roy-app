@@ -1,0 +1,53 @@
+/* Shared Apple-style layer for every page in the app.
+   Loaded last in each page's <head>, so it refines each page's own look
+   (colors stay per page) without changing structure. */
+
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Hebrew",Heebo,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-variant-numeric:tabular-nums}
+input,select,textarea,button{font-family:inherit}
+:root{--font-anthropic-sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Hebrew",Heebo,system-ui,sans-serif;--font-anthropic-serif:var(--font-anthropic-sans)}
+
+/* Headings: one typographic voice everywhere */
+h1{font-weight:700!important;letter-spacing:-.025em;text-shadow:none!important}
+h2,h3{letter-spacing:-.015em}
+
+/* Touch feedback on every control */
+button,summary,a.t,.strip a,[role=tab]{transition:transform .15s cubic-bezier(.2,.8,.2,1),opacity .15s,background-color .25s,color .25s,box-shadow .25s}
+button:active,summary:active,a.t:active,.strip a:active,[role=tab]:active{transform:scale(.96)}
+
+/* Inputs: soft focus ring instead of a hard outline */
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 0 0 3px rgba(10,132,255,.25)}
+
+/* Hidden scrollbars on horizontal strips, smooth momentum */
+*{scrollbar-width:none}
+*::-webkit-scrollbar{display:none}
+
+/* ===== Per page: same rules, each page keeps its own colors ===== */
+
+/* Finance (light, green accent) */
+body[data-tab=finance] .km-card{border:0;border-radius:22px;box-shadow:0 1px 2px rgba(11,59,46,.04),0 8px 26px rgba(5,150,105,.09)}
+body[data-tab=finance] .km-head{border-radius:0 0 32px 32px;background:linear-gradient(170deg,#06705A 0%,#0F9F7A 60%,#3CC9A3 100%)}
+body[data-tab=finance] .km-seg{border:0;background:rgba(118,118,128,.10);border-radius:9px;padding:2px}
+body[data-tab=finance] .km-seg button{border-radius:7px;padding:5px 14px;font-weight:500}
+body[data-tab=finance] .km-seg button.on{background:#fff!important;color:var(--color-fg)!important;box-shadow:0 1px 3px rgba(0,0,0,.08),0 3px 8px rgba(0,0,0,.06)!important;font-weight:600}
+body[data-tab=finance] .km-line,body[data-tab=finance] .km-item,body[data-tab=finance] .km-rel,body[data-tab=finance] .km-goal{border-top-width:.5px}
+body[data-tab=finance] .km-big{font-weight:700!important;letter-spacing:-.02em}
+body[data-tab=finance] .km-bar{height:6px;border-radius:3px;background:rgba(118,118,128,.14)}
+body[data-tab=finance] .km-pill{border:0;background:rgba(118,118,128,.12)}
+body[data-tab=finance] .km-pill.last{background:rgba(192,138,0,.12)}
+
+/* Portfolio (light, blue accent) */
+body[data-tab=portfolio] .pf .card{border:0;border-radius:22px;box-shadow:0 1px 2px rgba(17,24,39,.04),0 8px 26px rgba(17,24,39,.07)}
+body[data-tab=portfolio] .pf .tabs{background:rgba(118,118,128,.12);border-radius:10px;padding:2px;gap:0}
+body[data-tab=portfolio] .pf .tabs button{border-radius:8px;font-weight:500}
+body[data-tab=portfolio] .pf .tabs button[aria-selected=true]{box-shadow:0 1px 3px rgba(0,0,0,.08),0 3px 8px rgba(0,0,0,.06);font-weight:600}
+
+/* Lab (dark, purple accent) */
+body[data-tab=lab] .panel{border:.5px solid rgba(255,255,255,.12);border-radius:22px;background:rgba(255,255,255,.05);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
+body[data-tab=lab] .seg{border-radius:10px}
+
+/* Sectors (dark, lime accent) */
+body[data-tab=sectors] .bar{border:.5px solid rgba(255,255,255,.12);border-radius:20px;
+  -webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%)}
+body[data-tab=sectors] .row{border:.5px solid rgba(255,255,255,.10);border-radius:16px}
