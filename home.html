@@ -59,6 +59,60 @@ a.t:hover{border-color:var(--blu)}
 .strip.ru a::before{content:none}
 .strip.ru a span{font-size:15px}
 @media(min-width:900px){.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}}
+
+/* ===== Apple polish (layer on top; structure unchanged) ===== */
+:root{--line:rgba(60,60,67,.10);--sep:rgba(60,60,67,.12);--fill:rgba(118,118,128,.10);--sh:0 1px 2px rgba(15,30,61,.04),0 6px 20px rgba(15,30,61,.06);--ease:cubic-bezier(.2,.8,.2,1)}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Hebrew",Heebo,system-ui,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.01em;
+  background:linear-gradient(180deg,#F4F8FF 0%,#F2F5FC 50%,#F5F3FC 100%)}
+.hero{background:linear-gradient(170deg,#2D5BD8 0%,#3B7BF0 55%,#5AA2F7 100%);padding-bottom:58px;border-radius:0 0 32px 32px}
+.hero h1{font-weight:700;letter-spacing:-.025em}
+.hero .dt{font-size:14px;color:rgba(255,255,255,.82);margin-top:6px;letter-spacing:0}
+h2,.hh h2{font-size:15px;font-weight:600;color:#3C4A66;letter-spacing:-.01em}
+.hh .sys{font-weight:500}
+/* lists card */
+.lists{border:0;border-radius:22px;padding:12px 14px 10px;box-shadow:0 2px 6px rgba(30,58,138,.05),0 14px 36px rgba(30,58,138,.12)}
+.seg{background:var(--fill);border-radius:10px;padding:2px;margin-bottom:10px}
+.seg button{border-radius:8px;padding:7px 0;transition:color .25s var(--ease),background .25s var(--ease),box-shadow .25s var(--ease)}
+.seg button.on{box-shadow:0 1px 3px rgba(0,0,0,.08),0 3px 8px rgba(0,0,0,.06)}
+.add{gap:8px;margin-bottom:4px}
+.add input{border:0;background:var(--fill);border-radius:10px;padding:8px 12px;outline:none;transition:box-shadow .2s}
+.add input:focus{box-shadow:0 0 0 3px rgba(37,99,235,.22)}
+.add input::placeholder{color:#94A3B8}
+.add button{border-radius:10px;transition:transform .15s var(--ease),opacity .15s}
+.add button:active{transform:scale(.92);opacity:.85}
+ul.tl li{gap:12px;padding:10px 2px;border-top:.5px solid var(--sep)}
+ul.tl input[type=checkbox]{-webkit-appearance:none;appearance:none;width:22px;height:22px;border:1.5px solid #C3CBD9;border-radius:50%;position:relative;background:transparent;transition:background .2s var(--ease),border-color .2s var(--ease),transform .15s var(--ease)}
+ul.tl input[type=checkbox]:active{transform:scale(.88)}
+ul.tl input[type=checkbox]:checked{background:var(--blu);border-color:var(--blu)}
+ul.tl input[type=checkbox]:checked::after{content:"";position:absolute;left:6.5px;top:2.5px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);animation:pop .25s var(--ease)}
+@keyframes pop{from{opacity:0;transform:rotate(45deg) scale(.4)}to{opacity:1;transform:rotate(45deg) scale(1)}}
+ul.tl .tx{font-size:15px}
+ul.tl li.done .tx{text-decoration:none;color:#94A3B8}
+ul.tl .del{color:#C3CBD9;transition:color .2s}
+ul.tl .del:active{color:#FF3B30}
+.tg{color:var(--blu);font-weight:500}
+/* habits + strips */
+.hb,.strip a{border:0;box-shadow:var(--sh);transition:transform .15s var(--ease),background .25s var(--ease),color .25s var(--ease),box-shadow .25s var(--ease)}
+.hb:active,.strip a:active{transform:scale(.95)}
+.hb.on{box-shadow:0 4px 14px rgba(37,99,235,.28)}
+.strip{padding-top:4px;padding-bottom:12px}
+
+/* ===== Dark mode (follows the iPhone) ===== */
+@media(prefers-color-scheme:dark){
+  :root{--card:#1C1C1E;--fg:#F5F5F7;--mut:#98989D;--soft:#2C2C2E;--blu:#0A84FF;--blu-bg:rgba(10,132,255,.18);--sep:rgba(84,84,88,.45);--fill:rgba(118,118,128,.24);--sh:none}
+  body{background:#000}
+  .hero{background:linear-gradient(170deg,#16295E 0%,#1E3F96 60%,#2A5BC4 100%)}
+  h2,.hh h2{color:#C7C7CC}
+  .lists{box-shadow:none}
+  .seg button.on{background:#636366;color:#fff;box-shadow:none}
+  .seg button.on b{background:rgba(255,255,255,.22);color:#fff}
+  .add input{color:var(--fg)}
+  .add input::placeholder{color:#636366}
+  ul.tl input[type=checkbox]{border-color:#545458}
+  ul.tl li.done .tx{color:#636366}
+  ul.tl .del{color:#545458}
+  .hb.on{box-shadow:none}
+}
 </style>
 </head>
 <body data-tab="home">

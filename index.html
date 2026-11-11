@@ -35,6 +35,16 @@ body.t-portfolio{background:#FFFFFF;--nav-bg:rgba(27,36,89,.85);--nav-line:rgba(
 body.t-lab{background:#0d0a1c;--nav-bg:rgba(24,16,52,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#9a92c4;--nav-on:#C9A8FF}
 body.t-sectors{background:#0b0f0c;--nav-bg:rgba(20,34,16,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#93A198;--nav-on:#C3F53C}
 body.t-finance{background:#EFFBF6;--nav-bg:rgba(232,250,243,.66);--nav-line:rgba(5,150,105,.16);--nav-fg:#5E8A7C;--nav-on:#059669}
+/* Apple polish: softer glass tab bar */
+html,body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Hebrew",Heebo,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+nav{border-radius:26px;border-width:.5px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 10px 30px rgba(0,0,0,.12);
+  -webkit-backdrop-filter:blur(30px) saturate(190%);backdrop-filter:blur(30px) saturate(190%)}
+nav button{font-weight:500;letter-spacing:-.01em;transition:color .35s ease,transform .15s cubic-bezier(.2,.8,.2,1)}
+nav button:active{transform:scale(.9)}
+nav button[aria-current=page]{font-weight:600}
+@media(prefers-color-scheme:dark){
+  body.t-home{background:#000;--nav-bg:rgba(30,30,32,.62);--nav-line:rgba(255,255,255,.10);--nav-fg:#8E8E93;--nav-on:#0A84FF}
+}
 #lock{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:24px;
   background:radial-gradient(900px 600px at 80% -10%,#1d3b8a 0%,transparent 60%),radial-gradient(800px 500px at 0% 110%,#3b1d72 0%,transparent 60%),#0b0f1e}
 #lock[hidden]{display:none}
