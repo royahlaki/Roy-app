@@ -204,6 +204,25 @@ ul.tl .del:active{color:#FF3B30}
   });
   var load = function (k) { try { return JSON.parse(localStorage.getItem(L[k].key) || 'null'); } catch (e) { return null; } };
   var shop = load('shop'); L.shop.rows = Array.isArray(shop) ? shop : [];
+  // One-time additions from Claude: each id is added once per device, even if later deleted.
+  var ADD = [
+    { id: 's20261112a', text: 'דיסק און קי (64GB+, USB 3.0, USB-C)' },
+    { id: 's20261112b', text: 'מתאם USB-C לכבל רשת (Gigabit)' },
+    { id: 's20261112c', text: 'כבל רשת Cat6' }
+  ];
+  var seen = [];
+  try { seen = JSON.parse(localStorage.getItem('roy-shop-seen') || '[]') || []; } catch (e) {}
+  var added = false;
+  ADD.forEach(function (a) {
+    if (seen.indexOf(a.id) > -1) return;
+    seen.push(a.id);
+    if (!L.shop.rows.some(function (r) { return r.id === a.id; })) {
+      L.shop.rows.push({ id: a.id, text: a.text, done: false, created: new Date().toISOString(), by: 'Claude' });
+      added = true;
+    }
+  });
+  try { localStorage.setItem('roy-shop-seen', JSON.stringify(seen)); } catch (e) {}
+  if (added) save(L.shop);
   Roy.data().then(function (data) {
     var t = load('tasks');
     L.tasks.rows = Array.isArray(t) ? t : (data.tasks || []).map(function (x) { return Object.assign({}, x); });
