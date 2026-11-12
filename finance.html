@@ -46,7 +46,18 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
     <div class="km-label" id="bank-label">בנק עכשיו</div>
     <div class="km-big" id="bank-now">—</div>
     <div class="km-ledger" id="ledger-list"></div>
-    <div class="km-on15" id="on15"><span>ב15.11 תהיה ב</span><b id="on15-v">—</b></div>
+    <button type="button" class="km-more" id="led-more" hidden>עוד</button>
+    <details class="km-what" id="exp-box">
+      <summary id="exp-sum">צפוי</summary>
+      <div class="km-ledger" id="expected-list"></div>
+      <div class="km-add">
+        <input id="add-name" type="text" placeholder="מה" aria-label="תיאור">
+        <input id="add-amt" type="text" inputmode="numeric" placeholder="סכום" aria-label="סכום">
+        <select id="add-sign" aria-label="סוג"><option value="-">הוצאה</option><option value="+">הכנסה</option></select>
+        <button type="button" id="add-btn">הוסף</button>
+      </div>
+    </details>
+    <div class="km-on15" id="on15"><span>ב15 לחודש</span><b id="on15-v">—</b></div>
     <div class="km-room" id="room">
       <div class="km-label" id="room-label">עוד מותר להוציא באשראי</div>
       <div class="km-room-v" id="room-v">—</div>
@@ -185,8 +196,14 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-led.km-exp { color: var(--color-fg-muted); }
 .km-led.km-exp .b { font-weight: 400; }
 .km-led.km-exp .n::after { content: ' · צפוי'; font-size: var(--cds-font-size-caption); }
-.km-on15 { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px; padding-top: 10px; border-top: 1.5px solid var(--color-border-line); font-size: var(--cds-font-size-body); }
-.km-on15 b { font-weight: 800; font-size: var(--cds-font-size-heading); }
+.km-on15 { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 14px 16px; border-radius: var(--cds-radius); background: linear-gradient(155deg,#065F46 0%,#059669 100%); color: #fff; font-size: 15px; font-weight: 700; }
+.km-on15 b { font-weight: 800; font-size: 28px; color: #fff !important; }
+.km-on15.km-on15-neg { background: linear-gradient(155deg,#9F1239 0%,#E8435F 100%); }
+.km-led { grid-template-columns: 1fr auto 5.5rem auto !important; }
+.km-x-btn { border: 0; background: none; color: var(--color-fg-muted); font-size: 18px; line-height: 1; padding: 0 2px; cursor: pointer; }
+.km-add { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 6px; margin-top: 8px; }
+.km-add input, .km-add select { min-width: 0; border: 0; border-radius: 10px; background: var(--color-bg); color: var(--color-fg); font: inherit; font-size: 16px; padding: 8px 10px; outline: none; -webkit-appearance: none; appearance: none; }
+.km-add button { border: 0; border-radius: 10px; background: var(--color-ok); color: #fff; font: inherit; font-size: 14px; font-weight: 700; padding: 8px 12px; cursor: pointer; }
 .km-room { margin-top: 14px; padding: 10px 12px; border-radius: var(--cds-radius); background: var(--color-bg); }
 .km-room-v { font-weight: 800; font-size: var(--cds-font-size-heading); margin-top: 2px; }
 .km-fhead { margin-top: 18px; align-items: center; }
@@ -196,7 +213,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/core.js?v=4"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/finance-page.js?v=3"></script>
+<script src="js/finance-page.js?v=4"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};

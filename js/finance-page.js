@@ -145,27 +145,61 @@ dash.calc('networth', {
 
   $('more').addEventListener('click', () => { window.kmAll = !window.kmAll; const M = dash.data('months'), I = dash.data('inputs'); if (M.status === 'ok' && I.status === 'ok') drawScenario(M.data, I.data); });
 
+  function saveLedger(rows) {
+    const sh = (window.parent && window.parent.Roy && window.parent.Roy._sync) || (window.Roy && window.Roy._sync);
+    if (sh) sh.push([{ k: 'd:finance.ledger', v: JSON.stringify(rows), ts: Date.now() }]);
+    dash.setParams({});
+  }
+  const ledRow = (o, run, cls, onCancel) => {
+    const v = Number(o.amount);
+    const r = document.createElement('div'); r.className = 'km-led' + (cls ? ' ' + cls : '');
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = o.name || '';
+    const a = document.createElement('span'); a.className = 'a';
+    a.textContent = cls === 'km-first' ? '' : (v < 0 ? '⁦-' + ils(v) + '⁩' : '+' + ils(v));
+    const b = document.createElement('span'); b.className = 'b' + (run < 0 ? ' km-neg' : ''); b.textContent = bal(run);
+    r.append(n, a, b);
+    if (onCancel) {
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'km-x-btn'; x.setAttribute('aria-label', 'ביטול'); x.textContent = '×';
+      x.addEventListener('click', onCancel); r.appendChild(x);
+    }
+    return r;
+  };
   function drawLedger(rows) {
-    const box = $('ledger-list'); box.replaceChildren();
+    const list = $('ledger-list'), exp = $('expected-list');
+    list.replaceChildren(); exp.replaceChildren();
     const sorted = rows.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
-    let run = 0, now = 0, nowDate = null, lastDate = null;
+    let run = 0, now = 0, nowDate = null;
+    const done = [], expected = [];
     sorted.forEach((o, i) => {
-      const v = Number(o.amount); run += v;
-      const done = o.status !== 'expected';
-      if (done) { now = run; nowDate = o.date; }
-      lastDate = o.date;
-      const r = document.createElement('div'); r.className = 'km-led' + (done ? '' : ' km-exp') + (i === 0 ? ' km-first' : '');
-      const n = document.createElement('span'); n.className = 'n'; n.textContent = o.name;
-      const a = document.createElement('span'); a.className = 'a';
-      a.textContent = i === 0 ? '' : (v < 0 ? '\u2066-' + ils(v) + '\u2069' : '+' + ils(v));
-      const b = document.createElement('span'); b.className = 'b' + (run < 0 ? ' km-neg' : ''); b.textContent = bal(run);
-      r.append(n, a, b); box.appendChild(r);
+      run += Number(o.amount);
+      if (o.status !== 'expected') { now = run; nowDate = o.date; done.push({ o, run, first: i === 0 }); }
+      else expected.push({ o, run });
     });
+    const showAll = window.kmLedAll, shownDone = showAll ? done : done.slice(-5);
+    shownDone.forEach((d) => list.appendChild(ledRow(d.first ? { amount: d.o.amount } : d.o, d.run, d.first ? 'km-first' : '')));
+    $('led-more').hidden = done.length <= 5;
+    $('led-more').textContent = showAll ? 'פחות' : 'עוד';
+    expected.forEach((e) => exp.appendChild(ledRow(e.o, e.run, 'km-exp', () => {
+      const i = rows.indexOf(e.o); if (i > -1) { rows.splice(i, 1); saveLedger(rows); }
+    })));
+    $('exp-sum').textContent = 'צפוי' + (expected.length ? ' (' + expected.length + ')' : '');
     const el = $('bank-now'); el.textContent = bal(now); el.className = 'km-big' + (now < 0 ? ' km-neg' : '');
     if (nowDate) $('bank-label').textContent = 'בנק עכשיו · ' + dm(toDate(nowDate));
     const ov = $('on15-v'); ov.textContent = bal(run); ov.className = run < 0 ? 'km-neg' : '';
-    $('on15').firstElementChild.textContent = 'ב' + dm(toDate(lastDate)) + ' תהיה ב';
+    $('on15').classList.toggle('km-on15-neg', run < 0);
+    window.kmLedgerRows = rows;
   }
+  $('led-more').addEventListener('click', () => { window.kmLedAll = !window.kmLedAll; const L = dash.data('ledger'); if (L.status === 'ok') drawLedger(L.data); });
+  $('add-btn').addEventListener('click', () => {
+    const rows = window.kmLedgerRows; if (!rows) return;
+    const name = $('add-name').value.trim(), amt = num($('add-amt').value);
+    if (!name || !amt) return;
+    const d = new Date(), y = d.getFullYear(), m = d.getMonth() + (d.getDate() > 15 ? 1 : 0);
+    const date = new Date(Date.UTC(y, m, 15)).toISOString().slice(0, 10);
+    rows.push({ date, name, amount: $('add-sign').value === '+' ? amt : -amt, status: 'expected' });
+    $('add-name').value = ''; $('add-amt').value = '';
+    saveLedger(rows);
+  });
 
   function drawOneoffs(rows) {
     const box = $('oneoff-list'); box.replaceChildren();
