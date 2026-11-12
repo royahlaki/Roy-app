@@ -82,7 +82,7 @@ nav button[aria-current=page]{font-weight:600}
   </form>
 </div>
 
-<script src="js/core.js?v=4"></script>
+<script src="js/core.js?v=5"></script>
 <script>
 (function () {
   var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance'];
@@ -162,6 +162,13 @@ nav button[aria-current=page]{font-weight:600}
     var p = $('pass').value; if (!p.trim()) return;
     $('err').textContent = 'בודק…';
     Roy.unlock(p).then(Roy._sync.sync).then(start, function () { $('err').textContent = 'הסיסמה לא נכונה. נסה שוב.'; });
+  });
+
+  /* The home-screen app can stay in memory for hours: after a minute in the background, reload so the data is fresh */
+  var hiddenAt = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (hiddenAt && Date.now() - hiddenAt > 60000 && dataP) location.reload();
   });
 
   if (!Roy.hasKey()) askPass();

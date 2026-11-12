@@ -176,7 +176,7 @@
     cfg = data && data.config && data.config.sync;
     if (!cfg || !cfg.url) return Promise.resolve(data);
     var ctl = window.AbortController ? new AbortController() : null;
-    var to = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
+    var to = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
     return fetch(cfg.url + '?t=' + encodeURIComponent(cfg.token), ctl ? { signal: ctl.signal } : {})
       .then(function (r) { return r.json(); })
       .then(function (res) {

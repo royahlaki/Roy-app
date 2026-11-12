@@ -188,6 +188,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-what summary::after { content: ' \203a'; }
 .km-what[open] summary::after { content: ' ⌄'; }
 .km-oneoffs .km-rel { border-top: 0; }
+.km-more[hidden] { display: none; }
 .km-ledger { margin-top: 12px; }
 .km-led { display: grid; grid-template-columns: 1fr auto 5.5rem; gap: 10px; padding: 7px 0; font-size: var(--cds-font-size-body); border-top: .5px solid var(--color-border-line); }
 .km-led.km-first { border-top: 0; color: var(--color-fg-muted); }
@@ -210,7 +211,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 </style>
 </div>
 
-<script src="js/core.js?v=4"></script>
+<script src="js/core.js?v=5"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
 <script src="js/finance-page.js?v=4"></script>
