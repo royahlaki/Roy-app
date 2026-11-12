@@ -43,16 +43,21 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
   </header>
 
   <section class="km-card" id="bank">
-    <div class="km-row">
-      <div>
-        <div class="km-label" id="bank-label">בנק</div>
-        <div class="km-big" id="bank-now">—</div>
-      </div>
+    <div class="km-label" id="bank-label">בנק עכשיו</div>
+    <div class="km-big" id="bank-now">—</div>
+    <div class="km-ledger" id="ledger-list"></div>
+    <div class="km-on15" id="on15"><span>ב15.11 תהיה ב</span><b id="on15-v">—</b></div>
+    <div class="km-room" id="room">
+      <div class="km-label" id="room-label">עוד מותר להוציא באשראי</div>
+      <div class="km-room-v" id="room-v">—</div>
+    </div>
+    <div class="km-row km-fhead">
+      <div class="km-label">החודשים הבאים</div>
       <div class="km-seg" role="group" aria-label="תרחיש"><button type="button" data-s="n">רגיל</button><button type="button" data-s="c">זהיר</button></div>
     </div>
     <div class="km-tablebox" id="scenario">
       <table class="km-tbl" id="scenario-table">
-        <thead><tr><th></th><th>אחרי משכורת</th><th>ב15</th></tr></thead>
+        <thead><tr><th></th><th>ב15</th></tr></thead>
         <tbody></tbody>
       </table>
       <button type="button" class="km-more" id="more">עוד חודשים</button>
@@ -62,10 +67,6 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
       <label class="km-field"><span>הוצאה חריגה</span><span class="km-inp"><input id="w-vacation" type="text" inputmode="numeric" placeholder="0" aria-label="הוצאה חריגה"><i>₪</i></span></label>
       <label class="km-field"><span>בחודש</span><span class="km-inp"><select id="w-month" aria-label="באיזה חודש ההוצאה החריגה יורדת"></select></span></label>
     </div>
-    <details class="km-what" id="oneoffs-box">
-      <summary>חד פעמיים</summary>
-      <div class="km-oneoffs" id="oneoff-list"></div>
-    </details>
   </section>
 
   <section class="km-card" id="goals">
@@ -87,18 +88,9 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
     <div class="km-chart km-chart-sm" id="chart-hist"></div>
   </section>
 
-  <section class="km-card" id="free">
-    <div class="km-row">
-      <div class="km-label">פנוי בכל חודש</div>
-      <div class="km-legend"><span class="km-sw km-sw-exp"></span>הוצאות<span class="km-sw km-sw-free"></span>נשאר</div>
-    </div>
-    <div class="km-chart" id="chart-free"></div>
-    <div class="km-releases" id="releases"></div>
-  </section>
-
   <section class="km-card" id="expenses">
     <div class="km-row">
-      <div class="km-label">יוצא בנובמבר</div>
+      <div class="km-label">הוצאות קבועות בחודש</div>
       <div class="km-total" id="total">—</div>
     </div>
     <div class="km-list" id="exp-list"></div>
@@ -185,17 +177,30 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-what summary::after { content: ' \203a'; }
 .km-what[open] summary::after { content: ' ⌄'; }
 .km-oneoffs .km-rel { border-top: 0; }
+.km-ledger { margin-top: 12px; }
+.km-led { display: grid; grid-template-columns: 1fr auto 5.5rem; gap: 10px; padding: 7px 0; font-size: var(--cds-font-size-body); border-top: .5px solid var(--color-border-line); }
+.km-led.km-first { border-top: 0; color: var(--color-fg-muted); }
+.km-led .a { white-space: nowrap; color: var(--color-fg-muted); }
+.km-led .b { white-space: nowrap; text-align: left; font-weight: 500; }
+.km-led.km-exp { color: var(--color-fg-muted); }
+.km-led.km-exp .b { font-weight: 400; }
+.km-led.km-exp .n::after { content: ' · צפוי'; font-size: var(--cds-font-size-caption); }
+.km-on15 { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px; padding-top: 10px; border-top: 1.5px solid var(--color-border-line); font-size: var(--cds-font-size-body); }
+.km-on15 b { font-weight: 800; font-size: var(--cds-font-size-heading); }
+.km-room { margin-top: 14px; padding: 10px 12px; border-radius: var(--cds-radius); background: var(--color-bg); }
+.km-room-v { font-weight: 800; font-size: var(--cds-font-size-heading); margin-top: 2px; }
+.km-fhead { margin-top: 18px; align-items: center; }
 </style>
 </div>
 
-<script src="js/core.js?v=3"></script>
+<script src="js/core.js?v=4"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/finance-page.js?v=2"></script>
+<script src="js/finance-page.js?v=3"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
-  dash._load({ expenses: f.expenses || [], history: f.history || [], inputs: f.inputs || [], oneoffs: f.oneoffs || [], portfolio: (d.datasets && d.datasets.account) || [] });
+  dash._load({ expenses: f.expenses || [], history: f.history || [], inputs: f.inputs || [], oneoffs: f.oneoffs || [], ledger: f.ledger || [], portfolio: (d.datasets && d.datasets.account) || [] });
   document.getElementById('boot').hidden = true;
   document.getElementById('dash-root').hidden = false;
   financeMain();

@@ -1,13 +1,14 @@
 /* The finance page's own script (same as the "הכספים שלי" artifact), wrapped so it starts once the data is in. */
 function financeMain() {
 dash.calc('months', {
-  inputs: ['inputs', 'expenses', 'oneoffs'],
+  inputs: ['inputs', 'expenses', 'oneoffs', 'ledger'],
   title: 'תזרים לפי חודש',
   description: 'לכל חודש: יתרה ב1 לחודש, אחרי המשכורת ואחרי האשראי וההלוואה, בתרחיש רגיל וזהיר. חיוב אשראי ידוע בפועל מחליף את ההערכה, וחד פעמיים נכנסים בחודש שלהם.',
-  fn: (inputs, expenses, oneoffs) => {
+  fn: (inputs, expenses, oneoffs, ledger) => {
     const p = inputs[0];
     const [y, m] = String(p.first_charge).split('-').map(Number);
-    let bn = Number(p.bank_balance), bc = bn;
+    const afterLedger = (ledger || []).reduce((s, r) => s + Number(r.amount), 0);
+    let bn = ledger && ledger.length ? afterLedger : Number(p.bank_balance), bc = bn;
     const rows = [];
     for (let i = 0; i < 13; i++) {
       let en = 0, ec = 0, bk = 0; const ends = [];
@@ -33,7 +34,7 @@ dash.calc('months', {
         month: iso,
         start_normal: Math.round(b0n), start_cautious: Math.round(b0c),
         paid_normal: Math.round(b0n + sn), paid_cautious: Math.round(b0c + sc),
-        card_normal: Math.round(en - bk), card_cautious: Math.round(ec - bk), bank_debits: Math.round(bk), extra: Math.round(extra),
+        card_normal: Math.round(en - bk), card_cautious: Math.round(ec - bk), bank_debits: Math.round(bk), extra: Math.round(extra), card_known: !!card,
         exp_normal: Math.round(en), exp_cautious: Math.round(ec),
         free_normal: Math.round(sn - en + extra), free_cautious: Math.round(sc - ec + extra),
         bal_normal: Math.round(bn), bal_cautious: Math.round(bc), ends: ends.join(', ')
@@ -112,19 +113,59 @@ dash.calc('networth', {
       s.className = v < limit - 0.5 ? 'km-crit' : v < 0 ? 'km-neg' : 'km-pos';
       td.appendChild(s); return td;
     };
-    const shown = window.kmAll ? months.length : Math.min(6, months.length);
+    const shown = window.kmAll ? months.length : Math.min(3, months.length);
     months.slice(0, shown).forEach((r, i) => {
       const tr = document.createElement('tr'); if (X && i === xi) tr.className = 'km-x';
       const paid = r['paid_' + sc] + T - (X && i > xi ? X : 0);
       const end = r['bal_' + sc] + T - (X && i >= xi ? X : 0);
       const th = document.createElement('th'); th.scope = 'row'; th.textContent = label(r);
-      tr.append(th, cell(paid), cell(end, 'km-end'));
+      tr.append(th, cell(end, 'km-end'));
       body.appendChild(tr);
     });
     $('more').textContent = window.kmAll ? 'פחות' : 'עוד חודשים';
+    // room left on the card without dropping below 0 on any coming 15th
+    const ends = months.map((r, i) => r['bal_' + sc] + T - (X && i >= xi ? X : 0));
+    let k = months.findIndex((r) => !r.card_known); if (k < 0) k = 0;
+    const lowAhead = Math.min(...ends.slice(k)), room = lowAhead - Math.max(limit, 0);
+    const fixedLow = k > 0 ? Math.min(...ends.slice(0, k)) : Infinity;
+    const rl = $('room-label'), rv = $('room-v');
+    const due = '15.' + (toDate(months[k].month).getUTCMonth() + 1);
+    if (fixedLow < limit - 0.5) {
+      const bi = ends.findIndex((v) => v < limit - 0.5);
+      rl.textContent = 'ב15.' + (toDate(months[bi].month).getUTCMonth() + 1) + ' תהיה מתחת למסגרת';
+      rv.textContent = bal(ends[bi]); rv.className = 'km-room-v km-neg';
+    } else if (room <= 0) {
+      rl.textContent = 'אין מקום להוצאות נוספות באשראי לחיוב ' + due;
+      rv.textContent = ils(0); rv.className = 'km-room-v km-neg';
+    } else {
+      rl.textContent = 'עוד מותר להוציא באשראי, לחיוב ' + due;
+      rv.textContent = ils(room); rv.className = 'km-room-v';
+    }
   }
 
   $('more').addEventListener('click', () => { window.kmAll = !window.kmAll; const M = dash.data('months'), I = dash.data('inputs'); if (M.status === 'ok' && I.status === 'ok') drawScenario(M.data, I.data); });
+
+  function drawLedger(rows) {
+    const box = $('ledger-list'); box.replaceChildren();
+    const sorted = rows.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    let run = 0, now = 0, nowDate = null, lastDate = null;
+    sorted.forEach((o, i) => {
+      const v = Number(o.amount); run += v;
+      const done = o.status !== 'expected';
+      if (done) { now = run; nowDate = o.date; }
+      lastDate = o.date;
+      const r = document.createElement('div'); r.className = 'km-led' + (done ? '' : ' km-exp') + (i === 0 ? ' km-first' : '');
+      const n = document.createElement('span'); n.className = 'n'; n.textContent = o.name;
+      const a = document.createElement('span'); a.className = 'a';
+      a.textContent = i === 0 ? '' : (v < 0 ? '\u2066-' + ils(v) + '\u2069' : '+' + ils(v));
+      const b = document.createElement('span'); b.className = 'b' + (run < 0 ? ' km-neg' : ''); b.textContent = bal(run);
+      r.append(n, a, b); box.appendChild(r);
+    });
+    const el = $('bank-now'); el.textContent = bal(now); el.className = 'km-big' + (now < 0 ? ' km-neg' : '');
+    if (nowDate) $('bank-label').textContent = 'בנק עכשיו · ' + dm(toDate(nowDate));
+    const ov = $('on15-v'); ov.textContent = bal(run); ov.className = run < 0 ? 'km-neg' : '';
+    $('on15').firstElementChild.textContent = 'ב' + dm(toDate(lastDate)) + ' תהיה ב';
+  }
 
   function drawOneoffs(rows) {
     const box = $('oneoff-list'); box.replaceChildren();
@@ -349,12 +390,12 @@ dash.calc('networth', {
     }
 
     if (ok(E)) drawList(E.data);
-    if (ok(E) && ok(I)) drawReleases(E.data, I.data);
     if (ok(E) && ok(I) && ok(M)) drawGoals(M.data, E.data, I.data);
-    if (ok(M)) { $('total').textContent = ils(M.data[0].exp_normal); drawFree(M.data); }
+    if (ok(M)) { $('total').textContent = ils(M.data[0].exp_normal); }
 
     const O = dash.data('oneoffs');
-    if (O.status === 'ok' && Array.isArray(O.data)) drawOneoffs(O.data);
+    const L = dash.data('ledger');
+    if (L.status === 'ok' && Array.isArray(L.data) && L.data.length) drawLedger(L.data);
     if (ok(M) && ok(I)) {
       const sc = dash.params().scenario === 'c' ? 'c' : 'n';
       document.querySelectorAll('.km-seg button').forEach((b) => b.classList.toggle('on', b.dataset.s === sc));
