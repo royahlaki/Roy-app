@@ -196,9 +196,9 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-led.km-exp { color: var(--color-fg-muted); }
 .km-led.km-exp .b { font-weight: 400; }
 .km-led.km-exp .n::after { content: ' · צפוי'; font-size: var(--cds-font-size-caption); }
-.km-on15 { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 14px 16px; border-radius: var(--cds-radius); background: linear-gradient(155deg,#065F46 0%,#059669 100%); color: #fff; font-size: 15px; font-weight: 700; }
-.km-on15 b { font-weight: 800; font-size: 28px; color: #fff !important; }
-.km-on15.km-on15-neg { background: linear-gradient(155deg,#9F1239 0%,#E8435F 100%); }
+.km-on15 { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--color-ok) 8%, transparent); font-size: var(--cds-font-size-body); font-weight: 500; }
+.km-on15 b { font-weight: 700; font-size: 20px; }
+.km-on15.km-on15-neg { background: color-mix(in srgb, var(--km-red) 8%, transparent); }
 .km-led { grid-template-columns: 1fr auto 5.5rem auto !important; }
 .km-x-btn { border: 0; background: none; color: var(--color-fg-muted); font-size: 18px; line-height: 1; padding: 0 2px; cursor: pointer; }
 .km-add { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 6px; margin-top: 8px; }
