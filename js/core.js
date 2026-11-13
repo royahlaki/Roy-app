@@ -162,7 +162,7 @@
       after += Number(h.value_ils) || 0;
     });
     if (any && acc) {
-      acc.total_ils = Math.round((after + Number(acc.cash_ils || 0)) * 100) / 100;
+      acc.total_ils = Math.round((after + Number(acc.cash_ils || 0) + Number(acc.tax_shield || 0)) * 100) / 100;
       acc.pnl_total = Math.round((Number(acc.pnl_total || 0) + after - before) * 100) / 100;
       acc.daily_change = Math.round(day * 100) / 100;
       if (usd) acc.usd_rate = usd;
