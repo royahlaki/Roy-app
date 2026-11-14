@@ -47,7 +47,7 @@ dash.calc('summary', {
 });
 
 /* Control panel: built from the live finance data (the same rows the finance page uses), not a frozen copy. */
-dash.calc('finance_base', {
+dash.calc('fin_base', {
   title: 'בסיס כספים',
   inputs: ['fin_inputs', 'fin_expenses', 'fin_ledger'],
   fn: (inputs, expenses, ledger) => {
@@ -66,7 +66,7 @@ dash.calc('finance_base', {
 dash.calc('networth', {
   title: 'שווי נקי',
   description: 'תיק, פנסיה ורכב, פחות המינוס בבנק ויתרת הלוואת הרכב (כמו בעמוד הכספים).',
-  inputs: ['account', 'finance_base'],
+  inputs: ['account', 'fin_base'],
   fn: (account, fb) => {
     const p = Number(account[0].total_ils), f = fb[0];
     return [{ net: Math.round(p + f.pension + f.car + Math.min(0, f.bank_now) - f.loan_principal) }];
@@ -142,7 +142,7 @@ const placeTip = (box, tip, e) => {
 /* ---------- draw ---------- */
 window.pfDraw = () => {
   const D = id => dash.data(id);
-  const H = D('holdings'), A = D('account'), W = D('weights'), S = D('summary'), F = D('finance_base');
+  const H = D('holdings'), A = D('account'), W = D('weights'), S = D('summary'), F = D('fin_base');
   const NW = D('networth');
 
   // value marks
@@ -156,7 +156,7 @@ window.pfDraw = () => {
     const f = x.dataset.field, v = S.data[0][f];
     x.textContent = f === 'sentence' ? v : f === 'portfolio_beta' ? d3.format('.2f')(v) : pct(v);
   });
-  document.querySelectorAll('[data-source="finance_base"][data-field]').forEach(x => {
+  document.querySelectorAll('[data-source="fin_base"][data-field]').forEach(x => {
     if (F.status !== 'ok') { x.textContent = '—'; return; }
     const f = x.dataset.field, v = F.data[0][f];
     x.textContent = ['salary_day', 'charge_day', 'loan_left'].includes(f) ? String(v) : ['salary_normal', 'salary_careful', 'food_normal', 'food_careful'].includes(f) ? d3.format(',')(v) : f === 'loan_principal' ? '₪' + d3.format(',.2f')(v) : f === 'loan_payment' ? '₪' + d3.format(',.2f')(v) : ils(v);

@@ -371,8 +371,8 @@ html,body{margin:0;padding:0;background:#FFFFFF}
   <div class="ctrl-g">
     <div class="ct"><span class="n">שווי נקי</span><span class="a" data-source="networth" data-field="net" data-row="0">—</span></div>
     <div class="ct"><span class="n">בנק · אחרי החיובים</span><span class="a" id="ct-low" data-source="projection">—</span><span class="y" id="ct-low-d" data-source="projection">—</span></div>
-    <div class="ct"><span class="n">הלוואת רכב</span><span class="a" data-source="finance_base" data-field="loan_principal" data-row="0">—</span><span class="y">עוד <span data-source="finance_base" data-field="loan_left" data-row="0">—</span> תשלומים</span></div>
-    <div class="ct"><span class="n">הוצאות לחודש</span><span class="a" id="ct-exp" data-source="finance_base">—</span><span class="y">קבועות, כולל הלוואה</span></div>
+    <div class="ct"><span class="n">הלוואת רכב</span><span class="a" data-source="fin_base" data-field="loan_principal" data-row="0">—</span><span class="y">עוד <span data-source="fin_base" data-field="loan_left" data-row="0">—</span> תשלומים</span></div>
+    <div class="ct"><span class="n">הוצאות לחודש</span><span class="a" id="ct-exp" data-source="fin_base">—</span><span class="y">קבועות, כולל הלוואה</span></div>
   </div>
 </section>
 </div>
@@ -550,7 +550,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 <script src="js/core.js?v=6"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=2"></script>
+<script src="js/portfolio-page.js?v=3"></script>
 <script>
 Roy.data().then(function (d) {
   window.PF_CFG = d.config || {};
