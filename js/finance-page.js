@@ -229,7 +229,7 @@ dash.calc('networth', {
       const row = document.createElement('div'); row.className = 'km-led';
       const d = document.createElement('span'); d.className = 'd'; d.textContent = dm(toDate(r.date));
       const n = document.createElement('span'); n.className = 'n'; n.textContent = r.kind === 'in' ? (r.note || 'משיכה') : (r.cat || 'אחר') + (r.note ? ' · ' + r.note : '');
-      const a = document.createElement('span'); a.className = r.kind === 'in' ? 'b km-ok' : 'b'; a.textContent = (r.kind === 'in' ? '+' : '⁦-') + ils(v) + (r.kind === 'in' ? '' : '⁩');
+      const a = document.createElement('span'); a.className = r.kind === 'in' ? 'a km-ok' : 'a'; a.textContent = (r.kind === 'in' ? '+' : '⁦-') + ils(v) + (r.kind === 'in' ? '' : '⁩');
       const x = document.createElement('button'); x.type = 'button'; x.className = 'km-x-btn'; x.setAttribute('aria-label', 'מחיקה'); x.textContent = '×';
       x.addEventListener('click', () => { if (!confirmDel(r)) return; const i = rows.indexOf(r); if (i > -1) { rows.splice(i, 1); saveCash(rows); } });
       row.append(d, n, a, x); list.appendChild(row);
