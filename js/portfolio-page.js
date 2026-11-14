@@ -46,50 +46,30 @@ dash.calc('summary', {
   }
 });
 
-dash.calc('timeline', {
-  title: 'הוצאות ופנוי לפי חודש',
-  description: 'לכל חיוב מ-15/11/2026: סכום האשראי, ההלוואה, והפנוי מהמשכורת.',
-  inputs: ['expenses', 'finance_base'],
-  fn: (expenses, finance_base) => {
-    const f = finance_base[0], out = [];
-    for (let i = 0; i < 12; i++) {
-      const m0 = 10 + i, y = 2026 + Math.floor(m0 / 12), mo = (m0 % 12) + 1;
-      const month = `${y}-${String(mo).padStart(2, '0')}`;
-      const card = expenses.filter(e => e.payments_left === null || e.payments_left === '' || i < Number(e.payments_left) + 1).reduce((s, e) => s + Number(e.monthly), 0);
-      const loan = i < f.loan_left ? Number(f.loan_payment) : 0;
-      const total_normal = Math.round(card + f.food_normal + loan), total_careful = Math.round(card + f.food_careful + loan);
-      out.push({ month, card_no_food: Math.round(card), loan: Math.round(loan), total_normal, total_careful,
-        free_normal: f.salary_normal - total_normal, free_careful: f.salary_careful - total_careful });
-    }
-    return out;
-  }
-});
-
-dash.calc('projection', {
-  title: 'יתרת בנק צפויה',
-  description: 'מתחיל מהמינוס ב-22/10/2026: משכורת ב-9 לחודש, ניכוי אשראי והלוואה ב-15, בשני התרחישים.',
-  inputs: ['timeline', 'finance_base'],
-  fn: (timeline, finance_base) => {
-    const f = finance_base[0];
-    let n = Number(f.overdraft), c = Number(f.overdraft);
-    const rows = [{ date: f.overdraft_date, kind: 'היום', bal_normal: n, bal_careful: c }];
-    timeline.forEach(t => {
-      n += f.salary_normal; c += f.salary_careful;
-      rows.push({ date: `${t.month}-${String(f.salary_day).padStart(2, '0')}`, kind: 'משכורת', bal_normal: Math.round(n), bal_careful: Math.round(c) });
-      n -= t.total_normal; c -= t.total_careful;
-      rows.push({ date: `${t.month}-${String(f.charge_day).padStart(2, '0')}`, kind: 'חיוב אשראי והלוואה', bal_normal: Math.round(n), bal_careful: Math.round(c) });
-    });
-    return rows;
+/* Control panel: built from the live finance data (the same rows the finance page uses), not a frozen copy. */
+dash.calc('finance_base', {
+  title: 'בסיס כספים',
+  inputs: ['fin_inputs', 'fin_expenses', 'fin_ledger'],
+  fn: (inputs, expenses, ledger) => {
+    const p = inputs[0] || {}, loanRow = expenses.find(e => /הלוואת רכב/.test(e.name) && !e.starts) || {};
+    const done = ledger.filter(r => r.status !== 'expected'), bankNow = done.length ? done.reduce((s, r) => s + Number(r.amount), 0) : Number(p.bank_balance);
+    const after = ledger.length ? ledger.reduce((s, r) => s + Number(r.amount), 0) : bankNow;
+    const lastExp = ledger.filter(r => r.status === 'expected').map(r => r.date).sort().pop() || null;
+    const today = new Date().toISOString().slice(0, 10);
+    const monthly = expenses.filter(e => (!e.starts || e.starts <= today) && (e.left_after_current === null || e.left_after_current === '' || Number(e.left_after_current) >= 0)).reduce((s, e) => s + Number(e.amount || 0), 0);
+    return [{ loan_principal: Number(p.loan_principal) || 0, loan_left: loanRow.left_after_current === undefined || loanRow.left_after_current === null ? '—' : Number(loanRow.left_after_current) + 1,
+      bank_now: Math.round(bankNow), bank_after: Math.round(after), after_date: lastExp, monthly: Math.round(monthly),
+      pension: Number(p.pension) || 0, car: Number(p.car_value) || 0 }];
   }
 });
 
 dash.calc('networth', {
   title: 'שווי נקי',
-  description: 'שווי התיק פחות המינוס ויתרת הלוואת הרכב.',
+  description: 'תיק, פנסיה ורכב, פחות המינוס בבנק ויתרת הלוואת הרכב (כמו בעמוד הכספים).',
   inputs: ['account', 'finance_base'],
-  fn: (account, finance_base) => {
-    const p = Number(account[0].total_ils), o = Number(finance_base[0].overdraft), l = Number(finance_base[0].loan_principal);
-    return [{ portfolio: Math.round(p), overdraft: Math.round(o), loan: -Math.round(l), net: Math.round(p + o - l) }];
+  fn: (account, fb) => {
+    const p = Number(account[0].total_ils), f = fb[0];
+    return [{ net: Math.round(p + f.pension + f.car + Math.min(0, f.bank_now) - f.loan_principal) }];
   }
 });
 
@@ -163,7 +143,7 @@ const placeTip = (box, tip, e) => {
 window.pfDraw = () => {
   const D = id => dash.data(id);
   const H = D('holdings'), A = D('account'), W = D('weights'), S = D('summary'), F = D('finance_base');
-  const TL = D('timeline'), P = D('projection'), NW = D('networth');
+  const NW = D('networth');
 
   // value marks
   document.querySelectorAll('[data-source="account"][data-field]').forEach(x => {
@@ -209,14 +189,13 @@ window.pfDraw = () => {
 
   // control panel
   {
-    const tr0 = Number(dash.params().transfer) || 0, va0 = Number(dash.params().vacation) || 0;
     const lowEl = document.getElementById('ct-low'), lowD = document.getElementById('ct-low-d'), ex = document.getElementById('ct-exp');
-    if (P.status === 'ok' && P.data.length) {
-      const adj = P.data.map(d => ({ date: d.date, n: d.bal_normal + tr0 - (d.date >= '2026-11-15' ? va0 : 0) }));
-      const mn = adj.reduce((a, b) => b.n < a.n ? b : a);
-      lowEl.textContent = ils(Math.abs(mn.n)); lowEl.className = 'a ' + (mn.n < 0 ? 't-red' : 't-grn'); lowD.textContent = dmy(mn.date);
-    } else { lowEl.textContent = '—'; lowD.textContent = '—'; }
-    ex.textContent = TL.status === 'ok' ? ils(TL.data[0].total_normal) : '—';
+    if (F.status === 'ok' && F.data.length) {
+      const f = F.data[0];
+      lowEl.textContent = (f.bank_after < 0 ? '-' : '') + ils(Math.abs(f.bank_after)); lowEl.className = 'a ' + (f.bank_after < 0 ? 't-red' : 't-grn');
+      lowD.textContent = f.after_date ? 'אחרי ' + dmy(f.after_date) : 'עכשיו';
+      ex.textContent = ils(f.monthly);
+    } else { lowEl.textContent = '—'; lowD.textContent = '—'; ex.textContent = '—'; }
   }
 
   if (window.pfTab === 'portfolio') {
