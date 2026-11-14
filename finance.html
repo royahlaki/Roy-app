@@ -30,6 +30,17 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-sub{display:none}
 .km-seg button.on{background:#fff!important;color:#047857!important;box-shadow:0 0 0 1px #9FE3CB!important}
 .km-bar i{box-shadow:none!important}
+.km-cash-month { text-align: left; }
+.km-cash-month b { display: block; font-weight: 600; font-size: var(--cds-font-size-heading); margin-top: 2px; }
+.km-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.km-chips span { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--color-bg); color: var(--color-fg-muted); }
+.km-chips span b { font-weight: 600; color: var(--color-fg); margin-inline-start: 4px; }
+.km-cash-tabs { margin-top: 12px; }
+.km-cash-add { grid-template-columns: 1fr 1.1fr 1.2fr auto; }
+.km-cash-hint { align-self: center; font-size: 12px; color: var(--color-fg-muted); }
+#cash .km-led { grid-template-columns: 3rem 1fr auto auto !important; }
+#cash .km-led .d { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); align-self: center; }
+.km-add[hidden] { display: none; }
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -77,6 +88,35 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
       <label class="km-field"><span>הוספה לחשבון</span><span class="km-inp"><input id="w-transfer" type="text" inputmode="numeric" placeholder="0" aria-label="הוספה לחשבון"><i>₪</i></span></label>
       <label class="km-field"><span>הוצאה חריגה</span><span class="km-inp"><input id="w-vacation" type="text" inputmode="numeric" placeholder="0" aria-label="הוצאה חריגה"><i>₪</i></span></label>
       <label class="km-field"><span>בחודש</span><span class="km-inp"><select id="w-month" aria-label="באיזה חודש ההוצאה החריגה יורדת"></select></span></label>
+    </div>
+  </section>
+
+  <section class="km-card" id="cash">
+    <div class="km-row">
+      <div>
+        <div class="km-label">מזומן ביד</div>
+        <div class="km-big" id="cash-now">—</div>
+      </div>
+      <div class="km-cash-month"><span class="km-label" id="cash-month-label">יצא החודש</span><b id="cash-month">—</b></div>
+    </div>
+    <div class="km-chips" id="cash-cats"></div>
+    <div class="km-ledger" id="cash-list"></div>
+    <button type="button" class="km-more" id="cash-more" hidden>עוד</button>
+    <div class="km-cash-tabs km-seg" role="tablist">
+      <button type="button" data-m="out" class="on">הוצאתי</button>
+      <button type="button" data-m="in">משכתי</button>
+    </div>
+    <div class="km-add km-cash-add" id="cash-out">
+      <input id="cash-amt" type="text" inputmode="decimal" placeholder="סכום" aria-label="סכום">
+      <select id="cash-cat" aria-label="על מה"><option>אוכל</option><option>תספורת</option><option>אימון</option><option>בילויים</option><option>המרה לחו״ל</option><option>אחר</option></select>
+      <input id="cash-note" type="text" placeholder="הערה" aria-label="הערה">
+      <button type="button" id="cash-out-btn">הוסף</button>
+    </div>
+    <div class="km-add km-cash-add" id="cash-in" hidden>
+      <input id="cash-in-amt" type="text" inputmode="decimal" placeholder="סכום" aria-label="סכום שנמשך">
+      <input id="cash-fee" type="text" inputmode="decimal" placeholder="עמלה" aria-label="עמלה">
+      <span class="km-cash-hint">יורד גם מהבנק</span>
+      <button type="button" id="cash-in-btn">הוסף</button>
     </div>
   </section>
 
@@ -211,14 +251,14 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 </style>
 </div>
 
-<script src="js/core.js?v=5"></script>
+<script src="js/core.js?v=6"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/finance-page.js?v=4"></script>
+<script src="js/finance-page.js?v=5"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
-  dash._load({ expenses: f.expenses || [], history: f.history || [], inputs: f.inputs || [], oneoffs: f.oneoffs || [], ledger: f.ledger || [], portfolio: (d.datasets && d.datasets.account) || [] });
+  dash._load({ expenses: f.expenses || [], history: f.history || [], inputs: f.inputs || [], oneoffs: f.oneoffs || [], ledger: f.ledger || [], cash: f.cash || [], portfolio: (d.datasets && d.datasets.account) || [] });
   document.getElementById('boot').hidden = true;
   document.getElementById('dash-root').hidden = false;
   financeMain();

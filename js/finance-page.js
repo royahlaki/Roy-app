@@ -201,6 +201,71 @@ dash.calc('networth', {
     saveLedger(rows);
   });
 
+
+  /* Cash on hand: what came out of the bank as cash, and what was spent from it. */
+  function saveCash(rows) {
+    const sh = (window.parent && window.parent.Roy && window.parent.Roy._sync) || (window.Roy && window.Roy._sync);
+    if (sh) sh.push([{ k: 'd:finance.cash', v: JSON.stringify(rows), ts: Date.now() }]);
+    dash.setParams({});
+  }
+  const todayIso = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  function drawCash(rows) {
+    window.kmCashRows = rows;
+    const sorted = rows.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    const have = sorted.reduce((s, r) => s + (r.kind === 'in' ? 1 : -1) * Number(r.amount), 0);
+    const el = $('cash-now'); el.textContent = bal(have); el.className = 'km-big' + (have < 0 ? ' km-neg' : '');
+    const ym = todayIso().slice(0, 7), cats = {};
+    let month = 0;
+    sorted.forEach((r) => { if (r.kind === 'out' && String(r.date).slice(0, 7) === ym) { month += Number(r.amount); cats[r.cat || 'אחר'] = (cats[r.cat || 'אחר'] || 0) + Number(r.amount); } });
+    $('cash-month').textContent = ils(month);
+    const chips = $('cash-cats'); chips.replaceChildren();
+    Object.keys(cats).sort((a, b) => cats[b] - cats[a]).forEach((c) => {
+      const sp = document.createElement('span'); sp.textContent = c; const b = document.createElement('b'); b.textContent = ils(cats[c]); sp.appendChild(b); chips.appendChild(sp);
+    });
+    const list = $('cash-list'); list.replaceChildren();
+    const shown = window.kmCashAll ? sorted.slice().reverse() : sorted.slice(-4).reverse();
+    shown.forEach((r) => {
+      const v = Number(r.amount);
+      const row = document.createElement('div'); row.className = 'km-led';
+      const d = document.createElement('span'); d.className = 'd'; d.textContent = dm(toDate(r.date));
+      const n = document.createElement('span'); n.className = 'n'; n.textContent = r.kind === 'in' ? (r.note || 'משיכה') : (r.cat || 'אחר') + (r.note ? ' · ' + r.note : '');
+      const a = document.createElement('span'); a.className = r.kind === 'in' ? 'b km-ok' : 'b'; a.textContent = (r.kind === 'in' ? '+' : '⁦-') + ils(v) + (r.kind === 'in' ? '' : '⁩');
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'km-x-btn'; x.setAttribute('aria-label', 'מחיקה'); x.textContent = '×';
+      x.addEventListener('click', () => { if (!confirmDel(r)) return; const i = rows.indexOf(r); if (i > -1) { rows.splice(i, 1); saveCash(rows); } });
+      row.append(d, n, a, x); list.appendChild(row);
+    });
+    $('cash-more').hidden = sorted.length <= 4;
+    $('cash-more').textContent = window.kmCashAll ? 'פחות' : 'עוד';
+  }
+  const confirmDel = (r) => { try { return window.confirm('למחוק את השורה?'); } catch (e) { return true; } };
+  $('cash-more').addEventListener('click', () => { window.kmCashAll = !window.kmCashAll; drawCash(window.kmCashRows || []); });
+  document.querySelectorAll('.km-cash-tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.km-cash-tabs button').forEach((x) => x.classList.toggle('on', x === b));
+    $('cash-out').hidden = b.dataset.m !== 'out'; $('cash-in').hidden = b.dataset.m !== 'in';
+  }));
+  $('cash-out-btn').addEventListener('click', () => {
+    const rows = window.kmCashRows; if (!rows) return;
+    const amt = num($('cash-amt').value); if (!amt) return;
+    rows.push({ date: todayIso(), kind: 'out', amount: amt, cat: $('cash-cat').value, note: $('cash-note').value.trim() });
+    $('cash-amt').value = ''; $('cash-note').value = '';
+    saveCash(rows);
+  });
+  $('cash-in-btn').addEventListener('click', () => {
+    const rows = window.kmCashRows; if (!rows) return;
+    const amt = num($('cash-in-amt').value), fee = num($('cash-fee').value); if (!amt) return;
+    const date = todayIso();
+    rows.push({ date, kind: 'in', amount: amt, note: 'משיכה' });
+    const led = window.kmLedgerRows;
+    if (led) {
+      led.push({ date, name: 'משיכת מזומן', amount: -amt, status: 'done' });
+      if (fee) led.push({ date, name: 'עמלת משיכה', amount: -fee, status: 'done' });
+      const sh = (window.parent && window.parent.Roy && window.parent.Roy._sync) || (window.Roy && window.Roy._sync);
+      if (sh) sh.push([{ k: 'd:finance.ledger', v: JSON.stringify(led), ts: Date.now() }]);
+    }
+    $('cash-in-amt').value = ''; $('cash-fee').value = '';
+    saveCash(rows);
+  });
+
   function drawOneoffs(rows) {
     const box = $('oneoff-list'); box.replaceChildren();
     if (!rows.length) return;
@@ -430,6 +495,8 @@ dash.calc('networth', {
     const O = dash.data('oneoffs');
     const L = dash.data('ledger');
     if (L.status === 'ok' && Array.isArray(L.data) && L.data.length) drawLedger(L.data);
+    const C = dash.data('cash');
+    if (C.status === 'ok' && Array.isArray(C.data)) drawCash(C.data);
     if (ok(M) && ok(I)) {
       const sc = dash.params().scenario === 'c' ? 'c' : 'n';
       document.querySelectorAll('.km-seg button').forEach((b) => b.classList.toggle('on', b.dataset.s === sc));
