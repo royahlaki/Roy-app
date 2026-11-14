@@ -366,7 +366,7 @@ window.pfDraw = () => {
       const sc = v => v === null || v === undefined ? 'mut' : v > 0 ? 't-grn' : v < 0 ? 't-red' : '';
       const isTrade = h => h.trade === true || h.trade === 'true' || h.tag === 'טרייד';
       const sortedH = [...H.data].sort((a, b) => (isTrade(b) - isTrade(a)) || ((a.pnl_pct ?? 1e9) - (b.pnl_pct ?? 1e9)));
-      const half = Math.ceil(sortedH.length / 2), rowsPart = sortedH.slice(half);
+      const half = 0, rowsPart = sortedH;
       sortedH.slice(0, half).forEach(h => {
         const c = el('div', 'stock' + (isTrade(h) ? ' trade' : ''));
         c.title = h.data_date ? `${h.note} תמחור מ-${h.data_date}.` : (h.note || '');
@@ -433,7 +433,7 @@ window.pfDraw = () => {
         if (repB) c.appendChild(repB);
         st.appendChild(c);
       });
-      // trial: the other half as clean rows. A row opens to show the yearly numbers and pros / cons.
+      // Holdings as clean rows. A row opens to show the yearly numbers and pros / cons.
       if (rowsPart.length) {
         const tot = A.status === 'ok' ? Number(A.data[0].total_ils) : 0;
         const sgn = v => '\u2066' + (v < 0 ? '−' : '+') + sg(v) + '\u2069';
@@ -446,6 +446,8 @@ window.pfDraw = () => {
           const r = el('details', 'srw');
           const sm = el('summary', 'sr');
           const nm = el('span', 'c0'); nm.append(el('b', '', h.name), el('small', 'mut', h.sector || ''));
+          if (isTrade(h)) nm.appendChild(el('small', 't-red', 'טרייד'));
+          if (h.pnl_pct !== null && h.pnl_pct <= -8) { nm.appendChild(el('small', 't-red', 'ירדה 8% מהקנייה')); r.classList.add('warn'); }
           const val = el('span', 'c1'); val.append(el('b', '', ils(h.value_ils)), el('small', 'mut', tot ? d3.format('.1f')(h.value_ils / tot * 100) + '% מהתיק' : ''));
           const pn = el('span', 'c2');
           if (h.pnl_pct === null || h.pnl_pct === undefined) pn.appendChild(el('b', 'mut', '—'));
@@ -467,7 +469,7 @@ window.pfDraw = () => {
           r.appendChild(more);
           box.appendChild(r);
         });
-        const wrapR = el('div', 'srows-wrap'); wrapR.appendChild(el('div', 'srows-lab', 'ניסיון: אותו מידע בשורות'));
+        const wrapR = el('div', 'srows-wrap');
         wrapR.appendChild(box); st.appendChild(wrapR);
       }
     }
