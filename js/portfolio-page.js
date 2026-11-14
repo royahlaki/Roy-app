@@ -365,7 +365,9 @@ window.pfDraw = () => {
       const sg = v => v === null || v === undefined ? '—' : d3.format('.1f')(Math.abs(v)) + '%';
       const sc = v => v === null || v === undefined ? 'mut' : v > 0 ? 't-grn' : v < 0 ? 't-red' : '';
       const isTrade = h => h.trade === true || h.trade === 'true' || h.tag === 'טרייד';
-      [...H.data].sort((a, b) => (isTrade(b) - isTrade(a)) || ((a.pnl_pct ?? 1e9) - (b.pnl_pct ?? 1e9))).forEach(h => {
+      const sortedH = [...H.data].sort((a, b) => (isTrade(b) - isTrade(a)) || ((a.pnl_pct ?? 1e9) - (b.pnl_pct ?? 1e9)));
+      const half = Math.ceil(sortedH.length / 2), rowsPart = sortedH.slice(half);
+      sortedH.slice(0, half).forEach(h => {
         const c = el('div', 'stock' + (isTrade(h) ? ' trade' : ''));
         c.title = h.data_date ? `${h.note} תמחור מ-${h.data_date}.` : (h.note || '');
         const hd = el('div', 'sh');
@@ -431,6 +433,42 @@ window.pfDraw = () => {
         if (repB) c.appendChild(repB);
         st.appendChild(c);
       });
+      // trial: the other half as clean rows. A row opens to show the yearly numbers and pros / cons.
+      if (rowsPart.length) {
+        const tot = A.status === 'ok' ? Number(A.data[0].total_ils) : 0;
+        const box = el('div', 'srows');
+        const head = el('div', 'sr sr-h');
+        ['מניה', 'שווי', 'רווח מהקנייה', 'הכנסות ברבעון', 'רווח נקי ברבעון', 'דוח הבא'].forEach((t, i) => head.appendChild(el('span', 'c' + i, t)));
+        box.appendChild(head);
+        const asList = v => Array.isArray(v) ? v : (typeof v === 'string' && v ? (() => { try { const p = JSON.parse(v); return Array.isArray(p) ? p : [v]; } catch (e) { return [v]; } })() : []);
+        rowsPart.forEach(h => {
+          const r = el('details', 'srw');
+          const sm = el('summary', 'sr');
+          const nm = el('span', 'c0'); nm.append(el('b', '', h.name), el('small', 'mut', h.sector || ''));
+          const val = el('span', 'c1'); val.append(el('b', '', ils(h.value_ils)), el('small', 'mut', tot ? d3.format('.1f')(h.value_ils / tot * 100) + '% מהתיק' : ''));
+          const pn = el('span', 'c2');
+          if (h.pnl_pct === null || h.pnl_pct === undefined) pn.appendChild(el('b', 'mut', '—'));
+          else pn.append(el('b', sc(h.pnl_pct), (h.pnl_pct < 0 ? '−' : '+') + sg(h.pnl_pct)), el('small', sc(h.pnl_ils), ils(Math.abs(h.pnl_ils))));
+          const noRep = h.rev_q === null && h.ni_q === null && h.rev_y === null && h.ni_y === null;
+          const q = (v) => { const x = el('span', ''); x.appendChild(el('b', noRep ? 'mut' : sc(v), noRep ? '—' : (v === null || v === undefined ? '—' : (v < 0 ? '−' : '+') + sg(v)))); if (!noRep && h.q_period) x.appendChild(el('small', 'mut', h.q_period)); return x; };
+          const rq = q(h.rev_q); rq.className = 'c3'; const nq = q(h.ni_q); nq.className = 'c4';
+          const rp = el('span', 'c5');
+          if (h.next_report_date) { const rd = new Date(h.next_report_date + 'T00:00:00'), days = Math.ceil((rd - new Date()) / 86400000); rp.append(el('b', days >= 0 && days <= 7 ? 't-pur' : '', `${rd.getDate()}.${rd.getMonth() + 1}`), el('small', 'mut', days >= 0 ? (days === 0 ? 'היום' : `עוד ${days} ימים`) : '')); }
+          else rp.appendChild(el('b', 'mut', noRep ? 'קרן מדד' : '—'));
+          sm.append(nm, val, pn, rq, nq, rp);
+          r.appendChild(sm);
+          const more = el('div', 'sr-more');
+          if (!noRep) more.appendChild(el('div', 'cap mut', `12 חודשים (${h.y_period}): הכנסות ${h.rev_y === null ? '—' : (h.rev_y < 0 ? '−' : '+') + sg(h.rev_y)} · רווח נקי ${h.ni_y === null ? '—' : (h.ni_y < 0 ? '−' : '+') + sg(h.ni_y)}`));
+          const pcw = el('div', 'pcw'); const ul = el('ul', 'pcl'), ul2 = el('ul', 'pcl');
+          asList(h.pros).forEach(p => { const li = el('li', 'pro'); li.append(el('i', '', '+'), el('span', '', p)); ul.appendChild(li); });
+          asList(h.cons).forEach(p => { const li = el('li', 'con'); li.append(el('i', '', '−'), el('span', '', p)); ul2.appendChild(li); });
+          pcw.append(ul, ul2); more.appendChild(pcw);
+          r.appendChild(more);
+          box.appendChild(r);
+        });
+        const wrapR = el('div', 'srows-wrap'); wrapR.appendChild(el('div', 'srows-lab', 'ניסיון: אותו מידע בשורות'));
+        wrapR.appendChild(box); st.appendChild(wrapR);
+      }
     }
   }
 };
