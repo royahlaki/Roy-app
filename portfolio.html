@@ -179,7 +179,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 .pf .tile dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:0;font-size:12px}
 .pf .tile dt{color:var(--g-mut)}.pf .tile dd{margin:0;text-align:left;font-weight:600}
 .pf .stock .nt{font-size:12px;color:var(--g-mut);line-height:1.45}
-.pf .divs{display:grid;grid-template-columns:repeat(auto-fill,minmax(6.5rem,1fr));gap:8px}
+.pf .divs{display:grid;grid-template-columns:repeat(auto-fit,minmax(6.5rem,1fr));gap:8px}
 .pf .dv{background:#F9FAFB;border:1px solid var(--g-soft);border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
 .pf .dv .n{font-size:12px;color:var(--g-sub)}
 .pf .dv .a{font-size:16px;font-weight:800;color:var(--grn)}
@@ -312,23 +312,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 </section>
 
 
-<section class="card" id="scen-card">
-  <div class="row"><h2>תרחישים ומה עושים</h2><span class="pill gry" id="scen-cnt" data-source="scenario_status">—</span></div>
-  <p class="note">הפעולה נקבעה מראש, כדי שבזמן אמת לא מחליטים מהבטן.</p>
-  <style>
-  .pf .sg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--g-line);border-radius:12px;overflow:hidden;margin-top:4px}
-  @media (max-width:760px){.pf .sg{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  .pf .sg .sc{padding:8px 10px;border-inline-start:1px solid var(--g-soft);border-top:1px solid var(--g-soft);display:flex;flex-direction:column;gap:3px;min-width:0;text-align:center;align-items:center}
-  .pf .sg .sc.on{background:var(--red-bg)}
-  .pf .sg .sc .t{font-size:12px;font-weight:700;line-height:1.35;display:flex;align-items:center;gap:5px}
-  .pf .sg .sc .a{font-size:11px;color:var(--g-sub);line-height:1.4}
-  .pf .sg .sc i{flex:none;width:8px;height:8px;border-radius:50%;display:inline-block}
-  .pf .sg-leg{display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--g-mut);margin-top:8px}
-  .pf .sg-leg i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-inline-end:4px;vertical-align:middle}
-  </style>
-  <div class="sg" id="scen" data-source="scenario_status"></div>
-  <div class="sg-leg"><span><i style="background:#DC2626"></i>קורה עכשיו</span><span><i style="background:#16A34A"></i>לא קורה</span><span><i style="background:#9CA3AF"></i>בודקים ידנית</span></div>
-</section>
+
 
 <section class="card" id="risk-card">
   <h2>מפת סיכונים</h2>
@@ -375,6 +359,31 @@ html,body{margin:0;padding:0;background:#FFFFFF}
     <div class="ct"><span class="n">הוצאות לחודש</span><span class="a" id="ct-exp" data-source="fin_base">—</span><span class="y">קבועות, כולל הלוואה</span></div>
   </div>
 </section>
+
+<section class="card" id="scen-card" style="padding:12px 18px">
+  <details id="scen-det">
+  <summary class="row scen-sum"><h2>הכללים שלי</h2><span class="pill gry" id="scen-cnt" data-source="scenario_status">—</span></summary>
+  <p class="note">הפעולה נקבעה מראש, כדי שבזמן אמת לא מחליטים מהבטן.</p>
+  <style>
+  .pf .scen-sum{cursor:pointer;list-style:none}
+  .pf .scen-sum::-webkit-details-marker{display:none}
+  .pf .scen-sum h2::after{content:" \203A";color:var(--g-mut);font-weight:400}
+  .pf #scen-det[open] .scen-sum h2::after{content:" \2304"}
+  .pf #scen-det[open] .scen-sum{margin-bottom:8px}
+  .pf .sg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--g-line);border-radius:12px;overflow:hidden;margin-top:4px}
+  @media (max-width:760px){.pf .sg{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .pf .sg .sc{padding:8px 10px;border-inline-start:1px solid var(--g-soft);border-top:1px solid var(--g-soft);display:flex;flex-direction:column;gap:3px;min-width:0;text-align:center;align-items:center}
+  .pf .sg .sc.on{background:var(--red-bg)}
+  .pf .sg .sc .t{font-size:12px;font-weight:700;line-height:1.35;display:flex;align-items:center;gap:5px}
+  .pf .sg .sc .a{font-size:11px;color:var(--g-sub);line-height:1.4}
+  .pf .sg .sc i{flex:none;width:8px;height:8px;border-radius:50%;display:inline-block}
+  .pf .sg-leg{display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--g-mut);margin-top:8px}
+  .pf .sg-leg i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-inline-end:4px;vertical-align:middle}
+  </style>
+  <div class="sg" id="scen" data-source="scenario_status"></div>
+  <div class="sg-leg"><span><i style="background:#DC2626"></i>קורה עכשיו</span><span><i style="background:#16A34A"></i>לא קורה</span><span><i style="background:#9CA3AF"></i>בודקים ידנית</span></div>
+  </details>
+</section>
 </div>
 
 
@@ -415,10 +424,10 @@ html,body{margin:0;padding:0;background:#FFFFFF}
       "risk risk risk risk risk risk risk wts wts wts wts wts"
       "risk risk risk risk risk risk risk beta beta beta beta beta"
       "risk risk risk risk risk risk risk prog prog prog prog prog"
-      "scen scen scen scen scen scen scen scen scen scen scen scen"
-      "perf perf perf perf perf perf perf perf div div div div"
+      "perf perf perf perf perf div div div div div div div"
       "stk stk stk stk stk stk stk stk stk stk stk stk"
-      "ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl"}
+      "ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl"
+      "scen scen scen scen scen scen scen scen scen scen scen scen"}
   .pf #total-card{grid-area:total;display:flex;flex-direction:column;justify-content:center}
   .pf #page-portfolio>.kpis{grid-area:kpis;grid-auto-rows:1fr;gap:14px}
   .pf #page-portfolio>.kpis .kpi{justify-content:center;padding:18px}
@@ -550,7 +559,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 <script src="js/core.js?v=6"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=3"></script>
+<script src="js/portfolio-page.js?v=4"></script>
 <script>
 Roy.data().then(function (d) {
   window.PF_CFG = d.config || {};

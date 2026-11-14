@@ -139,6 +139,34 @@ const placeTip = (box, tip, e) => {
   tip.style.left = Math.max(4, tx) + 'px'; tip.style.top = Math.max(0, e.clientY - bb.top - tip.offsetHeight - 8) + 'px';
 };
 
+/* Performance strip: when the tiles don't fit, they glide slowly back and forth; a touch or hover pauses it. */
+function pfMarquee(car) {
+  if (car._mq) cancelAnimationFrame(car._mq.raf);
+  const st = car._mq = { pos: 0, dir: 1, wait: 90, hold: false, raf: 0 };
+  if (!car._mqBound) {
+    car._mqBound = true;
+    const on = () => { car._mq.hold = true; }, off = () => { car._mq.hold = false; car._mq.wait = 120; car._mq.pos = Math.abs(car.scrollLeft); };
+    car.addEventListener('pointerenter', on); car.addEventListener('pointerleave', off);
+    car.addEventListener('touchstart', on, { passive: true }); car.addEventListener('touchend', off, { passive: true });
+  }
+  const rtl = getComputedStyle(car).direction === 'rtl', sign = rtl ? -1 : 1;
+  const step = () => {
+    const max = car.scrollWidth - car.clientWidth;
+    if (max > 4 && !st.hold && !document.hidden) {
+      car.style.scrollSnapType = 'none';
+      if (st.wait > 0) st.wait--;
+      else {
+        st.pos += 0.4 * st.dir;
+        if (st.pos >= max) { st.pos = max; st.dir = -1; st.wait = 120; }
+        if (st.pos <= 0) { st.pos = 0; st.dir = 1; st.wait = 120; }
+        car.scrollLeft = sign * st.pos;
+      }
+    }
+    st.raf = requestAnimationFrame(step);
+  };
+  st.raf = requestAnimationFrame(step);
+}
+
 /* ---------- draw ---------- */
 window.pfDraw = () => {
   const D = id => dash.data(id);
@@ -310,6 +338,7 @@ window.pfDraw = () => {
           } else d3.select(sq).append('svg').attr('viewBox', '0 0 84 24').attr('aria-hidden', 'true');
           car.appendChild(sq);
         });
+        pfMarquee(car);
       }
     }
 
