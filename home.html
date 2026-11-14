@@ -97,6 +97,18 @@ ul.tl .del:active{color:#FF3B30}
 .hb.on{box-shadow:0 4px 14px rgba(37,99,235,.28)}
 .strip{padding-top:4px;padding-bottom:12px}
 
+/* attention card: shown only when something needs action */
+.alerts{max-width:400px;margin:14px auto 0;background:var(--card);border-radius:18px;padding:10px 14px 4px;box-shadow:var(--sh)}
+.al-h{font-size:12px;font-weight:600;color:#FF9500;letter-spacing:.02em;margin-bottom:2px}
+ul.al{list-style:none;margin:0;padding:0}
+ul.al li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-top:.5px solid var(--sep);font-size:14px;line-height:1.4}
+ul.al li:first-child{border-top:0}
+ul.al .i{flex:none;width:8px;height:8px;border-radius:50%;margin-top:7px;background:#FF9500}
+ul.al li.red .i{background:#FF3B30}
+ul.al li.blu .i{background:var(--blu)}
+ul.al .x{flex:1}
+ul.al .w{flex:none;font-size:12px;color:var(--mut);margin-top:1px}
+ul.al li.more{justify-content:center;color:var(--blu);font-size:13px;font-weight:500;cursor:pointer}
 /* ===== Dark mode (follows the iPhone) ===== */
 @media(prefers-color-scheme:dark){
   :root{--card:#1C1C1E;--fg:#F5F5F7;--mut:#98989D;--soft:#2C2C2E;--blu:#0A84FF;--blu-bg:rgba(10,132,255,.18);--sep:rgba(84,84,88,.45);--fill:rgba(118,118,128,.24);--sh:none}
@@ -131,6 +143,10 @@ ul.tl .del:active{color:#FF3B30}
     <div class="msg" id="msg">טוען...</div>
     <div class="foot"><button class="tg" id="tg" hidden></button></div>
     <ul class="tl" id="closed" hidden></ul>
+  </section>
+  <section class="alerts" id="alerts" hidden>
+    <div class="al-h">שים לב</div>
+    <ul class="al" id="al-list"></ul>
   </section>
   <div class="hh"><h2>היום</h2><a class="sys" href="https://docs.google.com/document/d/114oNvKnNHfBQTZwwgLMcO-XR9J41g7PAHYYeFPj5fN0/edit">המערכת שלי ‹</a></div>
   <div class="habits" id="habits"></div>
@@ -250,6 +266,69 @@ ul.tl .del:active{color:#FF3B30}
     });
     box.appendChild(b);
   });
+})();
+
+/* Attention card: portfolio alerts and upcoming renewals. Hidden when there is nothing to do. */
+(function () {
+  var box = document.getElementById('alerts'), list = document.getElementById('al-list'); if (!box) return;
+  var DAY = 86400000, today = new Date(); today.setHours(0, 0, 0, 0);
+  var days = function (iso) { return Math.round((new Date(iso + 'T00:00:00') - today) / DAY); };
+  var when = function (n) { return n <= 0 ? 'היום' : n === 1 ? 'מחר' : n < 14 ? 'עוד ' + n + ' ימים' : n < 60 ? 'עוד ' + Math.round(n / 7) + ' שבועות' : 'עוד ' + Math.round(n / 30) + ' חודשים'; };
+  var pct = function (v) { return (Math.round(v * 10) / 10).toString(); };
+  var y = today.getFullYear();
+  var next = function (m, d) { var t = new Date(y, m - 1, d); if (t < today) t = new Date(y + 1, m - 1, d); return t.getFullYear() + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'); };
+  /* Renewals: [date, text, how many days ahead to start showing] */
+  var RENEW = [
+    [next(7, 15), 'ביטוח רכב: לוודא שהסוכן התקשר לחידוש', 21],
+    [next(8, 1), 'לשלם אגרת רישוי ולקבוע טסט ותיקון לרכב', 30],
+    ['2027-08-15', 'לבטל את מנוי Office לפני החידוש בספטמבר', 45],
+    ['2027-11-01', 'להתחיל לחדש תעודת זהות (פגה בינואר 2028)', 60],
+    ['2030-08-10', 'לחדש רישיון נהיגה (פג ב 10.9.2030)', 60]
+  ];
+  var CAP = { ESLT: 11, TASE: 12, NXSN: 8 };
+  function draw(items) {
+    items.sort(function (a, b) { return a.rank - b.rank || a.n - b.n; });
+    list.replaceChildren();
+    var shown = items.slice(0, 3);
+    var add = function (it) {
+      var li = document.createElement('li'); li.className = it.cls || '';
+      var i = document.createElement('span'); i.className = 'i';
+      var x = document.createElement('span'); x.className = 'x'; x.textContent = it.text;
+      li.append(i, x);
+      if (it.w) { var w = document.createElement('span'); w.className = 'w'; w.textContent = it.w; li.appendChild(w); }
+      list.appendChild(li);
+    };
+    shown.forEach(add);
+    if (items.length > 3) {
+      var m = document.createElement('li'); m.className = 'more'; m.textContent = 'עוד ' + (items.length - 3);
+      m.addEventListener('click', function () { m.remove(); items.slice(3).forEach(add); });
+      list.appendChild(m);
+    }
+    box.hidden = !items.length;
+  }
+  function build(data) {
+    var items = [];
+    RENEW.forEach(function (r) { var n = days(r[0]); if (n >= 0 && n <= r[2]) items.push({ rank: 2, n: n, text: r[1], w: when(n), cls: 'blu' }); });
+    var ds = (data && data.datasets) || {}, hs = ds.holdings || [], acc = (ds.account || [])[0] || {}, total = Number(acc.total_ils) || 0;
+    hs.forEach(function (h) {
+      if (h.pnl_pct !== null && h.pnl_pct !== undefined && Number(h.pnl_pct) <= -8) items.push({ rank: 0, n: 0, cls: 'red', text: h.name + ' ירדה ' + pct(-Number(h.pnl_pct)) + '% משער הקנייה. לפי הכלל: יוצאים.' });
+      if (h.next_report_date) { var n = days(h.next_report_date); if (n >= 0 && n <= 3) items.push({ rank: 1, n: n, text: 'דוח רבעוני של ' + h.name + '. לא פותחים פוזיציה חדשה יום לפני.', w: when(n) }); }
+    });
+    if (total) {
+      var cash = Number(acc.cash_ils) / total * 100;
+      if (cash < 25) items.push({ rank: 0, n: 0, cls: 'red', text: 'מזומן בתיק ' + pct(cash) + '%, מתחת למינימום 25%. לא פותחים פוזיציה חדשה.' });
+      var w = {}; hs.forEach(function (h) { w[h.ticker] = Number(h.value_ils) / total * 100; });
+      if (w.NXSN > CAP.NXSN + 1) items.push({ rank: 1, n: 0, text: 'נקסט ויז׳ן ' + pct(w.NXSN) + '% מהתיק, מעל היעד 8%.' });
+      var step = (ds.plan || []).filter(function (p) { return p.status !== 'בוצע' && !/בוצע$/.test(p.status || ''); })
+        .map(function (p) { var m = /אמצע (דצמבר|ינואר)/.exec(p.window || ''); if (!m) return null; var due = m[1] === 'דצמבר' ? y + '-12-15' : (y + (today.getMonth() > 6 ? 1 : 0)) + '-01-15'; return { p: p, n: days(due) }; })
+        .filter(function (x) { return x && x.n >= 0; }).sort(function (a, b) { return a.n - b.n; })[0];
+      var over = ['ESLT', 'TASE'].filter(function (t) { return w[t] > CAP[t]; });
+      if (step && over.length && step.n <= 21) items.push({ rank: 1, n: step.n, text: 'מנה ' + step.p.step + ' של הורדת הריכוזיות: ' + over.map(function (t) { return (t === 'ESLT' ? 'אלביט ' : 'הבורסה ') + pct(w[t]) + '% (יעד ' + CAP[t] + '%)'; }).join(', '), w: when(step.n) });
+    }
+    draw(items);
+  }
+  build(null);
+  if (window.Roy && Roy.data) Roy.data().then(build, function () {});
 })();
 </script>
 </body>

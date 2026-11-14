@@ -266,6 +266,23 @@ dash.calc('networth', {
     saveCash(rows);
   });
 
+
+  /* Subscriptions: the recurring services inside the fixed expenses, with a note where there is a decision to make. */
+  const SUBS = { 'Claude': '', 'Netflix': '', 'גלובס': '', 'Office': 'כמעט לא בשימוש · לבטל לפני 9.2027', 'טלפון': '', 'מאוחדת': '', 'גיבוי Apple': '' };
+  function drawSubs(expenses) {
+    const rows = expenses.filter((e) => Object.prototype.hasOwnProperty.call(SUBS, e.name) && Number(e.amount) > 0).sort((a, b) => Number(b.amount) - Number(a.amount));
+    const m = rows.reduce((s, e) => s + Number(e.amount), 0);
+    $('subs-month').textContent = ils(m); $('subs-year').textContent = ils(m * 12);
+    const box = $('subs-list'); box.replaceChildren();
+    rows.forEach((e) => {
+      const r = document.createElement('div'); r.className = 'km-item';
+      const n = document.createElement('span'); n.className = 'n'; n.textContent = e.name;
+      if (SUBS[e.name]) { const p = document.createElement('span'); p.className = 'km-pill last'; p.textContent = SUBS[e.name]; n.append(' ', p); }
+      const a = document.createElement('span'); a.className = 'a'; a.textContent = ils(e.amount);
+      r.append(n, a); box.appendChild(r);
+    });
+  }
+
   function drawOneoffs(rows) {
     const box = $('oneoff-list'); box.replaceChildren();
     if (!rows.length) return;
@@ -488,7 +505,7 @@ dash.calc('networth', {
       $('bank-label').textContent = 'בנק · ' + dm(toDate(I.data[0].bank_as_of));
     }
 
-    if (ok(E)) drawList(E.data);
+    if (ok(E)) { drawList(E.data); drawSubs(E.data); }
     if (ok(E) && ok(I) && ok(M)) drawGoals(M.data, E.data, I.data);
     if (ok(M)) { $('total').textContent = ils(M.data[0].exp_normal); }
 

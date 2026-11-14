@@ -146,6 +146,17 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
     </div>
     <div class="km-list" id="exp-list"></div>
   </section>
+
+  <section class="km-card" id="subs">
+    <div class="km-row">
+      <div>
+        <div class="km-label">מנויים</div>
+        <div class="km-total" id="subs-month">—</div>
+      </div>
+      <div class="km-cash-month"><span class="km-label">בשנה</span><b id="subs-year">—</b></div>
+    </div>
+    <div class="km-list" id="subs-list"></div>
+  </section>
 </div>
 
 <style>
@@ -254,7 +265,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/core.js?v=6"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/finance-page.js?v=6"></script>
+<script src="js/finance-page.js?v=7"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
