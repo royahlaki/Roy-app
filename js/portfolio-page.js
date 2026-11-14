@@ -436,6 +436,7 @@ window.pfDraw = () => {
       // trial: the other half as clean rows. A row opens to show the yearly numbers and pros / cons.
       if (rowsPart.length) {
         const tot = A.status === 'ok' ? Number(A.data[0].total_ils) : 0;
+        const sgn = v => '\u2066' + (v < 0 ? '−' : '+') + sg(v) + '\u2069';
         const box = el('div', 'srows');
         const head = el('div', 'sr sr-h');
         ['מניה', 'שווי', 'רווח מהקנייה', 'הכנסות ברבעון', 'רווח נקי ברבעון', 'דוח הבא'].forEach((t, i) => head.appendChild(el('span', 'c' + i, t)));
@@ -448,17 +449,17 @@ window.pfDraw = () => {
           const val = el('span', 'c1'); val.append(el('b', '', ils(h.value_ils)), el('small', 'mut', tot ? d3.format('.1f')(h.value_ils / tot * 100) + '% מהתיק' : ''));
           const pn = el('span', 'c2');
           if (h.pnl_pct === null || h.pnl_pct === undefined) pn.appendChild(el('b', 'mut', '—'));
-          else pn.append(el('b', sc(h.pnl_pct), (h.pnl_pct < 0 ? '−' : '+') + sg(h.pnl_pct)), el('small', sc(h.pnl_ils), ils(Math.abs(h.pnl_ils))));
+          else pn.append(el('b', sc(h.pnl_pct), sgn(h.pnl_pct)), el('small', sc(h.pnl_ils), ils(Math.abs(h.pnl_ils))));
           const noRep = h.rev_q === null && h.ni_q === null && h.rev_y === null && h.ni_y === null;
-          const q = (v) => { const x = el('span', ''); x.appendChild(el('b', noRep ? 'mut' : sc(v), noRep ? '—' : (v === null || v === undefined ? '—' : (v < 0 ? '−' : '+') + sg(v)))); if (!noRep && h.q_period) x.appendChild(el('small', 'mut', h.q_period)); return x; };
+          const q = (v) => { const x = el('span', ''); x.appendChild(el('b', noRep ? 'mut' : sc(v), noRep ? '—' : (v === null || v === undefined ? '—' : sgn(v)))); if (!noRep && h.q_period) x.appendChild(el('small', 'mut', h.q_period)); return x; };
           const rq = q(h.rev_q); rq.className = 'c3'; const nq = q(h.ni_q); nq.className = 'c4';
           const rp = el('span', 'c5');
-          if (h.next_report_date) { const rd = new Date(h.next_report_date + 'T00:00:00'), days = Math.ceil((rd - new Date()) / 86400000); rp.append(el('b', days >= 0 && days <= 7 ? 't-pur' : '', `${rd.getDate()}.${rd.getMonth() + 1}`), el('small', 'mut', days >= 0 ? (days === 0 ? 'היום' : `עוד ${days} ימים`) : '')); }
+          if (h.next_report_date) { const rd = new Date(h.next_report_date + 'T00:00:00'), days = Math.ceil((rd - new Date()) / 86400000); rp.append(el('b', days >= 0 && days <= 7 ? 't-pur' : days < 0 ? 'mut' : '', `${rd.getDate()}.${rd.getMonth() + 1}`), el('small', 'mut', days >= 0 ? (days === 0 ? 'היום' : `עוד ${days} ימים`) : 'פורסם')); }
           else rp.appendChild(el('b', 'mut', noRep ? 'קרן מדד' : '—'));
           sm.append(nm, val, pn, rq, nq, rp);
           r.appendChild(sm);
           const more = el('div', 'sr-more');
-          if (!noRep) more.appendChild(el('div', 'cap mut', `12 חודשים (${h.y_period}): הכנסות ${h.rev_y === null ? '—' : (h.rev_y < 0 ? '−' : '+') + sg(h.rev_y)} · רווח נקי ${h.ni_y === null ? '—' : (h.ni_y < 0 ? '−' : '+') + sg(h.ni_y)}`));
+          if (!noRep) more.appendChild(el('div', 'cap mut', `12 חודשים (${h.y_period}): הכנסות ${h.rev_y === null ? '—' : sgn(h.rev_y)} · רווח נקי ${h.ni_y === null ? '—' : sgn(h.ni_y)}`));
           const pcw = el('div', 'pcw'); const ul = el('ul', 'pcl'), ul2 = el('ul', 'pcl');
           asList(h.pros).forEach(p => { const li = el('li', 'pro'); li.append(el('i', '', '+'), el('span', '', p)); ul.appendChild(li); });
           asList(h.cons).forEach(p => { const li = el('li', 'con'); li.append(el('i', '', '−'), el('span', '', p)); ul2.appendChild(li); });
