@@ -269,9 +269,10 @@ dash.calc('networth', {
 
   /* Subscriptions: the recurring services inside the fixed expenses, with a note where there is a decision to make. */
   const SUBS = { 'Claude': '', 'Netflix': '', 'גלובס': '', 'Office': 'כמעט לא בשימוש · לבטל לפני 9.2027', 'טלפון': '', 'מאוחדת': '', 'גיבוי Apple': '' };
+  const ANNUAL = [{ name: 'TradingView', ils: 400, note: '$125 שנתי · מתחדש ב 22.10' }];
   function drawSubs(expenses) {
     const rows = expenses.filter((e) => Object.prototype.hasOwnProperty.call(SUBS, e.name) && Number(e.amount) > 0).sort((a, b) => Number(b.amount) - Number(a.amount));
-    const m = rows.reduce((s, e) => s + Number(e.amount), 0);
+    const m = rows.reduce((s, e) => s + Number(e.amount), 0) + ANNUAL.reduce((s, a) => s + a.ils / 12, 0);
     $('subs-month').textContent = ils(m); $('subs-year').textContent = ils(m * 12);
     const box = $('subs-list'); box.replaceChildren();
     rows.forEach((e) => {
@@ -279,6 +280,13 @@ dash.calc('networth', {
       const n = document.createElement('span'); n.className = 'n'; n.textContent = e.name;
       if (SUBS[e.name]) { const p = document.createElement('span'); p.className = 'km-pill last'; p.textContent = SUBS[e.name]; n.append(' ', p); }
       const a = document.createElement('span'); a.className = 'a'; a.textContent = ils(e.amount);
+      r.append(n, a); box.appendChild(r);
+    });
+    ANNUAL.forEach((x) => {
+      const r = document.createElement('div'); r.className = 'km-item';
+      const n = document.createElement('span'); n.className = 'n'; n.textContent = x.name;
+      const p = document.createElement('span'); p.className = 'km-pill'; p.textContent = x.note; n.append(' ', p);
+      const a = document.createElement('span'); a.className = 'a'; a.textContent = ils(x.ils) + ' '; const sm = document.createElement('small'); sm.textContent = 'בשנה'; a.appendChild(sm);
       r.append(n, a); box.appendChild(r);
     });
   }
