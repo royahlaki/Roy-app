@@ -142,23 +142,25 @@ const placeTip = (box, tip, e) => {
 /* Performance strip: when the tiles don't fit, they glide slowly back and forth; a touch or hover pauses it. */
 function pfMarquee(car) {
   if (car._mq) cancelAnimationFrame(car._mq.raf);
-  const st = car._mq = { pos: 0, dir: 1, wait: 90, hold: false, raf: 0 };
+  const st = car._mq = { pos: 0, dir: 1, wait: 1.5, hold: false, raf: 0 };
   if (!car._mqBound) {
     car._mqBound = true;
-    const on = () => { car._mq.hold = true; }, off = () => { car._mq.hold = false; car._mq.wait = 120; car._mq.pos = Math.abs(car.scrollLeft); };
+    const on = () => { car._mq.hold = true; }, off = () => { car._mq.hold = false; car._mq.wait = 2; car._mq.pos = Math.abs(car.scrollLeft); };
     car.addEventListener('pointerenter', on); car.addEventListener('pointerleave', off);
     car.addEventListener('touchstart', on, { passive: true }); car.addEventListener('touchend', off, { passive: true });
   }
   const rtl = getComputedStyle(car).direction === 'rtl', sign = rtl ? -1 : 1;
-  const step = () => {
+  let last = 0;
+  const step = (t) => {
+    const dt = last ? Math.min(t - last, 100) / 1000 : 0; last = t;
     const max = car.scrollWidth - car.clientWidth;
     if (max > 4 && !st.hold && !document.hidden) {
       car.style.scrollSnapType = 'none';
-      if (st.wait > 0) st.wait--;
+      if (st.wait > 0) st.wait -= dt;
       else {
-        st.pos += 0.4 * st.dir;
-        if (st.pos >= max) { st.pos = max; st.dir = -1; st.wait = 120; }
-        if (st.pos <= 0) { st.pos = 0; st.dir = 1; st.wait = 120; }
+        st.pos += 22 * dt * st.dir;
+        if (st.pos >= max) { st.pos = max; st.dir = -1; st.wait = 2; }
+        if (st.pos <= 0) { st.pos = 0; st.dir = 1; st.wait = 2; }
         car.scrollLeft = sign * st.pos;
       }
     }
