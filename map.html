@@ -99,6 +99,18 @@ footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-he
 .tag.th{color:var(--thesis);border-color:rgba(199,125,255,.5)}
 .tag.il{color:var(--il);border-color:rgba(77,163,255,.5)}
 .close{display:block;width:100%;margin-top:16px;background:transparent;border:1px solid var(--neon);color:var(--neon);font:700 14px Heebo;border-radius:12px;padding:10px;cursor:pointer}
+.tabs{display:flex;gap:2px;background:rgba(118,118,128,.18);border-radius:11px;padding:2px;overflow-x:auto}
+.tabs button{flex:1 0 auto;border:0;background:none;color:var(--mut);font:600 12.5px Heebo;padding:7px 9px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.tabs button.on{background:var(--neon);color:#0a0d08}
+.tools{display:flex;align-items:center;gap:10px;margin-top:8px}
+.tools .legend{margin-top:0;flex:1;justify-content:flex-start;gap:10px}
+.tgl{flex:none;border:1px solid var(--line2);background:transparent;color:var(--mut);font:600 11.5px Heebo;border-radius:999px;padding:4px 10px;cursor:pointer}
+.tgl.on{border-color:var(--crit);color:var(--crit);background:rgba(255,92,122,.1)}
+.more{display:none;color:var(--mut);font-size:11px;text-align:center;margin-top:6px}
+.node.force{background:var(--card2);border-style:dashed}
+.node.force .nt{color:#dfe7e2}
+#pane{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -111,56 +123,227 @@ footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-he
 </header>
 
 <div class="bar">
-  <div class="seg" id="seg">
-    <button class="on" data-m="all">כל הקשרים</button>
-    <button data-m="crit">רק ההכרחיים</button>
+  <div class="tabs" id="tabs"></div>
+  <div class="tools">
+    <div class="legend">
+      <span><b style="border-color:var(--crit)"></b>הכרחי</span>
+      <span><b style="border-color:var(--strong)"></b>חזק</span>
+      <span><b style="border-color:var(--weak);border-top-style:dashed"></b>חלש</span>
+      <span><i style="background:var(--own)"></i>בתיק</span>
+      <span><i style="background:var(--thesis)"></i>תזה</span>
+    </div>
+    <button class="tgl" id="crit">רק הכרחי</button>
   </div>
-  <div class="legend">
-    <span><b style="border-color:var(--crit)"></b>לא מתקיים בלי</span>
-    <span><b style="border-color:var(--strong)"></b>תלות חזקה</span>
-    <span><b style="border-color:var(--weak);border-top-style:dashed"></b>קשר חלש</span>
-    <span><i style="background:var(--own)"></i>בתיק</span>
-    <span><i style="background:var(--thesis)"></i>מועמדת לתזה</span>
-    <span><i style="background:var(--il)"></i>ישראלית</span>
-  </div>
 </div>
 
-<h2>שרשרת ה AI: מהחול ועד הצ׳אט</h2>
-<div class="h2s">קוראים מלמעלה למטה. כל קופסה היא תחום, והמניות בתוכה. לחיצה על תחום מראה ממי הוא תלוי ומה קורה אם הוא נעלם.</div>
-<div class="graph" id="g1"></div>
+<div id="pane"></div>
 
-<div class="money">
-  <p><b>הכסף זורם הפוך.</b> הסחורה יורדת מלמטה למעלה בשרשרת, אבל הכסף מגיע מהקצה: חברות הענן והמודלים קונות שרתים, ושם מתחילה ההזמנה לכל השאר. אם הן מקצצות בהשקעות, כל השרשרת מעליהן מרגישה את זה, והרחוקות ביותר (ציוד, זיכרון) מרגישות הכי חזק.</p>
-</div>
-
-<h2>צווארי הבקבוק</h2>
-<div class="h2s">הנקודות שאין להן תחליף. כאן הכוח במחיר, וגם הסיכון הכי גדול.</div>
-<div class="cards" id="choke"></div>
-
-<h2>האשכול הישראלי בתיק</h2>
-<div class="h2s">מה מניע את המניות הישראליות שלך, ולמה הן נעות יחד.</div>
-<div class="graph" id="g2"></div>
-<div class="money" style="border-color:rgba(77,163,255,.35);background:rgba(77,163,255,.07)">
-  <p><b style="color:var(--il)">למה זה חשוב לך:</b> אלביט, נקסטויז׳ן, הבורסה והבנקים נשענים כולם על אותו גורם, ישראל. ביום רע לישראל הן עלולות לרדת יחד, ולכן הן מתנהגות כמו פוזיציה אחת גדולה. נייקי ומניות ה AI הן הפיזור האמיתי.</p>
-</div>
-
-<footer>מפה חינוכית, לא המלצה. הקשרים והתלויות הם הערכה כללית ומשתנים עם הזמן.</footer>
+<footer>מפה חינוכית, לא המלצה. הקשרים הם הערכה כללית ומשתנים עם הזמן.</footer>
 </div>
 
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
 <script src="js/core.js?v=6"></script>
 <script>
-/* Stock names, and which ones are AI thesis candidates */
 const NAMES={LIN:"Linde",ENTG:"Entegris",APD:"Air Products",SNPS:"Synopsys",CDNS:"Cadence",ARM:"Arm",ASML:"ASML",AMAT:"Applied Materials",LRCX:"Lam Research",KLAC:"KLA",NVMI:"נובה",CAMT:"קמטק",
 NVDA:"Nvidia",AMD:"AMD",AVGO:"Broadcom",MRVL:"Marvell",TSM:"TSMC",SAMSUNG:"Samsung",INTC:"Intel",TSEM:"טאואר",MU:"Micron","SK HYNIX":"SK hynix",ASX:"ASE",AMKR:"Amkor",
 SMCI:"Supermicro",DELL:"Dell",HPE:"HPE",FOXCONN:"Foxconn",ANET:"Arista",COHR:"Coherent",LITE:"Lumentum",CRDO:"Credo",SNDK:"SanDisk",WDC:"Western Digital",STX:"Seagate",PSTG:"Pure Storage",
 VST:"Vistra",CEG:"Constellation",NRG:"NRG",GEV:"GE Vernova",PWR:"Quanta",ETN:"Eaton",OKLO:"Oklo",VRT:"Vertiv",MOD:"Modine",DLR:"Digital Realty",EQIX:"Equinix",
 MSFT:"Microsoft",AMZN:"Amazon",GOOGL:"Google",ORCL:"Oracle",NBIS:"Nebius",CRWV:"CoreWeave",META:"Meta",PLTR:"Palantir",NOW:"ServiceNow",
-ESLT:"אלביט",NXSN:"נקסטויז׳ן",TASE:"הבורסה לני״ע",POLI:"בנק הפועלים",LUMI:"בנק לאומי","TA125":"קסם ת״א 125",NKE:"Nike"};
+ESLT:"אלביט",NXSN:"נקסטויז׳ן",TASE:"הבורסה לני״ע",POLI:"בנק הפועלים",LUMI:"בנק לאומי",TA125:"קסם ת״א 125",NKE:"Nike",
+MP:"MP Materials",TDY:"Teledyne",LHX:"L3Harris",GD:"General Dynamics",RHM:"Rheinmetall",LMT:"Lockheed Martin",RTX:"RTX",NOC:"Northrop Grumman",
+DSCT:"דיסקונט",MZTF:"מזרחי טפחות",HARL:"הראל",PHOE:"הפניקס",CLIS:"כלל ביטוח",
+ZIM:"צים",UPS:"UPS",FDX:"FedEx",ADS:"Adidas",LULU:"Lululemon",ONON:"On",DECK:"Deckers (Hoka)",DKS:"Dick's",WMT:"Walmart",
+XOM:"ExxonMobil",CVX:"Chevron",NWMD:"ניומד",CCJ:"Cameco",NEE:"NextEra",ENLT:"אנלייט",FSLR:"First Solar",VLO:"Valero",MPC:"Marathon Petroleum"};
 const THESIS=new Set(["TSM","NVDA","AVGO","VST","CEG","VRT","DLR"]);
-const ISR=new Set(["NVMI","CAMT","TSEM","ESLT","NXSN","TASE","POLI","LUMI","TA125"]);
+const ISR=new Set(["NVMI","CAMT","TSEM","ESLT","NXSN","TASE","POLI","LUMI","TA125","DSCT","MZTF","HARL","PHOE","CLIS","ZIM","NWMD","ENLT"]);
 let OWN=new Set(["NBIS","ESLT","NXSN","TASE","POLI","LUMI","TA125","NKE"]);
+
+/* ===== Forces: what moves the portfolio ===== */
+const FORCES={
+ rows:[["isr","rate","fx"],["def","fin","ai","nke"],["budget","capex","asia","consumer"]],
+ levels:["כוחות מקומיים","התיק שלך","כוחות עולמיים"],
+ nodes:{
+  isr:{t:"ישראל",s:"ביטחון ופוליטיקה",k:[],f:1,gl:"מה זה עושה לתיק",
+   what:"מלחמה, דירוג אשראי ומצב פוליטי. משפיע על כל המניות הישראליות בבת אחת.",
+   gone:"זה הכוח שהכי הרבה מהתיק שלך תלוי בו. ביום רע לישראל, הבורסה, הבנקים ואלביט עלולים לרדת יחד."},
+  rate:{t:"ריבית",s:"בנק ישראל והפד",k:[],f:1,gl:"מה זה עושה לתיק",
+   what:"ריבית גבוהה טובה לרווחי הבנקים, ופוגעת במניות צמיחה שחיות מחוב ומציפיות לעתיד, כמו Nebius.",
+   gone:"הורדת ריבית עוזרת למניות ה AI ופוגעת קצת בבנקים. כלומר הכוח הזה מושך את התיק לשני כיוונים."},
+  fx:{t:"דולר מול שקל",s:"שער החליפין",k:[],f:1,gl:"מה זה עושה לתיק",
+   what:"המניות האמריקאיות שלך שוות בשקלים יותר כשהדולר מתחזק. אלביט מוכרת בדולרים ומשלמת משכורות בשקלים.",
+   gone:"שקל חזק מוריד את השווי השקלי של נייקי ו Nebius, ושוחק את הרווחיות של יצואניות כמו אלביט."},
+  def:{t:"ביטחון",s:"אלביט, נקסטויז׳ן",k:["ESLT","NXSN"],gl:"השורה התחתונה",
+   what:"שתיהן רוכבות על אותו גל של הוצאות ביטחון, מלחמות ורחפנים.",
+   gone:"החזקה בשתיהן היא כמעט הימור כפול על אותו נושא."},
+  fin:{t:"פיננסים בישראל",s:"הבורסה, בנקים, מדד",k:["TASE","POLI","LUMI","TA125"],gl:"השורה התחתונה",
+   what:"תלויים בכלכלה הישראלית, בריבית ובמחזורי המסחר. קסם ת״א 125 מחזיקה בעצמה את הבנקים ואת אלביט.",
+   gone:"הקבוצה הכי רגישה לישראל בתיק, והמדד לא מגן כי הוא מכיל אותן."},
+  ai:{t:"AI",s:"Nebius ומועמדות לתזה",k:["NBIS"],gl:"השורה התחתונה",
+   what:"תלויה בכמה הענקיות ממשיכות להשקיע בתשתית AI, ובריבית. כמעט בלי קשר לישראל.",
+   gone:"פיזור אמיתי מול ישראל, אבל עם סיכון משלה: קיצוץ בהשקעות או מתיחות בטייוואן."},
+  nke:{t:"נייקי",s:"צריכה עולמית",k:["NKE"],gl:"השורה התחתונה",
+   what:"תלויה בצרכן בארה״ב ובסין, ובמפעלים באסיה. לא קשורה לאף קבוצה אחרת בתיק.",
+   gone:"הפיזור הכי נקי שיש לך כרגע."},
+  budget:{t:"תקציבי ביטחון",s:"ישראל, אירופה, ארה״ב",k:[],f:1,gl:"מה זה עושה לתיק",
+   what:"התחמשות באירופה ומלחמות מגדילות הזמנות. רגיעה עולמית מקטינה אותן.",
+   gone:"משפיע ישירות על אלביט ונקסטויז׳ן."},
+  capex:{t:"השקעות בתשתית AI",s:"כמה הענקיות מוציאות",k:[],f:1,gl:"מה זה עושה לתיק",
+   what:"מיקרוסופט, גוגל, אמזון ומטא מחליטות כמה לבנות. זה הכסף שמניע את כל שרשרת ה AI.",
+   gone:"קיצוץ כאן הוא הסיכון הגדול ביותר ל Nebius ולמניות התזה."},
+  asia:{t:"טייוואן וסין",s:"גאופוליטיקה ומכסים",k:[],f:1,gl:"מה זה עושה לתיק",
+   what:"כמעט כל השבבים המתקדמים מיוצרים בטייוואן, ונייקי מייצרת ומוכרת הרבה באסיה.",
+   gone:"מתיחות או מכסים פוגעים גם ב AI וגם בנייקי, כלומר בשני מקורות הפיזור שלך יחד."},
+  consumer:{t:"הצרכן העולמי",s:"תעסוקה ושכר",k:[],f:1,gl:"מה זה עושה לתיק",
+   what:"כמה כסף יש לאנשים לקנות בגדים ונעליים.",
+   gone:"מיתון עולמי פוגע בנייקי, וקצת בכלכלה הישראלית."}
+ },
+ edges:[["isr","def","s"],["isr","fin","c"],["rate","fin","c"],["rate","ai","s"],["fx","def","s"],["fx","ai","s"],["fx","nke","s"],
+  ["budget","def","c"],["capex","ai","c"],["asia","ai","c"],["asia","nke","s"],["consumer","nke","c"]],
+ extra:`<div class="money" style="border-color:rgba(77,163,255,.35);background:rgba(77,163,255,.07)"><p><b style="color:var(--il)">השורה התחתונה:</b> רוב התיק נשען על כוח אחד, ישראל. ביטחון ופיננסים נראים כמו שני תחומים שונים, אבל ביום רע הם יורדים יחד. ה AI ונייקי מושפעים מכוחות אחרים, ולכן הם הפיזור האמיתי.</p></div>`
+};
+
+/* ===== Defense chain ===== */
+const DEF={
+ rows:[["mat","chip"],["eo","avi","mun"],["sys"],["gov"],["war","nato"]],
+ levels:["שלב 1: חומרים","שלב 2: רכיבים","שלב 3: מערכות","שלב 4: הלקוח","מה מניע את הלקוח"],
+ nodes:{
+  mat:{t:"חומרים ומתכות נדירות",s:"טיטניום, מגנטים, נפץ",k:["MP"],choke:1,
+   what:"מתכות נדירות למגנטים במנועים ובטילים, טיטניום, וחומרי נפץ. סין שולטת ברוב העיבוד של המתכות הנדירות.",
+   gone:"קווי הייצור נעצרים. התלות בסין היא נקודת תורפה שהמערב מנסה לסגור."},
+  chip:{t:"שבבים ואלקטרוניקה",s:"מגיע משרשרת ה AI",k:["INTC","TSM"],
+   what:"כל מערכת מודרנית, מטיל ועד רחפן, מלאה בשבבים. כאן שרשרת הביטחון נפגשת עם שרשרת ה AI.",
+   gone:"אין מערכות חכמות. מחסור בשבבים מעכב אספקה."},
+  eo:{t:"אלקטרואופטיקה וחיישנים",s:"מצלמות, ראיית לילה",k:["NXSN","TDY"],
+   what:"העיניים של המערכת: מצלמות מיוצבות, חיישנים תרמיים ומכ״ם. נקסטויז׳ן מוכרת מצלמות לרחפנים ולכלי רכב.",
+   gone:"רחפן או טיל לא רואה את המטרה."},
+  avi:{t:"אוויוניקה ותקשורת",s:"קשר, מחשבים, ל״א",k:["LHX"],
+   what:"מערכות הקשר, השליטה והלוחמה האלקטרונית שמחברות את הכל.",
+   gone:"הכוחות לא מדברים ביניהם."},
+  mun:{t:"מנועים ותחמושת",s:"פגזים, טילים, מנועים",k:["RHM","GD"],
+   what:"הצד הכבד: תחמושת, מנועים ושלדות. Rheinmetall הגרמנית היא הנהנית הגדולה מהתחמשות אירופה.",
+   gone:"מלאי התחמושת נגמר מהר במלחמה. זה הלקח מאוקראינה ומישראל."},
+  sys:{t:"יצרניות מערכות",s:"מרכיבות את המוצר הסופי",k:["ESLT","LMT","RTX","NOC"],
+   what:"לוקחות את כל הרכיבים ובונות מטוסים, טילים, רחפנים ומערכות הגנה. אלביט עושה גם חלק מהרכיבים בעצמה.",
+   gone:"אין מי שמחבר את הרכיבים למערכת שעובדת."},
+  gov:{t:"ממשלות ומשרדי ביטחון",s:"הלקוח היחיד",k:[],
+   what:"כמעט כל ההכנסות מגיעות מממשלות. חוזים ארוכים ויציבים, אבל תלויים בהחלטות פוליטיות.",
+   gone:"אין שוק. לכן חשוב מה מניע את התקציבים, בשורה הבאה."},
+  war:{t:"מלחמות ואיומים",s:"ישראל, אוקראינה, אסיה",k:[],f:1,
+   what:"מלחמות מגדילות הזמנות מיד, וגם ממלאות מלאים לשנים קדימה.",
+   gone:"רגיעה אמיתית מאטה הזמנות חדשות, גם אם צבר ההזמנות הקיים נשאר."},
+  nato:{t:"התחמשות אירופה",s:"יעד נאט״ו",k:[],f:1,
+   what:"מדינות אירופה מעלות את תקציבי הביטחון בהדרגה לאורך שנים. זה מנוע צמיחה ארוך טווח לאלביט ולחברות אירופאיות.",
+   gone:"אם אירופה מאטה את ההגדלה, הצמיחה הצפויה קטנה."}
+ },
+ edges:[["mat","mun","s"],["mat","eo","s"],["chip","eo","c"],["chip","avi","c"],["eo","sys","c"],["avi","sys","c"],["mun","sys","s"],["sys","gov","c"],["war","gov","c"],["nato","gov","s"]]
+};
+
+/* ===== Finance chain ===== */
+const FIN={
+ rows:[["cb"],["banks","ins","tase"],["credit","pens","trade"],["econ"]],
+ levels:["שלב 1: המקור","שלב 2: הגופים","שלב 3: מה הם מוכרים","שלב 4: הכלכלה"],
+ nodes:{
+  cb:{t:"הבנק המרכזי",s:"ריבית והדפסת כסף",k:[],choke:1,
+   what:"בנק ישראל קובע את הריבית. היא מחיר הכסף, וממנה נגזר כמעט כל השאר.",
+   gone:"זה לא נעלם, אבל כל שינוי בריבית מזיז את כל השרשרת."},
+  banks:{t:"בנקים",s:"הלוואות ופיקדונות",k:["POLI","LUMI","DSCT","MZTF"],
+   what:"מרוויחים מהפער בין הריבית שהם גובים לזו שהם משלמים. חמשת הבנקים הגדולים שולטים בשוק.",
+   gone:"אין אשראי לעסקים ולמשכנתאות, והכלכלה נעצרת."},
+  ins:{t:"ביטוח ופנסיה",s:"מנהלים את החיסכון",k:["HARL","PHOE","CLIS"],
+   what:"מנהלים את כספי הפנסיה והביטוח של כולם, ומשקיעים אותם בשוק.",
+   gone:"הכסף הגדול שזורם לבורסה כל חודש נעלם."},
+  tase:{t:"הבורסה ובתי השקעות",s:"המקום שבו קונים ומוכרים",k:["TASE"],
+   what:"הבורסה מרוויחה מכל עסקה ומכל הנפקה. כשהשוק חם ויש הרבה מסחר, הרווחים קופצים.",
+   gone:"אין מקום לגייס כסף ולסחור. מונופול: יש בורסה אחת בישראל."},
+  credit:{t:"אשראי ומשכנתאות",s:"הלוואות למשק",k:[],
+   what:"הכסף שעסקים ומשקי בית לוקחים כדי לגדול, לקנות דירה או לצרוך.",
+   gone:"הצמיחה נעצרת."},
+  trade:{t:"מסחר והנפקות",s:"מחזורים בשוק",k:[],
+   what:"כמה כסף מחליף ידיים בבורסה, וכמה חברות מגייסות כסף. זה מקור ההכנסה המרכזי של הבורסה.",
+   gone:"הבורסה ובתי ההשקעות מרוויחים הרבה פחות."},
+  pens:{t:"חיסכון ארוך טווח",s:"פנסיה וקרנות",k:[],
+   what:"כל חודש נכנס כסף חדש מהמשכורות לקרנות הפנסיה, והן קונות מניות ואג״ח.",
+   gone:"פחות קונים קבועים בשוק."},
+  econ:{t:"הכלכלה הישראלית",s:"חברות ומשקי בית",k:["TA125"],
+   what:"בסוף הכל נשען על כמה הכלכלה צומחת. קסם ת״א 125 היא בעצם הימור על כל הכלכלה הזו.",
+   gone:"כלכלה חלשה פוגעת בכל הגופים מעליה יחד. זה הקשר שמחבר את הבנקים, הבורסה והמדד בתיק שלך."}
+ },
+ edges:[["cb","banks","c"],["cb","ins","s"],["cb","tase","w"],["banks","credit","c"],["tase","trade","c"],["ins","pens","c"],["pens","trade","s"],["credit","econ","c"],["trade","econ","s"],["pens","econ","w"]]
+};
+
+/* ===== Consumer chain ===== */
+const CON={
+ rows:[["raw"],["fac","tariff"],["ship"],["brand"],["store","online"],["buyer","jobs"]],
+ levels:["שלב 1: חומרים","שלב 2: ייצור","שלב 3: הובלה","שלב 4: המותג","שלב 5: מכירה","שלב 6: הקונה"],
+ nodes:{
+  raw:{t:"חומרי גלם",s:"כותנה, גומי, פוליאסטר",k:[],
+   what:"כותנה, גומי וסיבים סינתטיים שעשויים מנפט. מחיר הנפט משפיע כאן.",
+   gone:"עלויות עולות. יש הרבה ספקים, לכן זה לא חוסם."},
+  fac:{t:"מפעלים באסיה",s:"וייטנאם, אינדונזיה, סין",k:[],choke:1,
+   what:"כמעט כל נעלי הספורט בעולם מיוצרות באסיה, בעיקר בווייטנאם, על ידי קבלני משנה.",
+   gone:"אין מוצר למכור. העברת ייצור לוקחת שנים."},
+  tariff:{t:"מכסים וסחר",s:"מדיניות ארה״ב",k:[],f:1,
+   what:"מכסים על יבוא מאסיה מייקרים כל זוג נעליים שנכנס לארה״ב.",
+   gone:"מכסים גבוהים מכווצים את הרווחיות של המותגים או מעלים מחירים לצרכן."},
+  ship:{t:"שילוח ולוגיסטיקה",s:"אוניות, נמלים, הפצה",k:["ZIM","UPS","FDX"],
+   what:"מכולות באוניות מאסיה, ואז משאיות ושליחים עד לחנות או לבית.",
+   gone:"עיכובים ומחסור במלאי, כמו בקורונה."},
+  brand:{t:"מותגים",s:"עיצוב, שיווק, מחיר",k:["NKE","ADS","LULU","ONON","DECK"],
+   what:"המותג לא מייצר, הוא מעצב ומשווק. הכוח שלו הוא שאנשים מוכנים לשלם יותר על הלוגו. On ו Hoka לקחו נתח מנייקי.",
+   gone:"יש מתחרים רבים, וזה בדיוק הסיכון: הצרכן יכול לעבור מותג."},
+  store:{t:"חנויות",s:"רשתות ספורט וכלבו",k:["DKS","WMT"],
+   what:"רשתות שקונות מהמותגים ומוכרות לקהל. נייקי צמצמה אותן ואז חזרה אליהן.",
+   gone:"פחות חשיפה למותג ופחות מכירות."},
+  online:{t:"אונליין וישיר",s:"אתר ואפליקציה",k:["AMZN"],
+   what:"מכירה ישירה מהאתר של המותג, או דרך אמזון. רווחית יותר כי אין מתווך.",
+   gone:"המותג תלוי לגמרי ברשתות."},
+  buyer:{t:"הצרכן",s:"ארה״ב, סין, אירופה",k:[],
+   what:"הקונה הסופי. כאן נקבע אם יש ביקוש.",
+   gone:"בלי צרכן אין עסק. זה הכוח החזק ביותר בשרשרת."},
+  jobs:{t:"תעסוקה ושכר",s:"וריבית",k:[],f:1,
+   what:"כשיש עבודה ומשכורות עולות, אנשים קונים. מיתון ואבטלה עוצרים קניות של מוצרים שאינם הכרחיים.",
+   gone:"הצרכן מקצץ קודם כל בבגדים ובנעליים."}
+ },
+ edges:[["raw","fac","s"],["tariff","fac","s"],["fac","ship","c"],["ship","brand","c"],["brand","store","c"],["brand","online","s"],["store","buyer","c"],["online","buyer","c"],["jobs","buyer","c"]]
+};
+
+/* ===== Energy chain ===== */
+const ENE={
+ rows:[["oil","uran"],["refine","plant","renew"],["grid"],["move","dc","home"]],
+ levels:["שלב 1: המקור","שלב 2: הפקה","שלב 3: ההולכה","שלב 4: הצרכנים"],
+ nodes:{
+  oil:{t:"נפט וגז",s:"קידוח והפקה",k:["XOM","CVX","NWMD"],
+   what:"המקור הגדול ביותר של אנרגיה בעולם. גז מייצר גם הרבה מהחשמל. ניומד מחזיקה בלוויתן.",
+   gone:"תחבורה, תעשייה וחלק גדול מהחשמל נעצרים. המחיר נקבע הרבה בגאופוליטיקה ובאופ״ק."},
+  uran:{t:"אורניום",s:"דלק לגרעין",k:["CCJ"],
+   what:"הדלק לתחנות גרעיניות, שחוזרות לאופנה בגלל הביקוש של מרכזי הנתונים.",
+   gone:"תחנות גרעיניות נעצרות. מעט ספקים בעולם."},
+  refine:{t:"זיקוק",s:"דלק, סולר, פלסטיק",k:["VLO","MPC"],
+   what:"הופכים נפט גולמי לדלק, לסולר ולחומרי גלם לפלסטיק ולבדים.",
+   gone:"יש נפט, אבל אי אפשר לתדלק."},
+  plant:{t:"תחנות כוח",s:"גז, גרעין",k:["VST","CEG","NRG"],
+   what:"מייצרות את החשמל. Constellation היא הגדולה בגרעין בארה״ב, Vistra משלבת גז וגרעין.",
+   gone:"אין חשמל יציב 24 שעות ביממה."},
+  renew:{t:"שמש ורוח",s:"אנרגיה מתחדשת",k:["NEE","FSLR","ENLT"],
+   what:"חשמל זול לייצור, אבל לא קבוע. צריך סוללות או גיבוי. אנלייט הישראלית פעילה כאן.",
+   gone:"החשמל יקר יותר ומזהם יותר. תלוי מאוד בסובסידיות."},
+  grid:{t:"רשת החשמל",s:"שנאים, קווים, חיבור",k:["GEV","PWR","ETN"],choke:1,
+   what:"מעבירה את החשמל מהתחנות לצרכנים. שנאים וחיבורים לרשת הם היום הצוואר הצר: הזמנה לוקחת שנים.",
+   gone:"יש חשמל ואין איך להעביר אותו. זה מה שמעכב היום מרכזי נתונים חדשים."},
+  move:{t:"תחבורה ותעשייה",s:"דלק ושינוע",k:[],
+   what:"משאיות, מטוסים, אוניות ומפעלים. עדיין רובם על דלק.",
+   gone:"מחיר נפט גבוה מייקר כמעט כל מוצר, כולל השילוח של נייקי."},
+  dc:{t:"מרכזי נתונים",s:"הקשר לשרשרת ה AI",k:["DLR","EQIX"],
+   what:"הצרכן שגדל הכי מהר. כאן שרשרת האנרגיה ושרשרת ה AI נפגשות.",
+   gone:"בלי חשמל אין AI. לכן VST, CEG ו GEV ברשימת התזה שלך."},
+  home:{t:"בתים ועסקים",s:"צריכה רגילה",k:[],
+   what:"הצריכה הבסיסית, יציבה ועולה לאט.",
+   gone:"חשמל יקר פוגע בכיס של הצרכן, וגם בביקוש לשאר המוצרים."}
+ },
+ edges:[["oil","refine","c"],["oil","plant","c"],["uran","plant","s"],["plant","grid","c"],["renew","grid","s"],["refine","move","c"],["grid","dc","c"],["grid","home","c"],["grid","move","w"]],
+ extra:`<div class="money"><p><b>שני קשרים לתיק שלך:</b> מרכזי הנתונים מחברים את האנרגיה לשרשרת ה AI, ומחיר הנפט מגיע עד לנייקי דרך חומרי הגלם והשילוח.</p></div>`
+};
 
 /* ===== Map 1: the AI value chain ===== */
 const AI={
@@ -218,36 +401,6 @@ const AI={
   ["pow","dc","c"],["cool","dc","c"],["dc","cloud","c"],["cloud","app","c"]]
 };
 
-/* ===== Map 2: the Israeli cluster ===== */
-const IL={
- rows:[["geo"],["budget","econ","cons"],["def","fin","glob"]],
- levels:["הגורם המשותף","מה מניע","המניות"],
- nodes:{
-  geo:{t:"ישראל",s:"ביטחון, פוליטיקה, כלכלה",k:[],
-   what:"הגורם שמשותף לרוב התיק שלך. מלחמה, דירוג אשראי, שער השקל ומצב פוליטי משפיעים על כל המניות הישראליות בבת אחת.",
-   gone:"ביום רע לישראל, רוב התיק זז יחד. זה בדיוק סיכון הריכוזיות."},
-  budget:{t:"תקציבי ביטחון",s:"בישראל ובעולם",k:[],
-   what:"הזמנות ממשרדי ביטחון בישראל, באירופה ובארה״ב. מלחמות והתחמשות באירופה מגדילות אותן.",
-   gone:"אם העולם נרגע והתקציבים יורדים, צבר ההזמנות מתכווץ."},
-  econ:{t:"כלכלת ישראל ושוק ההון",s:"ריבית, מחזורי מסחר",k:[],
-   what:"הבנקים מרוויחים מהריבית ומהאשראי, הבורסה מרוויחה ממחזורי מסחר והנפקות. כשהשוק חם, שניהם נהנים.",
-   gone:"ירידת ריבית או שוק רדום פוגעים בשניהם ביחד."},
-  cons:{t:"הצרכן העולמי",s:"ארה״ב, סין, אירופה",k:[],
-   what:"נייקי תלויה בכמה אנשים בעולם קונים בגדים ונעליים, ובמותג. כמעט בלי קשר לישראל או ל AI.",
-   gone:"מיתון עולמי פוגע בה, אבל ממקור שונה משאר התיק."},
-  def:{t:"ביטחון",s:"אלביט ונקסטויז׳ן",k:["ESLT","NXSN"],
-   what:"שתיהן נהנות מאותו גל של הוצאות ביטחון ורחפנים. נקסטויז׳ן קטנה ותנודתית יותר.",
-   gone:"החזקה בשתיהן היא כמעט הימור כפול על אותו נושא."},
-  fin:{t:"פיננסים בישראל",s:"הבורסה, הבנקים, מדד",k:["TASE","POLI","LUMI","TA125"],
-   what:"הבורסה והבנקים תלויים באותה כלכלה ובאותו שוק. קסם ת״א 125 מחזיקה בעצמה את הבנקים ואת אלביט, כלומר חפיפה נוספת.",
-   gone:"בירידה בשוק הישראלי כולן נפגעות, והמדד לא מגן כי הוא מכיל אותן."},
-  glob:{t:"צריכה עולמית",s:"נייקי",k:["NKE"],
-   what:"מניה שלא קשורה לאף אחד מהאשכולות האחרים בתיק.",
-   gone:"זה הפיזור האמיתי היחיד בתיק לצד מניות ה AI."}
- },
- edges:[["geo","budget","s"],["geo","econ","c"],["budget","def","c"],["econ","fin","c"],["cons","glob","c"],["def","fin","m"]]
-};
-
 const CHOKE=[
  ["ASML ומכונות EUV","חברה אחת בעולם. בלי המכונות שלה אין שבבים מתקדמים, ואין לה מתחרה."],
  ["TSMC וטייוואן","מייצרת כמעט את כל שבבי ה AI המתקדמים, רובם באי אחד. הסיכון הגאופוליטי הגדול ביותר בשרשרת."],
@@ -257,96 +410,113 @@ const CHOKE=[
  ["Nvidia והתוכנה שלה","לא רק השבב: מפתחים בנו הכל על CUDA, וזה מה שהופך אותה לקשה להחלפה."]
 ];
 
-/* ===== Graph engine ===== */
-const LV={c:"לא מתקיים בלי",s:"תלות חזקה",w:"קשר חלש",m:"נעות יחד"};
-const LC={c:"var(--crit)",s:"var(--strong)",w:"var(--weak)",m:"var(--il)"};
-const graphs=[];
-function chip(k){ const cl=["c"]; if(OWN.has(k)) cl.push("own"); if(THESIS.has(k)) cl.push("th"); if(ISR.has(k)) cl.push("il");
-  const lbl=/^[A-Z0-9 ]+$/.test(k)&&k.length<=5?k:(NAMES[k]||k); return `<span class="${cl.join(" ")}">${lbl}</span>`; }
+AI.extra=`<div class="money"><p><b>הכסף זורם הפוך.</b> הסחורה יורדת במפה מלמעלה למטה, אבל הכסף מגיע מהקצה: חברות הענן והמודלים קונות שרתים, ושם מתחילה ההזמנה לכל השאר. אם הן מקצצות, כל השרשרת מעליהן מרגישה את זה, והרחוקות ביותר (ציוד, זיכרון) הכי חזק.</p></div>
+<h2>צווארי הבקבוק</h2><div class="h2s">הנקודות שאין להן תחליף. כאן כוח המחיר, וגם הסיכון.</div>
+<div class="cards">${CHOKE.map(c=>`<div class="card"><h3><i></i>${c[0]}</h3><p>${c[1]}</p></div>`).join("")}</div>`;
 
-function build(el,G){
-  el.innerHTML=`<svg></svg><div class="lay">${G.rows.map((r,i)=>`<div class="row${r.length===1?" one":""}"><span class="lvl">${G.levels[i]||""}</span>${r.map(id=>{const n=G.nodes[id];
-    return `<div class="node${n.choke?" choke":""}" data-id="${id}">${n.choke?'<span class="ck">צוואר בקבוק</span>':""}<div class="nt">${n.t}</div><div class="ns">${n.s}</div>${n.k.length?`<div class="chips">${n.k.map(chip).join("")}</div>`:""}</div>`;}).join("")}</div>`).join("")}</div>`;
-  const g={el,G,svg:el.querySelector("svg")}; graphs.push(g);
-  el.onclick=e=>{ const nd=e.target.closest(".node"); if(nd) select(g,nd.dataset.id); };
-  return g;
+const TABS=[
+ {id:"forces",t:"הכוחות",h:"מה מזיז את התיק שלך",s:"למעלה ולמטה הכוחות הגדולים, באמצע הקבוצות בתיק. לחיצה על קופסה מראה מה היא מזיזה.",G:FORCES},
+ {id:"ai",t:"AI",h:"שרשרת ה AI: מהחול ועד הצ׳אט",s:"קוראים מלמעלה למטה. כל קופסה היא תחום והמניות בתוכה.",G:AI},
+ {id:"def",t:"ביטחון",h:"שרשרת הביטחון",s:"מחומרי גלם ועד משרד הביטחון, ומה מניע את התקציבים.",G:DEF},
+ {id:"fin",t:"פיננסים",h:"שרשרת הכסף בישראל",s:"מהריבית של בנק ישראל ועד הכלכלה כולה.",G:FIN},
+ {id:"con",t:"צריכה",h:"שרשרת הצריכה",s:"איך נעל של נייקי מגיעה מאסיה עד הקונה.",G:CON},
+ {id:"ene",t:"אנרגיה",h:"שרשרת האנרגיה",s:"מהנפט והאורניום ועד מרכזי הנתונים והבית.",G:ENE}
+];
+
+/* ===== Graph engine ===== */
+const LV={c:"הכרחי, לא מתקיים בלי",s:"תלות חזקה",w:"קשר חלש"};
+const LC={c:"var(--crit)",s:"var(--strong)",w:"var(--weak)"};
+const isTk=k=>/^[A-Z0-9 ]+$/.test(k)&&k.length<=5;
+let cur=null, sel=null, critOnly=false;
+const $=id=>document.getElementById(id);
+
+function chip(k){ const cl=["c"]; if(OWN.has(k)) cl.push("own"); if(THESIS.has(k)) cl.push("th"); if(ISR.has(k)) cl.push("il");
+  return `<span class="${cl.join(" ")}">${isTk(k)?k:(NAMES[k]||k)}</span>`; }
+
+function render(tab){
+  cur=tab; sel=null; const G=tab.G;
+  $("pane").style.animation="none"; $("pane").offsetHeight; $("pane").style.animation="";
+  $("pane").innerHTML=`<h2>${tab.h}</h2><div class="h2s">${tab.s}</div>
+   <div class="graph${critOnly?" crit":""}" id="g"><svg></svg><div class="lay">${G.rows.map((r,i)=>`<div class="row${r.length===1?" one":""}"><span class="lvl">${G.levels[i]||""}</span>${r.map(id=>{const n=G.nodes[id];
+    return `<div class="node${n.choke?" choke":""}${n.f?" force":""}" data-id="${id}">${n.choke?'<span class="ck">צוואר בקבוק</span>':""}<div class="nt">${n.t}</div><div class="ns">${n.s}</div>${n.k.length?`<div class="chips">${n.k.map(chip).join("")}</div>`:""}</div>`;}).join("")}</div>`).join("")}</div></div>
+   ${G.extra||""}`;
+  $("g").onclick=e=>{ const nd=e.target.closest(".node"); if(nd) select(nd.dataset.id); };
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.id===tab.id));
+  try{ localStorage.setItem("roy-map-tab",tab.id); }catch(e){}
+  draw();
 }
 
-function draw(g){
-  const {el,G,svg}=g, box=el.getBoundingClientRect(), R={};
+function draw(){
+  const el=$("g"); if(!el||!cur) return;
+  const G=cur.G, svg=el.querySelector("svg"), box=el.getBoundingClientRect(), R={};
   el.querySelectorAll(".node").forEach(n=>{ const r=n.getBoundingClientRect(); R[n.dataset.id]={x:r.left-box.left,y:r.top-box.top,w:r.width,h:r.height,row:G.rows.findIndex(rw=>rw.includes(n.dataset.id))}; });
   svg.setAttribute("width",box.width); svg.setAttribute("height",box.height);
   const cx=id=>R[id].x+R[id].w/2;
-  /* spread anchors so lines leaving or entering the same box don't overlap */
-  const outs={},ins={};
-  G.edges.forEach((e,i)=>{ if(R[e[0]].row!==R[e[1]].row){ (outs[e[0]]=outs[e[0]]||[]).push(i); (ins[e[1]]=ins[e[1]]||[]).push(i); } });
-  const ax={};
-  const spread=(map,end,other)=>Object.keys(map).forEach(id=>{ const L=map[id].sort((a,b)=>cx(G.edges[a][other])-cx(G.edges[b][other])), r=R[id], span=Math.min(r.w*.6,L.length*18);
-    L.forEach((ei,j)=>{ ax[ei+end]=r.x+r.w/2+(L.length>1?(j/(L.length-1)-.5)*span:0); }); });
-  spread(outs,"o",1); spread(ins,"i",0);
-  let defs="<defs>"; for(const k in LC) defs+=`<marker id="a${k}${graphs.indexOf(g)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${LC[k]}"/></marker>`; defs+="</defs>";
+  /* each line gets its own anchor on the box side it uses, ordered by where it goes, so lines don't overlap */
+  const groups={}, ax={};
+  G.edges.forEach((e,i)=>{ const A=R[e[0]],B=R[e[1]]; if(A.row===B.row) return; const down=A.row<B.row;
+    (groups[e[0]+(down?"b":"t")]=groups[e[0]+(down?"b":"t")]||[]).push([i,"o",e[1]]);
+    (groups[e[1]+(down?"t":"b")]=groups[e[1]+(down?"t":"b")]||[]).push([i,"i",e[0]]); });
+  Object.keys(groups).forEach(key=>{ const id=key.slice(0,-1), r=R[id], L=groups[key].sort((a,b)=>cx(a[2])-cx(b[2])), span=Math.min(r.w*.6,(L.length-1)*20);
+    L.forEach((it,j)=>{ ax[it[0]+it[1]]=r.x+r.w/2+(L.length>1?(j/(L.length-1)-.5)*span:0); }); });
+  let defs="<defs>"; for(const k in LC) defs+=`<marker id="a${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${LC[k]}"/></marker>`; defs+="</defs>";
   svg.innerHTML=defs+G.edges.map((e,i)=>{ const a=R[e[0]],b=R[e[1]]; let d;
-    if(a.row===b.row){ const ltr=a.x<b.x, x1=ltr?a.x+a.w:a.x, x2=ltr?b.x:b.x+b.w, y=Math.min(a.y+a.h/2,b.y+b.h/2);
-      d=`M${x1} ${y} L${x2+(ltr?-2:2)} ${y}`; }
-    else { const x1=ax[i+"o"],y1=a.y+a.h,x2=ax[i+"i"],y2=b.y-3,m=(y2-y1)*.55; d=`M${x1} ${y1} C${x1} ${y1+m},${x2} ${y2-m},${x2} ${y2}`; }
-    const mk=e[2]==="m"?"":`marker-end="url(#a${e[2]}${graphs.indexOf(g)})"`;
-    return `<path class="e ${e[2]}" data-a="${e[0]}" data-b="${e[1]}" d="${d}" ${mk}/>`; }).join("");
-  if(g.sel) mark(g,g.sel);
-}
-function redraw(){ graphs.forEach(draw); }
-
-function mark(g,id){
-  g.el.classList.toggle("sel",!!id);
-  g.el.querySelectorAll(".node").forEach(n=>n.classList.remove("on","nb"));
-  g.svg.querySelectorAll("path.e").forEach(p=>p.classList.remove("on"));
-  if(!id) return;
-  g.el.querySelector(`.node[data-id="${id}"]`).classList.add("on");
-  g.svg.querySelectorAll("path.e").forEach(p=>{ if(p.dataset.a===id||p.dataset.b===id){ p.classList.add("on");
-    const o=p.dataset.a===id?p.dataset.b:p.dataset.a; g.el.querySelector(`.node[data-id="${o}"]`).classList.add("nb"); } });
-}
-function select(g,id){
-  graphs.forEach(x=>{ if(x!==g){ x.sel=null; mark(x,null);} });
-  g.sel=id; mark(g,id); openSheet(g,id);
+    if(a.row===b.row){ const ltr=a.x<b.x, x1=ltr?a.x+a.w:a.x, x2=ltr?b.x-2:b.x+b.w+2, y=Math.min(a.y+a.h/2,b.y+b.h/2); d=`M${x1} ${y} L${x2} ${y}`; }
+    else { const down=a.row<b.row, dir=down?1:-1, x1=ax[i+"o"], y1=down?a.y+a.h:a.y, x2=ax[i+"i"], y2=(down?b.y:b.y+b.h)-dir*3, m=Math.abs(y2-y1)*.55;
+      d=`M${x1} ${y1} C${x1} ${y1+dir*m},${x2} ${y2-dir*m},${x2} ${y2}`; }
+    return `<path class="e ${e[2]}" data-a="${e[0]}" data-b="${e[1]}" d="${d}" marker-end="url(#a${e[2]})"/>`; }).join("");
+  mark();
 }
 
-function openSheet(g,id){
-  const G=g.G,n=G.nodes[id];
+function mark(){
+  const el=$("g"); if(!el) return;
+  el.classList.toggle("sel",!!sel);
+  el.querySelectorAll(".node").forEach(n=>n.classList.remove("on","nb"));
+  el.querySelectorAll("path.e").forEach(p=>p.classList.remove("on"));
+  if(!sel) return;
+  el.querySelector(`.node[data-id="${sel}"]`).classList.add("on");
+  el.querySelectorAll("path.e").forEach(p=>{ if(p.dataset.a===sel||p.dataset.b===sel){ p.classList.add("on");
+    el.querySelector(`.node[data-id="${p.dataset.a===sel?p.dataset.b:p.dataset.a}"]`).classList.add("nb"); } });
+}
+function select(id){ sel=id; mark(); openSheet(id); }
+
+function openSheet(id){
+  const G=cur.G,n=G.nodes[id];
   const from=G.edges.filter(e=>e[1]===id), to=G.edges.filter(e=>e[0]===id);
-  const line=(o,lv,txt)=>`<div class="lnk" data-go="${o}"><i style="background:${LC[lv]}"></i>${G.nodes[o].t}<small>${txt}</small></div>`;
+  const line=(o,lv)=>`<div class="lnk" data-go="${o}"><i style="background:${LC[lv]}"></i>${G.nodes[o].t}<small>${LV[lv]}</small></div>`;
   const tks=n.k.map(k=>{ const tags=(OWN.has(k)?'<span class="tag own">בתיק</span>':"")+(THESIS.has(k)?'<span class="tag th">מועמדת לתזה</span>':"")+(ISR.has(k)&&!OWN.has(k)?'<span class="tag il">ישראלית</span>':"");
-    const sym=/^[A-Z0-9 ]+$/.test(k)&&k.length<=5?k:""; return `<div class="tk"><span class="sym">${sym}</span><span class="nm">${NAMES[k]||k}</span>${tags}</div>`; }).join("");
-  document.getElementById("sheet").innerHTML=`<div class="grab"></div><h3>${n.t}</h3><div class="what">${n.what}</div>
-   ${from.length?`<div class="blk"><h4>תלוי ב</h4>${from.map(e=>line(e[0],e[2],LV[e[2]])).join("")}</div>`:""}
-   ${to.length?`<div class="blk"><h4>מזין את</h4>${to.map(e=>line(e[1],e[2],LV[e[2]])).join("")}</div>`:""}
-   <div class="blk"><div class="gone"><b>אם הוא נעלם: </b>${n.gone}</div></div>
-   ${tks?`<div class="blk"><h4>המניות בתחום</h4><div class="tks">${tks}</div></div>`:""}
+    return `<div class="tk"><span class="sym">${isTk(k)?k:""}</span><span class="nm">${NAMES[k]||k}</span>${tags}</div>`; }).join("");
+  $("sheet").innerHTML=`<div class="grab"></div><h3>${n.t}</h3><div class="what">${n.what}</div>
+   ${from.length?`<div class="blk"><h4>${n.f?"מושפע מ":"תלוי ב"}</h4>${from.map(e=>line(e[0],e[2])).join("")}</div>`:""}
+   ${to.length?`<div class="blk"><h4>${n.f?"משפיע על":"מזין את"}</h4>${to.map(e=>line(e[1],e[2])).join("")}</div>`:""}
+   <div class="blk"><div class="gone"><b>${n.gl||"אם הוא נעלם"}: </b>${n.gone}</div></div>
+   ${tks?`<div class="blk"><h4>המניות כאן</h4><div class="tks">${tks}</div></div>`:""}
    <button class="close" id="cls">סגור</button>`;
-  document.getElementById("ov").classList.add("on");
-  document.getElementById("sheet").scrollTop=0;
-  document.getElementById("cls").onclick=closeSheet;
-  document.querySelectorAll(".lnk").forEach(l=>l.onclick=()=>{ select(g,l.dataset.go); g.el.querySelector(`.node[data-id="${l.dataset.go}"]`).scrollIntoView({block:"center",behavior:"smooth"}); });
+  $("ov").classList.add("on"); $("sheet").scrollTop=0;
+  $("cls").onclick=closeSheet;
+  document.querySelectorAll(".lnk").forEach(l=>l.onclick=()=>{ select(l.dataset.go); });
 }
-function closeSheet(){ document.getElementById("ov").classList.remove("on"); graphs.forEach(g=>{ g.sel=null; mark(g,null); }); }
-document.getElementById("ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeSheet(); });
+function closeSheet(){ $("ov").classList.remove("on"); sel=null; mark(); }
+$("ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeSheet(); });
 
-document.getElementById("choke").innerHTML=CHOKE.map(c=>`<div class="card"><h3><i></i>${c[0]}</h3><p>${c[1]}</p></div>`).join("");
-document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{ document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x===b));
-  graphs.forEach(g=>g.el.classList.toggle("crit",b.dataset.m==="crit")); });
-document.getElementById("back").onclick=()=>Roy.go("sectors");
+$("tabs").innerHTML=TABS.map(t=>`<button data-id="${t.id}">${t.t}</button>`).join("");
+$("tabs").onclick=e=>{ const b=e.target.closest("button"); if(b&&b.dataset.id!==cur.id){ render(TABS.find(t=>t.id===b.dataset.id)); window.scrollTo({top:0}); } };
+$("crit").onclick=()=>{ critOnly=!critOnly; $("crit").classList.toggle("on",critOnly); const g=$("g"); if(g) g.classList.toggle("crit",critOnly); };
+$("back").onclick=()=>Roy.go("sectors");
 
-build(document.getElementById("g1"),AI); build(document.getElementById("g2"),IL);
-redraw();
-window.addEventListener("resize",redraw);
-if(document.fonts&&document.fonts.ready) document.fonts.ready.then(redraw);
-window.addEventListener("load",redraw);
-if(window.ResizeObserver) new ResizeObserver(redraw).observe(document.body);
+let first="forces"; try{ first=localStorage.getItem("roy-map-tab")||"forces"; }catch(e){}
+render(TABS.find(t=>t.id===first)||TABS[0]);
+window.addEventListener("resize",draw);
+window.addEventListener("load",draw);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(draw);
+if(window.ResizeObserver) new ResizeObserver(draw).observe($("pane"));
 
 /* Mark what's actually in the portfolio, from the app's data */
 Roy.data().then(d=>{
   const h=((d.datasets&&d.datasets.holdings)||[]).map(x=>String(x.ticker||"").toUpperCase()).filter(Boolean);
   if(!h.length) return;
   const own=new Set(h); ["ESLT","NXSN","TASE","POLI","LUMI","TA125","NKE"].forEach(k=>own.add(k));
-  OWN=own; graphs.length=0; build(document.getElementById("g1"),AI); build(document.getElementById("g2"),IL); redraw();
+  OWN=own; render(cur);
 },()=>{});
 </script>
 </body>
