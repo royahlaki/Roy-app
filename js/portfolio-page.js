@@ -477,10 +477,17 @@ window.pfDraw = () => {
             });
             tb.appendChild(tbd); more.appendChild(tb);
           }
-          const pcw = el('div', 'pcw'); const ul = el('ul', 'pcl'), ul2 = el('ul', 'pcl');
-          asList(h.pros).forEach(p => { const li = el('li', 'pro'); li.append(el('i', '', '+'), el('span', '', p)); ul.appendChild(li); });
-          asList(h.cons).forEach(p => { const li = el('li', 'con'); li.append(el('i', '', '−'), el('span', '', p)); ul2.appendChild(li); });
-          pcw.append(ul, ul2); more.appendChild(pcw);
+          const pros = asList(h.pros), cons = asList(h.cons);
+          if (pros.length || cons.length) {
+            const tb = el('table', 'sr-pc'), th = el('tr');
+            th.append(el('th', 't-grn', 'חיובי'), el('th', 't-red', 'שלילי'));
+            const thead = el('thead'); thead.appendChild(th); tb.appendChild(thead);
+            const tbd = el('tbody');
+            for (let i = 0; i < Math.max(pros.length, cons.length); i++) {
+              const tr = el('tr'); tr.append(el('td', 'pro', pros[i] || ''), el('td', 'con', cons[i] || '')); tbd.appendChild(tr);
+            }
+            tb.appendChild(tbd); more.appendChild(tb);
+          }
           r.appendChild(more);
           box.appendChild(r);
         });
