@@ -50,7 +50,8 @@ h2{font-weight:900;font-size:19px;color:var(--neon);margin:26px 0 4px}
 .c{font:600 10.5px Oswald;letter-spacing:.03em;background:rgba(255,255,255,.06);border:1px solid var(--line2);border-radius:6px;padding:0 5px;line-height:17px;color:var(--txt)}
 .c.own{border-color:var(--own);color:var(--own);background:rgba(181,242,61,.1)}
 .c.th{border-color:rgba(199,125,255,.7)}
-.c.il{direction:rtl;font:600 11px Heebo;letter-spacing:0}
+.c.il{direction:rtl;font:600 11px Heebo;letter-spacing:0;border-color:var(--il)}
+.tk.il{border-color:rgba(77,163,255,.6)}
 .tk .sales{display:block;font-size:11px;color:var(--mut);margin-top:1px}
 .graph.sel .node{opacity:.28}
 .graph.sel .node.on,.graph.sel .node.nb{opacity:1}
@@ -132,7 +133,7 @@ footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-he
       <span><b style="border-color:var(--weak);border-top-style:dashed"></b>חלש</span>
       <span><i style="background:var(--own)"></i>בתיק</span>
       <span><i style="background:var(--thesis)"></i>תזה</span>
-      <span>🇮🇱 ישראלית</span>
+      <span><i style="background:transparent;border:1.5px solid var(--il);border-radius:3px"></i>ישראלית</span>
     </div>
     <button class="tgl" id="crit">רק הכרחי</button>
   </div>
@@ -437,7 +438,7 @@ let cur=null, sel=null, critOnly=false;
 const $=id=>document.getElementById(id);
 
 function chip(k){ const cl=["c"]; if(OWN.has(k)) cl.push("own"); if(THESIS.has(k)) cl.push("th"); if(ISR.has(k)) cl.push("il");
-  return `<span class="${cl.join(" ")}">${ISR.has(k)?"🇮🇱 "+(NAMES[k]||k):(isTk(k)?k:(NAMES[k]||k))}</span>`; }
+  return `<span class="${cl.join(" ")}">${ISR.has(k)?(NAMES[k]||k):(isTk(k)?k:(NAMES[k]||k))}</span>`; }
 
 function render(tab){
   cur=tab; sel=null; const G=tab.G;
@@ -491,7 +492,7 @@ function openSheet(id){
   const from=G.edges.filter(e=>e[1]===id), to=G.edges.filter(e=>e[0]===id);
   const line=(o,lv)=>`<div class="lnk" data-go="${o}"><i style="background:${LC[lv]}"></i>${G.nodes[o].t}<small>${LV[lv]}</small></div>`;
   const tks=n.k.map(k=>{ const tags=(OWN.has(k)?'<span class="tag own">בתיק</span>':"")+(THESIS.has(k)?'<span class="tag th">מועמדת לתזה</span>':"")+"";
-    const il=ISR.has(k); return `<div class="tk"><span class="sym">${il?"🇮🇱":(isTk(k)?k:"")}</span><span class="nm">${NAMES[k]||k}${il&&SALES[k]?`<span class="sales">מוכרת ל: ${SALES[k]}</span>`:""}</span>${tags}</div>`; }).join("");
+    const il=ISR.has(k); return `<div class="tk${il?" il":""}"><span class="sym">${il?"":(isTk(k)?k:"")}</span><span class="nm">${NAMES[k]||k}${il&&SALES[k]?`<span class="sales">מוכרת ל: ${SALES[k]}</span>`:""}</span>${tags}</div>`; }).join("");
   $("sheet").innerHTML=`<div class="grab"></div><h3>${n.t}</h3><div class="what">${n.what}</div>
    ${from.length?`<div class="blk"><h4>${n.f?"מושפע מ":"תלוי ב"}</h4>${from.map(e=>line(e[0],e[2])).join("")}</div>`:""}
    ${to.length?`<div class="blk"><h4>${n.f?"משפיע על":"מזין את"}</h4>${to.map(e=>line(e[1],e[2])).join("")}</div>`:""}
