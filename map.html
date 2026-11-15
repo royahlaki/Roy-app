@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מפת הקשרים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --card:#1E2622; --card2:#232D28; --line:#2F3A34; --line2:#3F4C44;
+  --neon:#C3F53C; --neon-dim:#86AD2A; --txt:#F2F6F2; --mut:#93A198;
+  --crit:#FF5C7A; --strong:#FFB020; --weak:#6B7A70; --il:#4DA3FF; --own:#B5F23D; --thesis:#C77DFF
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{color:var(--txt);font-family:Heebo,system-ui,sans-serif;font-size:14px;line-height:1.45;min-height:100vh;
+  background:radial-gradient(1200px 700px at 80% -10%,#2c5a1c 0%,transparent 60%),radial-gradient(900px 600px at 0% 100%,#0f3d36 0%,transparent 60%),#0b0f0c;background-attachment:fixed}
+.wrap{max-width:900px;margin:0 auto;padding:calc(var(--top-h,0px) + 6px) 12px calc(var(--nav-h,0px) + 28px)}
+header{position:relative;text-align:center;padding:10px 0 12px}
+.back{position:absolute;right:0;top:12px;background:rgba(255,255,255,.06);border:.5px solid var(--line2);color:var(--neon);font:600 13px Heebo;border-radius:999px;padding:5px 12px;cursor:pointer}
+h1{font-weight:900;font-size:30px;line-height:1.1;margin-top:28px}
+h1 span{color:var(--neon);text-shadow:0 0 18px rgba(195,245,60,.35)}
+.sub{color:var(--mut);margin-top:6px;font-size:13px}
+.bar{position:sticky;top:calc(var(--top-h,0px) + 6px);z-index:6;background:rgba(30,38,34,.88);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);
+  padding:9px 12px;margin:6px 0 14px;border:.5px solid rgba(255,255,255,.12);border-radius:18px}
+.seg{display:flex;background:rgba(118,118,128,.18);border-radius:10px;padding:2px}
+.seg button{flex:1;border:0;background:none;color:var(--mut);font:600 12.5px Heebo;padding:6px 4px;border-radius:8px;cursor:pointer}
+.seg button.on{background:var(--neon);color:#0a0d08}
+.legend{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;color:var(--mut);font-size:11px;margin-top:8px}
+.legend b{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-left:5px;border-radius:2px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;vertical-align:middle}
+.hint{color:var(--mut);font-size:12px;text-align:center;margin:-4px 0 10px}
+
+h2{font-weight:900;font-size:19px;color:var(--neon);margin:26px 0 4px}
+.h2s{color:var(--mut);font-size:12.5px;margin-bottom:12px}
+
+.graph{position:relative;padding-top:24px}
+.graph svg{position:absolute;top:0;left:0;pointer-events:none;overflow:visible;z-index:1}
+.lay{position:relative;z-index:2;display:flex;flex-direction:column;gap:38px}
+.row{position:relative;display:flex;gap:8px;justify-content:center;align-items:stretch}
+.lvl{position:absolute;right:-2px;transform:translateY(-24px);font:600 10px Heebo;color:var(--neon-dim);letter-spacing:.02em}
+.node{position:relative;flex:1;min-width:0;max-width:300px;background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:8px 9px 9px;cursor:pointer;
+  transition:opacity .25s,border-color .25s,transform .15s,box-shadow .25s;text-align:right}
+.node:active{transform:scale(.97)}
+.row.one .node{max-width:62%}
+.node.choke{border-color:rgba(255,92,122,.55)}
+.node .nt{font-weight:800;font-size:13.5px;line-height:1.2}
+.node .ns{color:var(--mut);font-size:10.5px;margin-top:2px;line-height:1.3}
+.node .ck{position:absolute;top:-8px;left:8px;background:#2a1418;color:var(--crit);border:1px solid rgba(255,92,122,.6);border-radius:999px;font:700 9.5px Heebo;padding:0 7px;line-height:15px}
+.chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;direction:ltr;justify-content:flex-end}
+.c{font:600 10.5px Oswald;letter-spacing:.03em;background:rgba(255,255,255,.06);border:1px solid var(--line2);border-radius:6px;padding:0 5px;line-height:17px;color:var(--txt)}
+.c.own{border-color:var(--own);color:var(--own);background:rgba(181,242,61,.1)}
+.c.th{border-color:rgba(199,125,255,.7)}
+.c.il{color:var(--il)}
+.graph.sel .node{opacity:.28}
+.graph.sel .node.on,.graph.sel .node.nb{opacity:1}
+.graph.sel .node.on{border-color:var(--neon);box-shadow:0 0 0 1px var(--neon),0 0 22px rgba(195,245,60,.25)}
+path.e{fill:none;transition:opacity .25s,stroke-width .25s}
+path.e.c{stroke:var(--crit);stroke-width:2.4}
+path.e.s{stroke:var(--strong);stroke-width:1.8}
+path.e.w{stroke:var(--weak);stroke-width:1.5;stroke-dasharray:4 4}
+path.e.m{stroke:var(--il);stroke-width:1.6;stroke-dasharray:2 5}
+.graph.crit path.e:not(.c){opacity:.08}
+.graph.sel path.e{opacity:.07}
+.graph.sel path.e.on{opacity:1;stroke-width:3}
+
+.cards{display:grid;gap:8px}
+@media(min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.card h3{font-size:14px;font-weight:800;display:flex;gap:7px;align-items:center}
+.card h3 i{width:8px;height:8px;border-radius:50%;background:var(--crit);flex:none}
+.card p{color:var(--mut);font-size:12.5px;margin-top:3px;line-height:1.5}
+.money{background:linear-gradient(135deg,rgba(195,245,60,.10),rgba(61,220,192,.06));border:1px solid rgba(195,245,60,.3);border-radius:14px;padding:11px 13px;margin-top:10px}
+.money b{color:var(--neon)}
+.money p{font-size:12.5px;color:#cfd8d2;line-height:1.55}
+footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-height:1.6}
+
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.on{display:flex}
+.sheet{background:var(--card);border:.5px solid var(--line2);border-bottom:0;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:78vh;overflow:auto;
+  padding:16px 18px calc(var(--nav-h,0px) + 16px);animation:up .22s ease}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line2);margin:0 auto 12px}
+.sheet h3{font-size:20px;font-weight:900}
+.sheet .what{color:#d6ded9;font-size:13.5px;margin-top:6px;line-height:1.55}
+.sheet .blk{margin-top:14px}
+.sheet .blk h4{font-size:12px;color:var(--mut);font-weight:600;margin-bottom:5px}
+.lnk{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:.5px solid var(--line);font-size:13.5px;cursor:pointer}
+.lnk:first-of-type{border-top:0}
+.lnk i{width:9px;height:9px;border-radius:50%;flex:none}
+.lnk small{color:var(--mut);margin-inline-start:auto;font-size:11px}
+.gone{background:rgba(255,92,122,.08);border:1px solid rgba(255,92,122,.3);border-radius:12px;padding:9px 11px;font-size:13px;line-height:1.5}
+.gone b{color:var(--crit)}
+.tks{display:grid;gap:5px}
+.tk{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:.5px solid var(--line2);border-radius:10px;padding:6px 10px}
+.tk .sym{font:700 14px Oswald;letter-spacing:.03em;direction:ltr;min-width:58px;text-align:right}
+.tk .nm{font-size:12.5px;color:#cfd8d2;flex:1;min-width:0}
+.tag{font:700 10px Heebo;border-radius:999px;padding:1px 8px;border:1px solid}
+.tag.own{color:var(--own);border-color:rgba(181,242,61,.5)}
+.tag.th{color:var(--thesis);border-color:rgba(199,125,255,.5)}
+.tag.il{color:var(--il);border-color:rgba(77,163,255,.5)}
+.close{display:block;width:100%;margin-top:16px;background:transparent;border:1px solid var(--neon);color:var(--neon);font:700 14px Heebo;border-radius:12px;padding:10px;cursor:pointer}
+</style>
+<link rel="stylesheet" href="apple.css?v=1">
+</head>
+<body data-tab="map">
+<div class="wrap">
+<header>
+  <button class="back" id="back">› סקטורים</button>
+  <h1>מפת <span>הקשרים</span></h1>
+  <div class="sub">מי מזין את מי, ומי לא מתקיים בלי מי</div>
+</header>
+
+<div class="bar">
+  <div class="seg" id="seg">
+    <button class="on" data-m="all">כל הקשרים</button>
+    <button data-m="crit">רק ההכרחיים</button>
+  </div>
+  <div class="legend">
+    <span><b style="border-color:var(--crit)"></b>לא מתקיים בלי</span>
+    <span><b style="border-color:var(--strong)"></b>תלות חזקה</span>
+    <span><b style="border-color:var(--weak);border-top-style:dashed"></b>קשר חלש</span>
+    <span><i style="background:var(--own)"></i>בתיק</span>
+    <span><i style="background:var(--thesis)"></i>מועמדת לתזה</span>
+    <span><i style="background:var(--il)"></i>ישראלית</span>
+  </div>
+</div>
+
+<h2>שרשרת ה AI: מהחול ועד הצ׳אט</h2>
+<div class="h2s">קוראים מלמעלה למטה. כל קופסה היא תחום, והמניות בתוכה. לחיצה על תחום מראה ממי הוא תלוי ומה קורה אם הוא נעלם.</div>
+<div class="graph" id="g1"></div>
+
+<div class="money">
+  <p><b>הכסף זורם הפוך.</b> הסחורה יורדת מלמטה למעלה בשרשרת, אבל הכסף מגיע מהקצה: חברות הענן והמודלים קונות שרתים, ושם מתחילה ההזמנה לכל השאר. אם הן מקצצות בהשקעות, כל השרשרת מעליהן מרגישה את זה, והרחוקות ביותר (ציוד, זיכרון) מרגישות הכי חזק.</p>
+</div>
+
+<h2>צווארי הבקבוק</h2>
+<div class="h2s">הנקודות שאין להן תחליף. כאן הכוח במחיר, וגם הסיכון הכי גדול.</div>
+<div class="cards" id="choke"></div>
+
+<h2>האשכול הישראלי בתיק</h2>
+<div class="h2s">מה מניע את המניות הישראליות שלך, ולמה הן נעות יחד.</div>
+<div class="graph" id="g2"></div>
+<div class="money" style="border-color:rgba(77,163,255,.35);background:rgba(77,163,255,.07)">
+  <p><b style="color:var(--il)">למה זה חשוב לך:</b> אלביט, נקסטויז׳ן, הבורסה והבנקים נשענים כולם על אותו גורם, ישראל. ביום רע לישראל הן עלולות לרדת יחד, ולכן הן מתנהגות כמו פוזיציה אחת גדולה. נייקי ומניות ה AI הן הפיזור האמיתי.</p>
+</div>
+
+<footer>מפה חינוכית, לא המלצה. הקשרים והתלויות הם הערכה כללית ומשתנים עם הזמן.</footer>
+</div>
+
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+
+<script src="js/core.js?v=6"></script>
+<script>
+/* Stock names, and which ones are AI thesis candidates */
+const NAMES={LIN:"Linde",ENTG:"Entegris",APD:"Air Products",SNPS:"Synopsys",CDNS:"Cadence",ARM:"Arm",ASML:"ASML",AMAT:"Applied Materials",LRCX:"Lam Research",KLAC:"KLA",NVMI:"נובה",CAMT:"קמטק",
+NVDA:"Nvidia",AMD:"AMD",AVGO:"Broadcom",MRVL:"Marvell",TSM:"TSMC",SAMSUNG:"Samsung",INTC:"Intel",TSEM:"טאואר",MU:"Micron","SK HYNIX":"SK hynix",ASX:"ASE",AMKR:"Amkor",
+SMCI:"Supermicro",DELL:"Dell",HPE:"HPE",FOXCONN:"Foxconn",ANET:"Arista",COHR:"Coherent",LITE:"Lumentum",CRDO:"Credo",SNDK:"SanDisk",WDC:"Western Digital",STX:"Seagate",PSTG:"Pure Storage",
+VST:"Vistra",CEG:"Constellation",NRG:"NRG",GEV:"GE Vernova",PWR:"Quanta",ETN:"Eaton",OKLO:"Oklo",VRT:"Vertiv",MOD:"Modine",DLR:"Digital Realty",EQIX:"Equinix",
+MSFT:"Microsoft",AMZN:"Amazon",GOOGL:"Google",ORCL:"Oracle",NBIS:"Nebius",CRWV:"CoreWeave",META:"Meta",PLTR:"Palantir",NOW:"ServiceNow",
+ESLT:"אלביט",NXSN:"נקסטויז׳ן",TASE:"הבורסה לני״ע",POLI:"בנק הפועלים",LUMI:"בנק לאומי","TA125":"קסם ת״א 125",NKE:"Nike"};
+const THESIS=new Set(["TSM","NVDA","AVGO","VST","CEG","VRT","DLR"]);
+const ISR=new Set(["NVMI","CAMT","TSEM","ESLT","NXSN","TASE","POLI","LUMI","TA125"]);
+let OWN=new Set(["NBIS","ESLT","NXSN","TASE","POLI","LUMI","TA125","NKE"]);
+
+/* ===== Map 1: the AI value chain ===== */
+const AI={
+ rows:[["eda"],["design","equip","mat"],["fab","mem"],["pkg"],["srv","net","sto"],["pow","dc","cool"],["cloud"],["app"]],
+ levels:["שלב 1: תכנון","שלב 2: כלים וחומרים","שלב 3: ייצור","שלב 4: הרכבה","שלב 5: מערכות","שלב 6: התשתית הפיזית","שלב 7: ענן","שלב 8: השימוש"],
+ nodes:{
+  eda:{t:"תוכנות תכנון שבבים",s:"EDA וקניין רוחני",k:["SNPS","CDNS","ARM"],choke:1,
+   what:"כל שבב בעולם מתוכנן בתוכנה של אחת משתי חברות, Synopsys או Cadence. Arm מוכרת את הארכיטקטורה שעליה בנויים רוב המעבדים.",
+   gone:"אי אפשר לתכנן שבב חדש. אין חלופה אמיתית, זו דואופול."},
+  design:{t:"מעצבי שבבים",s:"GPU ושבבים ייעודיים",k:["NVDA","AMD","AVGO","MRVL"],choke:1,
+   what:"מתכננים את המעבדים שמריצים AI, אבל לא מייצרים אותם. Nvidia שולטת בשוק, Broadcom ו Marvell בונות שבבים ייעודיים לגוגל, מטא ואמזון.",
+   gone:"אין מעבדים לאמן ולהריץ מודלים. Nvidia קשה מאוד להחלפה בטווח קצר בגלל התוכנה שלה (CUDA)."},
+  equip:{t:"ציוד ייצור",s:"מכונות הדפסה, חריטה ובדיקה",k:["ASML","AMAT","LRCX","KLAC","NVMI","CAMT"],choke:1,
+   what:"המכונות שבתוך המפעלים. ASML היא היחידה בעולם שמייצרת מכונות EUV, בלעדיהן אין שבבים מתקדמים. נובה וקמטק הישראליות מודדות ובודקות.",
+   gone:"המפעלים לא יכולים להתרחב או לעבור לדור הבא. בלי ASML אין שבב מתקדם בכלל."},
+  mat:{t:"חומרי גלם וגזים",s:"סיליקון, כימיקלים, גזים",k:["LIN","ENTG","APD"],
+   what:"פרוסות הסיליקון, הכימיקלים הטהורים והגזים המיוחדים שנדרשים בכל שלב בייצור.",
+   gone:"הייצור נעצר. יש כמה ספקים לכל חומר, לכן הסיכון בינוני ולא קריטי."},
+  fab:{t:"ייצור שבבים",s:"המפעלים (Foundry)",k:["TSM","SAMSUNG","INTC","TSEM"],choke:1,
+   what:"המפעלים שמייצרים בפועל את השבבים לפי התכנון. TSMC מייצרת כמעט את כל שבבי ה AI המתקדמים, רובם בטייוואן.",
+   gone:"זה הנקודה הרגישה ביותר בשרשרת. אין לאף אחד יכולת להחליף את TSMC בשנים הקרובות. סיכון טייוואן יושב כאן."},
+  mem:{t:"זיכרון מהיר",s:"DRAM ו HBM",k:["MU","SK HYNIX","SAMSUNG"],choke:1,
+   what:"זיכרון HBM יושב צמוד למעבד ומזין אותו בנתונים. רק שלוש חברות בעולם מייצרות אותו: SK hynix, Samsung ו Micron.",
+   gone:"המעבד הכי חזק עומד ומחכה לנתונים. HBM הוא אחד הרכיבים הכי חסרים בשרשרת."},
+  pkg:{t:"אריזה מתקדמת",s:"מחברים מעבד וזיכרון",k:["TSM","ASX","AMKR"],choke:1,
+   what:"מחברים את המעבד ואת שבבי הזיכרון לחבילה אחת. טכנולוגיית CoWoS של TSMC היא צוואר בקבוק שקובע כמה שבבי AI יוצאים לשוק.",
+   gone:"יש מעבדים ויש זיכרון, אבל אי אפשר לחבר אותם. זה מה שהגביל את Nvidia בשנים האחרונות."},
+  srv:{t:"שרתים",s:"מרכיבים ארונות שלמים",k:["SMCI","DELL","HPE","FOXCONN"],
+   what:"לוקחים את השבבים ובונים מהם שרתים וארונות מוכנים. שוק תחרותי עם רווחיות נמוכה יחסית.",
+   gone:"יש הרבה מרכיבים, אפשר לעבור ביניהם. תלות חזקה בשבבים, אבל אף אחד מהם לא הכרחי."},
+  net:{t:"רשתות ותקשורת",s:"מתגים, סיבים, אופטיקה",k:["AVGO","ANET","MRVL","COHR","LITE","CRDO"],
+   what:"מחברים אלפי מעבדים כדי שיעבדו כמחשב אחד ענק. ככל שהמודלים גדלים, הרשת נעשית חשובה יותר.",
+   gone:"המעבדים לא מדברים מהר מספיק ביניהם, והאימון מאט מאוד."},
+  sto:{t:"אחסון",s:"כוננים ו SSD",k:["SNDK","WDC","STX","PSTG"],
+   what:"שומרים את הנתונים: SanDisk ו Western Digital עם זיכרון פלאש (SSD), Seagate עם כוננים קשיחים. נדרש בכמויות ענק, אבל זה לא אותו זיכרון מהיר שליד המעבד.",
+   gone:"יש כמה ספקים ותחליפים. השפעה על העלות, לא עצירה. לכן הקשר חלש יחסית."},
+  pow:{t:"אנרגיה ורשת חשמל",s:"ייצור חשמל, שנאים, חיבור",k:["VST","CEG","NRG","GEV","PWR","OKLO"],choke:1,
+   what:"מרכז נתונים גדול צורך חשמל כמו עיר. Vistra ו Constellation מייצרות חשמל (גם גרעיני), GE Vernova ו Quanta בונות את הרשת והחיבור.",
+   gone:"מרכז נתונים בלי חשמל הוא מבנה ריק. כבר היום חשמל וזמני המתנה לשנאים הם המגבלה הגדולה על בנייה חדשה."},
+  dc:{t:"מרכזי נתונים",s:"הבניין, השטח, החיבורים",k:["DLR","EQIX"],
+   what:"המבנים שבהם הכל יושב: שטח, חשמל מחובר, קירור ותקשורת. חלק משכירים לענקיות, חלק נבנים על ידן ישירות.",
+   gone:"אין איפה לשים את השרתים. כאן כל הזרמים מתכנסים."},
+  cool:{t:"קירור וניהול חשמל",s:"קירור נוזלי, UPS",k:["VRT","ETN","MOD"],choke:1,
+   what:"שבבי AI חדשים חמים מכדי לקרר באוויר, לכן עוברים לקירור נוזלי. Vertiv מובילה גם בניהול החשמל בתוך המרכז.",
+   gone:"השבבים מתחממים ונכבים. בדור החדש אי אפשר להפעיל ארון בלי קירור נוזלי."},
+  cloud:{t:"ענן",s:"שוכרים כוח מחשוב",k:["MSFT","AMZN","GOOGL","ORCL","NBIS","CRWV"],choke:1,
+   what:"הענקיות ושחקני ענן חדשים כמו Nebius ו CoreWeave קונים את השבבים ומשכירים כוח מחשוב. הם הלקוח הגדול שמממן את כל השרשרת.",
+   gone:"אין מי שקונה את כל מה שמעל. כשהן מקצצות השקעות, כל השרשרת יורדת."},
+  app:{t:"מודלים ואפליקציות",s:"מכאן מגיע הכסף",k:["GOOGL","META","MSFT","PLTR","NOW"],
+   what:"המודלים (OpenAI ו Anthropic פרטיות) והחברות שמוכרות מוצרי AI. כאן נבחן אם יש ביקוש אמיתי שמצדיק את כל ההשקעה.",
+   gone:"בלי הכנסות מהשימוש, ההשקעה בכל השרשרת לא מחזירה את עצמה. זה מבחן הבועה."}
+ },
+ edges:[["eda","design","c"],["design","fab","c"],["equip","fab","c"],["equip","mem","c"],["mat","fab","s"],["mat","mem","s"],
+  ["fab","pkg","c"],["mem","pkg","c"],["pkg","srv","c"],["pkg","net","w"],["srv","dc","c"],["net","dc","s"],["sto","dc","w"],
+  ["pow","dc","c"],["cool","dc","c"],["dc","cloud","c"],["cloud","app","c"]]
+};
+
+/* ===== Map 2: the Israeli cluster ===== */
+const IL={
+ rows:[["geo"],["budget","econ","cons"],["def","fin","glob"]],
+ levels:["הגורם המשותף","מה מניע","המניות"],
+ nodes:{
+  geo:{t:"ישראל",s:"ביטחון, פוליטיקה, כלכלה",k:[],
+   what:"הגורם שמשותף לרוב התיק שלך. מלחמה, דירוג אשראי, שער השקל ומצב פוליטי משפיעים על כל המניות הישראליות בבת אחת.",
+   gone:"ביום רע לישראל, רוב התיק זז יחד. זה בדיוק סיכון הריכוזיות."},
+  budget:{t:"תקציבי ביטחון",s:"בישראל ובעולם",k:[],
+   what:"הזמנות ממשרדי ביטחון בישראל, באירופה ובארה״ב. מלחמות והתחמשות באירופה מגדילות אותן.",
+   gone:"אם העולם נרגע והתקציבים יורדים, צבר ההזמנות מתכווץ."},
+  econ:{t:"כלכלת ישראל ושוק ההון",s:"ריבית, מחזורי מסחר",k:[],
+   what:"הבנקים מרוויחים מהריבית ומהאשראי, הבורסה מרוויחה ממחזורי מסחר והנפקות. כשהשוק חם, שניהם נהנים.",
+   gone:"ירידת ריבית או שוק רדום פוגעים בשניהם ביחד."},
+  cons:{t:"הצרכן העולמי",s:"ארה״ב, סין, אירופה",k:[],
+   what:"נייקי תלויה בכמה אנשים בעולם קונים בגדים ונעליים, ובמותג. כמעט בלי קשר לישראל או ל AI.",
+   gone:"מיתון עולמי פוגע בה, אבל ממקור שונה משאר התיק."},
+  def:{t:"ביטחון",s:"אלביט ונקסטויז׳ן",k:["ESLT","NXSN"],
+   what:"שתיהן נהנות מאותו גל של הוצאות ביטחון ורחפנים. נקסטויז׳ן קטנה ותנודתית יותר.",
+   gone:"החזקה בשתיהן היא כמעט הימור כפול על אותו נושא."},
+  fin:{t:"פיננסים בישראל",s:"הבורסה, הבנקים, מדד",k:["TASE","POLI","LUMI","TA125"],
+   what:"הבורסה והבנקים תלויים באותה כלכלה ובאותו שוק. קסם ת״א 125 מחזיקה בעצמה את הבנקים ואת אלביט, כלומר חפיפה נוספת.",
+   gone:"בירידה בשוק הישראלי כולן נפגעות, והמדד לא מגן כי הוא מכיל אותן."},
+  glob:{t:"צריכה עולמית",s:"נייקי",k:["NKE"],
+   what:"מניה שלא קשורה לאף אחד מהאשכולות האחרים בתיק.",
+   gone:"זה הפיזור האמיתי היחיד בתיק לצד מניות ה AI."}
+ },
+ edges:[["geo","budget","s"],["geo","econ","c"],["budget","def","c"],["econ","fin","c"],["cons","glob","c"],["def","fin","m"]]
+};
+
+const CHOKE=[
+ ["ASML ומכונות EUV","חברה אחת בעולם. בלי המכונות שלה אין שבבים מתקדמים, ואין לה מתחרה."],
+ ["TSMC וטייוואן","מייצרת כמעט את כל שבבי ה AI המתקדמים, רובם באי אחד. הסיכון הגאופוליטי הגדול ביותר בשרשרת."],
+ ["אריזה מתקדמת (CoWoS)","קובעת כמה שבבי AI יכולים לצאת לשוק בכל רבעון. התרחבה מהר, ועדיין צמודה לביקוש."],
+ ["זיכרון HBM","שלוש חברות בלבד. כשהוא חסר, גם המעבדים הכי חזקים לא יוצאים."],
+ ["חשמל ושנאים","המגבלה החדשה: יש שבבים, אבל אין מספיק חשמל וחיבור לרשת למרכזי נתונים חדשים."],
+ ["Nvidia והתוכנה שלה","לא רק השבב: מפתחים בנו הכל על CUDA, וזה מה שהופך אותה לקשה להחלפה."]
+];
+
+/* ===== Graph engine ===== */
+const LV={c:"לא מתקיים בלי",s:"תלות חזקה",w:"קשר חלש",m:"נעות יחד"};
+const LC={c:"var(--crit)",s:"var(--strong)",w:"var(--weak)",m:"var(--il)"};
+const graphs=[];
+function chip(k){ const cl=["c"]; if(OWN.has(k)) cl.push("own"); if(THESIS.has(k)) cl.push("th"); if(ISR.has(k)) cl.push("il");
+  const lbl=/^[A-Z0-9 ]+$/.test(k)&&k.length<=5?k:(NAMES[k]||k); return `<span class="${cl.join(" ")}">${lbl}</span>`; }
+
+function build(el,G){
+  el.innerHTML=`<svg></svg><div class="lay">${G.rows.map((r,i)=>`<div class="row${r.length===1?" one":""}"><span class="lvl">${G.levels[i]||""}</span>${r.map(id=>{const n=G.nodes[id];
+    return `<div class="node${n.choke?" choke":""}" data-id="${id}">${n.choke?'<span class="ck">צוואר בקבוק</span>':""}<div class="nt">${n.t}</div><div class="ns">${n.s}</div>${n.k.length?`<div class="chips">${n.k.map(chip).join("")}</div>`:""}</div>`;}).join("")}</div>`).join("")}</div>`;
+  const g={el,G,svg:el.querySelector("svg")}; graphs.push(g);
+  el.onclick=e=>{ const nd=e.target.closest(".node"); if(nd) select(g,nd.dataset.id); };
+  return g;
+}
+
+function draw(g){
+  const {el,G,svg}=g, box=el.getBoundingClientRect(), R={};
+  el.querySelectorAll(".node").forEach(n=>{ const r=n.getBoundingClientRect(); R[n.dataset.id]={x:r.left-box.left,y:r.top-box.top,w:r.width,h:r.height,row:G.rows.findIndex(rw=>rw.includes(n.dataset.id))}; });
+  svg.setAttribute("width",box.width); svg.setAttribute("height",box.height);
+  const cx=id=>R[id].x+R[id].w/2;
+  /* spread anchors so lines leaving or entering the same box don't overlap */
+  const outs={},ins={};
+  G.edges.forEach((e,i)=>{ if(R[e[0]].row!==R[e[1]].row){ (outs[e[0]]=outs[e[0]]||[]).push(i); (ins[e[1]]=ins[e[1]]||[]).push(i); } });
+  const ax={};
+  const spread=(map,end,other)=>Object.keys(map).forEach(id=>{ const L=map[id].sort((a,b)=>cx(G.edges[a][other])-cx(G.edges[b][other])), r=R[id], span=Math.min(r.w*.6,L.length*18);
+    L.forEach((ei,j)=>{ ax[ei+end]=r.x+r.w/2+(L.length>1?(j/(L.length-1)-.5)*span:0); }); });
+  spread(outs,"o",1); spread(ins,"i",0);
+  let defs="<defs>"; for(const k in LC) defs+=`<marker id="a${k}${graphs.indexOf(g)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${LC[k]}"/></marker>`; defs+="</defs>";
+  svg.innerHTML=defs+G.edges.map((e,i)=>{ const a=R[e[0]],b=R[e[1]]; let d;
+    if(a.row===b.row){ const ltr=a.x<b.x, x1=ltr?a.x+a.w:a.x, x2=ltr?b.x:b.x+b.w, y=Math.min(a.y+a.h/2,b.y+b.h/2);
+      d=`M${x1} ${y} L${x2+(ltr?-2:2)} ${y}`; }
+    else { const x1=ax[i+"o"],y1=a.y+a.h,x2=ax[i+"i"],y2=b.y-3,m=(y2-y1)*.55; d=`M${x1} ${y1} C${x1} ${y1+m},${x2} ${y2-m},${x2} ${y2}`; }
+    const mk=e[2]==="m"?"":`marker-end="url(#a${e[2]}${graphs.indexOf(g)})"`;
+    return `<path class="e ${e[2]}" data-a="${e[0]}" data-b="${e[1]}" d="${d}" ${mk}/>`; }).join("");
+  if(g.sel) mark(g,g.sel);
+}
+function redraw(){ graphs.forEach(draw); }
+
+function mark(g,id){
+  g.el.classList.toggle("sel",!!id);
+  g.el.querySelectorAll(".node").forEach(n=>n.classList.remove("on","nb"));
+  g.svg.querySelectorAll("path.e").forEach(p=>p.classList.remove("on"));
+  if(!id) return;
+  g.el.querySelector(`.node[data-id="${id}"]`).classList.add("on");
+  g.svg.querySelectorAll("path.e").forEach(p=>{ if(p.dataset.a===id||p.dataset.b===id){ p.classList.add("on");
+    const o=p.dataset.a===id?p.dataset.b:p.dataset.a; g.el.querySelector(`.node[data-id="${o}"]`).classList.add("nb"); } });
+}
+function select(g,id){
+  graphs.forEach(x=>{ if(x!==g){ x.sel=null; mark(x,null);} });
+  g.sel=id; mark(g,id); openSheet(g,id);
+}
+
+function openSheet(g,id){
+  const G=g.G,n=G.nodes[id];
+  const from=G.edges.filter(e=>e[1]===id), to=G.edges.filter(e=>e[0]===id);
+  const line=(o,lv,txt)=>`<div class="lnk" data-go="${o}"><i style="background:${LC[lv]}"></i>${G.nodes[o].t}<small>${txt}</small></div>`;
+  const tks=n.k.map(k=>{ const tags=(OWN.has(k)?'<span class="tag own">בתיק</span>':"")+(THESIS.has(k)?'<span class="tag th">מועמדת לתזה</span>':"")+(ISR.has(k)&&!OWN.has(k)?'<span class="tag il">ישראלית</span>':"");
+    const sym=/^[A-Z0-9 ]+$/.test(k)&&k.length<=5?k:""; return `<div class="tk"><span class="sym">${sym}</span><span class="nm">${NAMES[k]||k}</span>${tags}</div>`; }).join("");
+  document.getElementById("sheet").innerHTML=`<div class="grab"></div><h3>${n.t}</h3><div class="what">${n.what}</div>
+   ${from.length?`<div class="blk"><h4>תלוי ב</h4>${from.map(e=>line(e[0],e[2],LV[e[2]])).join("")}</div>`:""}
+   ${to.length?`<div class="blk"><h4>מזין את</h4>${to.map(e=>line(e[1],e[2],LV[e[2]])).join("")}</div>`:""}
+   <div class="blk"><div class="gone"><b>אם הוא נעלם: </b>${n.gone}</div></div>
+   ${tks?`<div class="blk"><h4>המניות בתחום</h4><div class="tks">${tks}</div></div>`:""}
+   <button class="close" id="cls">סגור</button>`;
+  document.getElementById("ov").classList.add("on");
+  document.getElementById("sheet").scrollTop=0;
+  document.getElementById("cls").onclick=closeSheet;
+  document.querySelectorAll(".lnk").forEach(l=>l.onclick=()=>{ select(g,l.dataset.go); g.el.querySelector(`.node[data-id="${l.dataset.go}"]`).scrollIntoView({block:"center",behavior:"smooth"}); });
+}
+function closeSheet(){ document.getElementById("ov").classList.remove("on"); graphs.forEach(g=>{ g.sel=null; mark(g,null); }); }
+document.getElementById("ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeSheet(); });
+
+document.getElementById("choke").innerHTML=CHOKE.map(c=>`<div class="card"><h3><i></i>${c[0]}</h3><p>${c[1]}</p></div>`).join("");
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{ document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x===b));
+  graphs.forEach(g=>g.el.classList.toggle("crit",b.dataset.m==="crit")); });
+document.getElementById("back").onclick=()=>Roy.go("sectors");
+
+build(document.getElementById("g1"),AI); build(document.getElementById("g2"),IL);
+redraw();
+window.addEventListener("resize",redraw);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(redraw);
+window.addEventListener("load",redraw);
+if(window.ResizeObserver) new ResizeObserver(redraw).observe(document.body);
+
+/* Mark what's actually in the portfolio, from the app's data */
+Roy.data().then(d=>{
+  const h=((d.datasets&&d.datasets.holdings)||[]).map(x=>String(x.ticker||"").toUpperCase()).filter(Boolean);
+  if(!h.length) return;
+  const own=new Set(h); ["ESLT","NXSN","TASE","POLI","LUMI","TA125","NKE"].forEach(k=>own.add(k));
+  OWN=own; graphs.length=0; build(document.getElementById("g1"),AI); build(document.getElementById("g2"),IL); redraw();
+},()=>{});
+</script>
+</body>
+</html>

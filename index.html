@@ -34,6 +34,7 @@ body.t-home{background:#F2F7FF;--nav-bg:rgba(236,244,255,.66);--nav-line:rgba(37
 body.t-portfolio{background:#FFFFFF;--nav-bg:rgba(27,36,89,.85);--nav-line:rgba(169,198,255,.22);--nav-fg:#AEB6D9;--nav-on:#A9C6FF}
 body.t-lab{background:#0d0a1c;--nav-bg:rgba(24,16,52,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#9a92c4;--nav-on:#C9A8FF}
 body.t-sectors{background:#0b0f0c;--nav-bg:rgba(20,34,16,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#93A198;--nav-on:#C3F53C}
+body.t-sectors,body.t-map{background:#0b0f0c;--nav-bg:rgba(20,34,16,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#93A198;--nav-on:#C3F53C}
 body.t-finance{background:#EFFBF6;--nav-bg:rgba(232,250,243,.66);--nav-line:rgba(5,150,105,.16);--nav-fg:#5E8A7C;--nav-on:#059669}
 /* Apple polish: softer glass tab bar */
 html,body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Hebrew",Heebo,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
@@ -85,8 +86,8 @@ nav button[aria-current=page]{font-weight:600}
 <script src="js/core.js?v=6"></script>
 <script>
 (function () {
-  var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance'];
-  var PAGES = { home: 'home.html', portfolio: 'portfolio.html', lab: 'lab.html', sectors: 'sectors.html', finance: 'finance.html' };
+  var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance', 'map'];
+  var PAGES = { home: 'home.html', portfolio: 'portfolio.html', lab: 'lab.html', sectors: 'sectors.html', finance: 'finance.html', map: 'map.html' };
   var frames = {}, current = null, dataP = null;
   var $ = function (id) { return document.getElementById(id); };
 
@@ -132,7 +133,7 @@ nav button[aria-current=page]{font-weight:600}
     var f = frame(tab, hash);
     TABS.forEach(function (t) { if (frames[t]) frames[t].classList.toggle('on', t === tab); });
     document.querySelectorAll('nav button').forEach(function (b) {
-      if (b.dataset.tab === tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+      if (b.dataset.tab === (tab === 'map' ? 'sectors' : tab)) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
     current = tab;
     document.body.className = 't-' + tab;
