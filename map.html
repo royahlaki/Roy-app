@@ -35,9 +35,9 @@ h2{font-weight:900;font-size:19px;color:var(--neon);margin:26px 0 4px}
 
 .graph{position:relative;padding-top:24px}
 .graph svg{position:absolute;top:0;left:0;pointer-events:none;overflow:visible;z-index:1}
-.lay{position:relative;z-index:2;display:flex;flex-direction:column;gap:38px}
+.lay{position:relative;z-index:2;display:flex;flex-direction:column;gap:46px}
 .row{position:relative;display:flex;gap:8px;justify-content:center;align-items:stretch}
-.lvl{position:absolute;right:-2px;transform:translateY(-24px);font:600 10px Heebo;color:var(--neon-dim);letter-spacing:.02em}
+.lvl{position:absolute;right:0;top:-31px;z-index:3;font:600 10px Heebo;color:var(--neon);letter-spacing:.02em;background:#111814;border:.5px solid var(--line2);border-radius:999px;padding:1px 9px;line-height:15px;white-space:nowrap}
 .node{position:relative;flex:1;min-width:0;max-width:300px;background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:8px 9px 9px;cursor:pointer;
   transition:opacity .25s,border-color .25s,transform .15s,box-shadow .25s;text-align:right}
 .node:active{transform:scale(.97)}
@@ -50,7 +50,8 @@ h2{font-weight:900;font-size:19px;color:var(--neon);margin:26px 0 4px}
 .c{font:600 10.5px Oswald;letter-spacing:.03em;background:rgba(255,255,255,.06);border:1px solid var(--line2);border-radius:6px;padding:0 5px;line-height:17px;color:var(--txt)}
 .c.own{border-color:var(--own);color:var(--own);background:rgba(181,242,61,.1)}
 .c.th{border-color:rgba(199,125,255,.7)}
-.c.il{color:var(--il)}
+.c.il{direction:rtl;font:600 11px Heebo;letter-spacing:0}
+.tk .sales{display:block;font-size:11px;color:var(--mut);margin-top:1px}
 .graph.sel .node{opacity:.28}
 .graph.sel .node.on,.graph.sel .node.nb{opacity:1}
 .graph.sel .node.on{border-color:var(--neon);box-shadow:0 0 0 1px var(--neon),0 0 22px rgba(195,245,60,.25)}
@@ -131,6 +132,7 @@ footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-he
       <span><b style="border-color:var(--weak);border-top-style:dashed"></b>חלש</span>
       <span><i style="background:var(--own)"></i>בתיק</span>
       <span><i style="background:var(--thesis)"></i>תזה</span>
+      <span>🇮🇱 ישראלית</span>
     </div>
     <button class="tgl" id="crit">רק הכרחי</button>
   </div>
@@ -157,6 +159,10 @@ ZIM:"צים",UPS:"UPS",FDX:"FedEx",ADS:"Adidas",LULU:"Lululemon",ONON:"On",DECK:
 XOM:"ExxonMobil",CVX:"Chevron",NWMD:"ניומד",CCJ:"Cameco",NEE:"NextEra",ENLT:"אנלייט",FSLR:"First Solar",VLO:"Valero",MPC:"Marathon Petroleum"};
 const THESIS=new Set(["TSM","NVDA","AVGO","VST","CEG","VRT","DLR"]);
 const ISR=new Set(["NVMI","CAMT","TSEM","ESLT","NXSN","TASE","POLI","LUMI","TA125","DSCT","MZTF","HARL","PHOE","CLIS","ZIM","NWMD","ENLT"]);
+const SALES={NVMI:"יצרניות שבבים בטייוואן, קוריאה וארה״ב",CAMT:"יצרניות שבבים ואריזה באסיה",TSEM:"לקוחות בארה״ב, אירופה ואסיה",
+ESLT:"בעיקר לחו״ל: אירופה, ארה״ב ואסיה, וגם משרד הביטחון",NXSN:"יצרני רחפנים וכלי רכב בעולם",ZIM:"ספנות בין אסיה, ארה״ב ואירופה",
+NWMD:"ישראל, מצרים וירדן",ENLT:"ישראל, אירופה וארה״ב",POLI:"בעיקר בישראל",LUMI:"בעיקר בישראל",DSCT:"בעיקר בישראל",MZTF:"בעיקר בישראל",
+HARL:"בעיקר בישראל",PHOE:"בעיקר בישראל",CLIS:"בעיקר בישראל",TASE:"השוק הישראלי",TA125:"מדד של 125 החברות הגדולות בישראל"};
 let OWN=new Set(["NBIS","ESLT","NXSN","TASE","POLI","LUMI","TA125","NKE"]);
 
 /* ===== Forces: what moves the portfolio ===== */
@@ -431,7 +437,7 @@ let cur=null, sel=null, critOnly=false;
 const $=id=>document.getElementById(id);
 
 function chip(k){ const cl=["c"]; if(OWN.has(k)) cl.push("own"); if(THESIS.has(k)) cl.push("th"); if(ISR.has(k)) cl.push("il");
-  return `<span class="${cl.join(" ")}">${isTk(k)?k:(NAMES[k]||k)}</span>`; }
+  return `<span class="${cl.join(" ")}">${ISR.has(k)?"🇮🇱 "+(NAMES[k]||k):(isTk(k)?k:(NAMES[k]||k))}</span>`; }
 
 function render(tab){
   cur=tab; sel=null; const G=tab.G;
@@ -484,8 +490,8 @@ function openSheet(id){
   const G=cur.G,n=G.nodes[id];
   const from=G.edges.filter(e=>e[1]===id), to=G.edges.filter(e=>e[0]===id);
   const line=(o,lv)=>`<div class="lnk" data-go="${o}"><i style="background:${LC[lv]}"></i>${G.nodes[o].t}<small>${LV[lv]}</small></div>`;
-  const tks=n.k.map(k=>{ const tags=(OWN.has(k)?'<span class="tag own">בתיק</span>':"")+(THESIS.has(k)?'<span class="tag th">מועמדת לתזה</span>':"")+(ISR.has(k)&&!OWN.has(k)?'<span class="tag il">ישראלית</span>':"");
-    return `<div class="tk"><span class="sym">${isTk(k)?k:""}</span><span class="nm">${NAMES[k]||k}</span>${tags}</div>`; }).join("");
+  const tks=n.k.map(k=>{ const tags=(OWN.has(k)?'<span class="tag own">בתיק</span>':"")+(THESIS.has(k)?'<span class="tag th">מועמדת לתזה</span>':"")+"";
+    const il=ISR.has(k); return `<div class="tk"><span class="sym">${il?"🇮🇱":(isTk(k)?k:"")}</span><span class="nm">${NAMES[k]||k}${il&&SALES[k]?`<span class="sales">מוכרת ל: ${SALES[k]}</span>`:""}</span>${tags}</div>`; }).join("");
   $("sheet").innerHTML=`<div class="grab"></div><h3>${n.t}</h3><div class="what">${n.what}</div>
    ${from.length?`<div class="blk"><h4>${n.f?"מושפע מ":"תלוי ב"}</h4>${from.map(e=>line(e[0],e[2])).join("")}</div>`:""}
    ${to.length?`<div class="blk"><h4>${n.f?"משפיע על":"מזין את"}</h4>${to.map(e=>line(e[1],e[2])).join("")}</div>`:""}
