@@ -444,7 +444,11 @@ html,body{margin:0;padding:0;background:#FFFFFF}
   .pf .sr-more{padding:4px 12px 12px}
   .pf .sr-more .pcw{grid-template-columns:1fr}
 }
-@media (min-width:761px){.pf .sr-q{display:none}}
+.pf .sr-fin{width:100%;max-width:26rem;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden}
+.pf .sr-fin th{font-size:11px;font-weight:600;color:var(--g-mut);padding:7px 8px;text-align:center}
+.pf .sr-fin th:first-child,.pf .sr-fin td:first-child{text-align:right;color:var(--g-sub)}
+.pf .sr-fin td{padding:7px 8px;text-align:center;border-top:1px solid var(--g-soft)}
+.pf .sr-fin td.v2{font-weight:700}
 .pf #div-card{display:flex;flex-direction:column}
 .pf #div-card .divs{flex:1;align-content:center}
 </style>
@@ -594,7 +598,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 <script src="js/core.js?v=6"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=9"></script>
+<script src="js/portfolio-page.js?v=10"></script>
 <script>
 Roy.data().then(function (d) {
   window.PF_CFG = d.config || {};

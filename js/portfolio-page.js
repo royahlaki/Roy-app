@@ -467,8 +467,16 @@ window.pfDraw = () => {
           sm.append(nm, val, pn, rq, nq, rp);
           r.appendChild(sm);
           const more = el('div', 'sr-more');
-          if (!noRep) more.appendChild(el('div', 'cap mut sr-q', `רבעון (${h.q_period}): הכנסות ${h.rev_q === null ? '—' : sgn(h.rev_q)} · רווח נקי ${h.ni_q === null ? '—' : sgn(h.ni_q)}`));
-          if (!noRep) more.appendChild(el('div', 'cap mut', `12 חודשים (${h.y_period}): הכנסות ${h.rev_y === null ? '—' : sgn(h.rev_y)} · רווח נקי ${h.ni_y === null ? '—' : sgn(h.ni_y)}`));
+          if (!noRep) {
+            const tb = el('table', 'sr-fin'), th = el('tr');
+            th.append(el('th', '', ''), el('th', '', `רבעון · ${h.q_period}`), el('th', '', `12 חודשים · ${h.y_period}`));
+            const thead = el('thead'); thead.appendChild(th); tb.appendChild(thead);
+            const tbd = el('tbody');
+            [['הכנסות', h.rev_q, h.rev_y], ['רווח נקי', h.ni_q, h.ni_y]].forEach(([lbl, q, y]) => {
+              const tr = el('tr'); tr.append(el('td', '', lbl), el('td', 'v2 ' + sc(q), q === null || q === undefined ? '—' : sgn(q)), el('td', 'v2 ' + sc(y), y === null || y === undefined ? '—' : sgn(y))); tbd.appendChild(tr);
+            });
+            tb.appendChild(tbd); more.appendChild(tb);
+          }
           const pcw = el('div', 'pcw'); const ul = el('ul', 'pcl'), ul2 = el('ul', 'pcl');
           asList(h.pros).forEach(p => { const li = el('li', 'pro'); li.append(el('i', '', '+'), el('span', '', p)); ul.appendChild(li); });
           asList(h.cons).forEach(p => { const li = el('li', 'con'); li.append(el('i', '', '−'), el('span', '', p)); ul2.appendChild(li); });
