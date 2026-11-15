@@ -32,6 +32,7 @@ nav button[aria-current=page]{color:var(--nav-on)}
 body{--nav-bg:rgba(255,255,255,.62);--nav-line:rgba(15,23,42,.08);--nav-fg:#64748B;--nav-on:#2563EB;transition:background-color .35s ease}
 body.t-home{background:#F2F7FF;--nav-bg:rgba(236,244,255,.66);--nav-line:rgba(37,99,235,.14);--nav-fg:#6A7FA3;--nav-on:#2563EB}
 body.t-portfolio{background:#FFFFFF;--nav-bg:rgba(27,36,89,.85);--nav-line:rgba(169,198,255,.22);--nav-fg:#AEB6D9;--nav-on:#A9C6FF}
+body.t-entry{background:#0a0e1a;--nav-bg:rgba(16,24,44,.55);--nav-line:rgba(255,255,255,.1);--nav-fg:#93a0c2;--nav-on:#ffd166}
 body.t-lab{background:#0d0a1c;--nav-bg:rgba(24,16,52,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#9a92c4;--nav-on:#C9A8FF}
 body.t-sectors{background:#0b0f0c;--nav-bg:rgba(20,34,16,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#93A198;--nav-on:#C3F53C}
 body.t-sectors,body.t-map{background:#0b0f0c;--nav-bg:rgba(20,34,16,.5);--nav-line:rgba(255,255,255,.1);--nav-fg:#93A198;--nav-on:#C3F53C}
@@ -83,11 +84,11 @@ nav button[aria-current=page]{font-weight:600}
   </form>
 </div>
 
-<script src="js/core.js?v=6"></script>
+<script src="js/core.js?v=7"></script>
 <script>
 (function () {
-  var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance', 'map'];
-  var PAGES = { home: 'home.html', portfolio: 'portfolio.html', lab: 'lab.html', sectors: 'sectors.html', finance: 'finance.html', map: 'map.html' };
+  var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance', 'map', 'entry'];
+  var PAGES = { home: 'home.html', portfolio: 'portfolio.html', lab: 'lab.html', sectors: 'sectors.html', finance: 'finance.html', map: 'map.html', entry: 'entry.html' };
   var frames = {}, current = null, dataP = null;
   var $ = function (id) { return document.getElementById(id); };
 
@@ -133,7 +134,7 @@ nav button[aria-current=page]{font-weight:600}
     var f = frame(tab, hash);
     TABS.forEach(function (t) { if (frames[t]) frames[t].classList.toggle('on', t === tab); });
     document.querySelectorAll('nav button').forEach(function (b) {
-      if (b.dataset.tab === (tab === 'map' ? 'sectors' : tab)) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+      if (b.dataset.tab === (tab === 'map' ? 'sectors' : tab === 'entry' ? 'lab' : tab)) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
     current = tab;
     document.body.className = 't-' + tab;

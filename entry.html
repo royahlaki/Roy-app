@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>מחיר כניסה</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:Heebo,system-ui,sans-serif;color:#e9ecf5;min-height:100vh;
+ background:radial-gradient(1100px 650px at 85% -10%,#173a5c 0%,transparent 60%),radial-gradient(900px 600px at 0% 105%,#2a1d4f 0%,transparent 60%),#0a0e1a;background-attachment:fixed}
+#app{max-width:760px;margin:0 auto;padding:calc(var(--top-h,0px) + 14px) 14px calc(var(--nav-h,0px) + 24px)}
+button{font-family:inherit;cursor:pointer}
+.top{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;margin:8px 0 16px;position:relative}
+.top h1{margin:0;font-size:24px;color:#fff}
+.top .dt{color:#93a0c2;font-size:13px}
+.back{position:absolute;right:0;top:2px;background:transparent;border:.5px solid #ffffff2e;color:#cfd7ee;border-radius:10px;padding:6px 10px;font-size:13px}
+.intro{color:#aab4d4;font-size:14px;line-height:1.6;text-align:center;margin:0 4px 14px}
+.add{display:flex;gap:8px;background:#ffffff0a;border:.5px solid #ffffff1f;border-radius:16px;padding:10px;margin-bottom:12px}
+.add input{flex:1;min-width:0;background:#00000040;border:.5px solid #ffffff26;color:#fff;border-radius:10px;padding:10px 12px;font-size:16px}
+.btn{background:linear-gradient(135deg,#ffd166,#f4a259);color:#2a1600;border:0;border-radius:10px;padding:10px 14px;font-weight:800;font-size:15px;white-space:nowrap}
+.set{display:flex;gap:6px;justify-content:center;margin-bottom:16px;font-size:12.5px;color:#aab4d4;white-space:nowrap}
+.set label{display:flex;align-items:center;gap:6px;background:#ffffff08;border:.5px solid #ffffff1a;border-radius:99px;padding:4px 5px 4px 10px}
+.set input{width:44px;background:#00000040;border:.5px solid #ffffff26;color:#fff;border-radius:99px;padding:4px 6px;font-size:15px;text-align:center}
+.empty{text-align:center;color:#93a0c2;padding:26px 8px;line-height:1.7}
+.empty .btn{margin-top:10px}
+.card{background:#ffffff0b;border:.5px solid #ffffff1d;border-radius:22px;padding:14px;margin-bottom:12px;
+ -webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
+.card.g{box-shadow:inset 0 0 0 1px #34d39955}.card.y{box-shadow:inset 0 0 0 1px #fbbf2440}.card.r{box-shadow:inset 0 0 0 1px #f8717140}
+.ch{display:flex;align-items:center;gap:10px}
+.tk{font-size:22px;font-weight:800;letter-spacing:.5px;color:#fff;direction:ltr}
+.pill{margin-inline-start:auto;font-size:13px;font-weight:700;padding:4px 12px;border-radius:99px;display:flex;align-items:center;gap:6px}
+.pill i{width:9px;height:9px;border-radius:50%;display:block}
+.g .pill{background:#34d3991f;color:#6ee7b7}.g .pill i{background:#34d399;box-shadow:0 0 8px #34d399}
+.y .pill{background:#fbbf241c;color:#fcd34d}.y .pill i{background:#fbbf24;box-shadow:0 0 8px #fbbf24}
+.r .pill{background:#f871711c;color:#fca5a5}.r .pill i{background:#f87171;box-shadow:0 0 8px #f87171}
+.n .pill{background:#ffffff12;color:#aab4d4}.n .pill i{background:#7c87a8}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}
+.big div{background:#00000030;border-radius:14px;padding:10px 6px;text-align:center}
+.big small{display:block;color:#93a0c2;font-size:11.5px;margin-bottom:2px}
+.big b{font-size:19px;color:#fff;direction:ltr;display:inline-block}
+.big .buy b{color:#ffd166}
+.scale{position:relative;height:8px;border-radius:9px;margin:14px 4px 4px;background:linear-gradient(270deg,#34d399 0%,#34d399 var(--b),#fbbf24 var(--b),#fbbf24 var(--f),#f87171 var(--f),#f87171 100%);opacity:.85}
+.scale span{position:absolute;top:-5px;width:4px;height:18px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px #0a0e1a;transform:translateX(50%)}
+.sl{display:flex;justify-content:space-between;font-size:11px;color:#7c87a8;margin:4px 4px 0}
+.more{display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:14px;color:#c4cce6}
+.more div{display:flex;justify-content:space-between;gap:10px;border-top:.5px solid #ffffff14;padding-top:6px}
+.more b{color:#fff;direction:ltr}
+.why{font-size:13px;color:#aab4d4;line-height:1.6;margin-top:10px;background:#ffffff08;border-radius:12px;padding:8px 10px}
+.tools{display:flex;gap:8px;margin-top:12px}
+.ghost{background:transparent;border:.5px solid #ffffff2e;color:#cfd7ee;border-radius:10px;padding:7px 12px;font-size:14px}
+.ghost.warn{color:#fca5a5;border-color:#f8717155}
+.ed{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.ed label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:#aab4d4}
+.ed label span{color:#7c87a8;font-size:11.5px;line-height:1.4}
+.ed input{background:#00000045;border:.5px solid #ffffff2a;color:#fff;border-radius:10px;padding:10px;font-size:17px;direction:ltr;text-align:right;width:100%}
+.live{font-size:11px;color:#6ee7b7}
+.guide{margin-top:22px;background:#ffffff08;border:.5px solid #ffffff17;border-radius:18px;padding:12px 14px;color:#aab4d4;font-size:13.5px;line-height:1.7}
+.guide h3{margin:0 0 6px;color:#fff;font-size:15px}
+.guide p{margin:0 0 8px}
+</style>
+<link rel="stylesheet" href="apple.css?v=1">
+</head>
+<body data-tab="entry">
+<div id="app"><div class="empty">טוען…</div></div>
+<script src="js/core.js?v=7"></script>
+<script>
+(function () {
+  var LK = 'roy-entry', S, prices = {}, open = {}, pendDel = null;
+  var $app = document.getElementById('app');
+  function load() {
+    try { S = JSON.parse(localStorage.getItem(LK)) || null; } catch (e) { S = null; }
+    if (!S || !Array.isArray(S.items)) S = { req: 10, m: 25, items: [] };
+    if (S.req == null) S.req = 10; if (S.m == null) S.m = 25;
+  }
+  function save() { S.ts = Date.now(); try { localStorage.setItem(LK, JSON.stringify(S)); } catch (e) {} }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function num(v) { var n = parseFloat(v); return isFinite(n) ? n : null; }
+  function f(n, d) { if (n == null || !isFinite(n)) return '…'; return n.toLocaleString('en-US', { maximumFractionDigits: d == null ? (Math.abs(n) >= 100 ? 0 : 2) : d, minimumFractionDigits: 0 }); }
+  function pct(n) { return n == null || !isFinite(n) ? '…' : (n * 100).toFixed(1).replace('.0', '') + '%'; }
+  function uid() { return Math.random().toString(36).slice(2, 9); }
+  var Y = 5;
+
+  /* All the math in one place */
+  function calc(it) {
+    var price = num(it.price), eps = num(it.eps), g = num(it.g), pe = num(it.pe);
+    var req = (num(S.req) || 10) / 100, m = (num(S.m) || 0) / 100, live = false;
+    var lp = prices[String(it.tk || '').toUpperCase()];
+    if (lp && lp.price) { price = lp.price; live = true; }
+    var r = { price: price, live: live, ready: price > 0 && eps != null && g != null && pe > 0 };
+    if (!r.ready) { r.sig = 'n'; r.lab = 'חסרים נתונים'; return r; }
+    if (eps <= 0) { r.ready = false; r.sig = 'n'; r.lab = 'אין רווח'; r.noEps = true; return r; }
+    var future = eps * Math.pow(1 + g / 100, Y) * pe;            /* price in 5 years if growth holds and the multiple is fair */
+    r.fair = future / Math.pow(1 + req, Y);                        /* what it is worth today for the return I want */
+    r.buy = r.fair * (1 - m);
+    r.ret = Math.pow(future / price, 1 / Y) - 1;                   /* yearly return if I buy at today's price */
+    r.implied = Math.pow(price * Math.pow(1 + req, Y) / (eps * pe), 1 / Y) - 1; /* growth the price already needs */
+    r.pe = price / eps;
+    r.future = future;
+    if (price <= r.buy) { r.sig = 'g'; r.lab = 'זול, אזור קנייה'; }
+    else if (price <= r.fair) { r.sig = 'y'; r.lab = 'הוגן, לחכות'; }
+    else { r.sig = 'r'; r.lab = 'יקר, לא לגעת'; }
+    return r;
+  }
+
+  function scale(r) {
+    /* bar from 0 to 1.5 × fair value; green up to buy price, yellow to fair, red above */
+    var max = r.fair * 1.5, pos = Math.min(Math.max(r.price / max, 0), 1) * 100;
+    return '<div class="scale" style="--b:' + (r.buy / max * 100) + '%;--f:' + (r.fair / max * 100) + '%"><span style="right:' + pos + '%"></span></div>' +
+      '<div class="sl"><span>זול</span><span>הוגן</span><span>יקר</span></div>';
+  }
+
+  function card(it) {
+    var r = calc(it), o = open[it.id] || !r.ready && !r.noEps;
+    var h = '<div class="card ' + r.sig + '"><div class="ch"><span class="tk">' + esc(it.tk) + '</span><span class="pill"><i></i>' + r.lab + '</span></div>';
+    if (r.ready) {
+      h += '<div class="big"><div><small>מחיר עכשיו' + (r.live ? ' <span class="live">חי</span>' : '') + '</small><b>' + f(r.price) + '</b></div>' +
+        '<div><small>שווי הוגן</small><b>' + f(r.fair) + '</b></div>' +
+        '<div class="buy"><small>מחיר קנייה</small><b>' + f(r.buy) + '</b></div></div>' + scale(r);
+      var gap = r.price / r.buy - 1;
+      h += '<div class="more">' +
+        (r.sig === 'g' ? '<div><span>מתחת למחיר הקנייה ב</span><b>' + pct(-gap) + '</b></div>' : '<div><span>צריכה לרדת עוד</span><b>' + pct(1 - r.buy / r.price) + '</b></div>') +
+        '<div><span>תשואה צפויה בשנה אם קונים היום</span><b>' + pct(r.ret) + '</b></div>' +
+        '<div><span>הצמיחה שהמחיר כבר מגלם</span><b>' + pct(r.implied) + '</b></div>' +
+        '<div><span>מכפיל רווח היום</span><b>' + f(r.pe, 1) + '</b></div></div>';
+      if (o) h += '<div class="why">אם הרווח למניה יגדל ' + f(num(it.g), 1) + '% בשנה, בעוד ' + Y + ' שנים הוא יהיה ' + f(num(it.eps) * Math.pow(1 + num(it.g) / 100, Y)) +
+        '. במכפיל ' + f(num(it.pe), 1) + ' המניה תהיה שווה כ ' + f(r.future) + '. כדי להרוויח ' + f(num(S.req), 1) + '% בשנה, מותר לשלם היום עד ' + f(r.fair) +
+        '. עם מרווח ביטחון של ' + f(num(S.m), 0) + '%, קונים מתחת ל ' + f(r.buy) + '.</div>';
+    } else if (r.noEps) {
+      h += '<div class="why">החברה לא רווחית, אז אי אפשר לתמחר אותה לפי רווח. כאן צריך כלי אחר (מכפיל מכירות או תזרים).</div>';
+    }
+    if (o) {
+      h += '<div class="ed">' +
+        inp(it, 'price', 'מחיר המניה היום', r.live ? 'מתעדכן אוטומטית מהגיליון' : 'מחיר אחרון') +
+        inp(it, 'eps', 'רווח למניה (EPS)', 'לשנה הקרובה') +
+        inp(it, 'g', 'צמיחה בשנה %', 'צמיחת הרווח ל 5 שנים, תהיה שמרן') +
+        inp(it, 'pe', 'מכפיל הוגן', 'הממוצע ההיסטורי שלה, או 20 עד 25 לחברה איכותית') + '</div>';
+    }
+    h += '<div class="tools"><button class="ghost" data-act="tog" data-id="' + it.id + '">' + (o ? 'סגור' : 'ערוך מספרים') + '</button>' +
+      '<button class="ghost warn" data-act="del" data-id="' + it.id + '">' + (pendDel === it.id ? 'למחוק? הקש שוב' : 'מחק') + '</button></div>';
+    return h + '</div>';
+  }
+  function inp(it, k, l, hint) {
+    return '<label>' + l + '<input inputmode="decimal" data-id="' + it.id + '" data-k="' + k + '" value="' + esc(it[k] == null ? '' : it[k]) + '"><span>' + hint + '</span></label>';
+  }
+
+  function render() {
+    var order = { g: 0, y: 1, r: 2, n: 3 };
+    var items = S.items.slice().sort(function (a, b) { return order[calc(a).sig] - order[calc(b).sig]; });
+    var h = '<header class="top"><button class="back" data-act="lab">→ המעבדה</button><h1>מחיר כניסה</h1><div class="dt">' + esc(Roy.today()) + '</div></header>';
+    h += '<p class="intro">המניה זולה או יקרה ביחס לעסק? ירוק קונים, צהוב מחכים, אדום לא נוגעים.</p>';
+    h += '<form class="add" id="addf"><input name="tk" placeholder="טיקר, למשל NVDA" maxlength="12" autocomplete="off" required><button class="btn">+ הוסף מניה</button></form>';
+    h += '<div class="set"><label>תשואה שאני דורש<input inputmode="decimal" data-set="req" value="' + esc(S.req) + '">%</label><label>מרווח ביטחון<input inputmode="decimal" data-set="m" value="' + esc(S.m) + '">%</label></div>';
+    if (!items.length) h += '<div class="empty">עוד אין מניות. הוסף טיקר למעלה, או נסה דוגמה כדי לראות איך זה עובד.<br><button class="btn" data-act="demo">נסה דוגמה</button></div>';
+    h += items.map(card).join('');
+    h += '<div class="guide"><h3>איך לקרוא את זה</h3>' +
+      '<p><b>שווי הוגן:</b> כמה מותר לשלם היום כדי להרוויח את התשואה שאתה דורש, אם החברה תצמח כמו שהכנסת.</p>' +
+      '<p><b>מחיר קנייה:</b> השווי ההוגן פחות מרווח ביטחון, כי התחזית שלך יכולה לטעות.</p>' +
+      '<p><b>הצמיחה שהמחיר מגלם:</b> אם המספר הזה גבוה בהרבה ממה שאתה מאמין, השוק כבר משלם על הרבה אופטימיות.</p>' +
+      '<p><b>ירידה גדולה במחיר:</b> קודם תבדוק שהרווחים עדיין גדלים. אם כן, המכפיל רק התכווץ, וזו הזדמנות. אם הרווחים נשברים, תעדכן את הצמיחה למטה לפני שקונים. וקונים במנות, לא בבת אחת.</p></div>';
+    $app.innerHTML = h;
+  }
+
+  $app.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var a = b.dataset.act, id = b.dataset.id;
+    if (a !== 'del') pendDel = null;
+    if (a === 'lab') { Roy.go('lab'); return; }
+    if (a === 'tog') { open[id] = !open[id]; render(); return; }
+    if (a === 'del') {
+      if (pendDel === id) { S.items = S.items.filter(function (x) { return x.id !== id; }); pendDel = null; save(); }
+      else pendDel = id;
+      render(); return;
+    }
+    if (a === 'demo') { S.items.push({ id: uid(), tk: 'DEMO', price: 150, eps: 6, g: 20, pe: 25 }); save(); render(); }
+  });
+  $app.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var tk = e.target.tk.value.trim().toUpperCase(); if (!tk) return;
+    var it = { id: uid(), tk: tk, price: null, eps: null, g: null, pe: null };
+    if (prices[tk]) it.price = prices[tk].price;
+    S.items.unshift(it); open[it.id] = true; save(); render();
+    var first = $app.querySelector('input[data-id="' + it.id + '"][data-k="eps"]'); if (first) first.focus();
+  });
+  /* Typing: save as you go, redraw on leaving the field so the keyboard stays open */
+  $app.addEventListener('input', function (e) {
+    var el = e.target;
+    if (el.dataset.set) { S[el.dataset.set] = el.value === '' ? null : num(el.value); save(); return; }
+    if (el.dataset.k) {
+      var it = S.items.filter(function (x) { return x.id === el.dataset.id; })[0]; if (!it) return;
+      it[el.dataset.k] = el.value === '' ? null : num(el.value); save();
+    }
+  });
+  $app.addEventListener('change', function (e) {
+    if (!e.target.dataset.k && !e.target.dataset.set) return;
+    setTimeout(function () {
+      var a = document.activeElement, sel = null;
+      if (a && a.dataset && a.dataset.k) sel = 'input[data-id="' + a.dataset.id + '"][data-k="' + a.dataset.k + '"]';
+      else if (a && a.dataset && a.dataset.set) sel = 'input[data-set="' + a.dataset.set + '"]';
+      render();
+      if (sel) { var n = $app.querySelector(sel); if (n) n.focus(); }
+    }, 0);
+  });
+
+  Roy.data().then(function (d) { prices = (d && d._prices) || {}; load(); render(); },
+    function () { $app.innerHTML = '<div class="empty">הדף לא נטען. נסה לרענן.</div>'; });
+})();
+</script>
+</body></html>

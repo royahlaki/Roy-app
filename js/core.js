@@ -107,7 +107,7 @@
    - Live prices from the sheet's מחירים tab update holdings and the account total.
    The sheet address and token live inside the encrypted bundle (config.sync). */
 (function () {
-  var SYNC_KEYS = ['roy-tasks', 'roy-shop', 'roy-habits', 'srl-data-v1', 'themeWatch'];
+  var SYNC_KEYS = ['roy-tasks', 'roy-shop', 'roy-habits', 'srl-data-v1', 'themeWatch', 'roy-entry'];
   var TS = 'roy-ts:';
   var DATA_PATHS = ['datasets.account', 'datasets.holdings', 'datasets.decisions', 'datasets.plan', 'datasets.research',
     'datasets.scenarios', 'datasets.theses', 'datasets.trades', 'finance.expenses', 'finance.history', 'finance.inputs',
@@ -195,6 +195,7 @@
           else if (local != null && (!row || localTs > row.ts)) seed.push({ k: 'l:' + k, v: local, ts: localTs || Date.now() });
         });
         applyPrices(data, res.prices);
+        if (res.prices) data._prices = res.prices;
         if (seed.length) send(seed);
         data._synced = res.at;
         return data;

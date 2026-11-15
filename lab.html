@@ -29,6 +29,7 @@ h1{margin:0;font-size:24px;font-weight:800;color:#fff;text-shadow:0 0 18px #8f6b
 .cnt{display:flex;gap:14px;font-size:13px;color:#bdb4e8}
 .cnt b{color:#fff}
 .ghost{background:transparent;border:1px solid #ffffff2a;color:#d7d0ff;border-radius:10px;padding:8px 12px;font-size:14px}
+.ghost.entry{display:block;width:100%;margin:-6px 0 16px;padding:11px;border-color:#ffd16666;color:#ffd166;font-weight:700}
 .ghost.on{border-color:#ffe14d;color:#ffe14d;box-shadow:0 0 10px #ffe14d44}
 .ghost.warn{border-color:#ff5c7a;color:#ff5c7a}
 .back{background:none;border:0;color:#d7d0ff;font-size:15px;padding:6px 0}
@@ -151,6 +152,7 @@ function isOpen(nid){return !!UI.open[UI.sid+':'+nid]}
 function vHome(){
  var h='<header class="top home"><h1>המעבדה</h1><div class="dt">'+esc(Roy.today())+'</div><span class="st" id="st">'+esc(status)+'</span></header>';
  h+='<form class="add" data-form="add"><input name="tk" placeholder="טיקר (למשל NVDA)" maxlength="12" required autocomplete="off" value="'+esc(PRE)+'"><input name="nm" placeholder="שם החברה (לא חובה)" autocomplete="off"><button>+ מחקר חדש</button></form>';
+ h+='<button class="ghost entry" onclick="Roy.go(\'entry\')">מחשבון מחיר כניסה: זול או יקר?</button>';
  if(!S.stocks.length)h+='<div class="empty">עוד אין מחקרים. הוסף מניה ראשונה למעלה.</div>';
  S.stocks.slice().sort(function(a,b){return(b.u||0)-(a.u||0)}).forEach(function(s){var t=stats({k:S.tree},s);
   h+='<button class="card" data-act="open" data-id="'+s.id+'"><div class="ch"><span class="tk">'+esc(s.tk)+'</span><span class="nm">'+esc(s.nm||'')+'</span>'+(s.held?'<span class="inp">בתיק</span>':'')+'<span class="pill '+stCls(s)+'">'+stLabel(s)+'</span>'+(stale(s)?'<span class="stl">לבדוק שוב</span>':'')+'</div><div class="bar"><i style="width:'+t.p+'%"></i></div><div class="cnt"><span><b>'+t.p+'%</b> נבדק</span><span>✓ <b>'+t.ok+'</b></span><span>? <b>'+t.q+'</b></span><span>🚩 <b>'+t.f+'</b></span></div>'+((s.th&&s.th.why)?'<div class="why">'+esc(s.th.why)+'</div>':'')+'</button>'});
@@ -251,7 +253,7 @@ var sy=null;window.addEventListener('scroll',function(){clearTimeout(sy);sy=setT
 render();
 })();
 </script>
-<script src="js/core.js?v=6"></script>
+<script src="js/core.js?v=7"></script>
 <script>
 Roy.data().then(function (d) {
   document.getElementById('data').textContent = JSON.stringify(d.lab || {});
