@@ -432,15 +432,19 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 .pf .sr-more{padding:4px 18px 14px;display:flex;flex-direction:column;gap:8px;background:#F7F5FF}
 .pf .sr-more .pcw{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .pf .t-pur{color:#7C3AED}
+.pf .sr .c5{align-items:center}
+.pf .rp-pill{display:inline-block;border:1.5px solid #8B5CF6;color:#6D28D9;background:#fff;border-radius:999px;padding:1px 10px;font-size:12px;font-weight:600;white-space:nowrap}
 .pf .srw.warn summary{background:#FFF1F3}
 @media (max-width:760px){
-  .pf .sr{grid-template-columns:1.3fr 1fr 1fr;row-gap:8px;padding:12px 14px}
+  .pf .sr{grid-template-columns:minmax(0,1.4fr) minmax(0,1.1fr) minmax(0,1fr) 3.4rem;gap:6px;padding:11px 12px}
   .pf .sr-h{display:none}
-  .pf .sr .c3::before{content:"הכנסות";font-size:10.5px;color:var(--g-mut)}
-  .pf .sr .c4::before{content:"רווח נקי";font-size:10.5px;color:var(--g-mut)}
-  .pf .sr .c5::before{content:"דוח";font-size:10.5px;color:var(--g-mut)}
+  .pf .sr .c3,.pf .sr .c4{display:none}
+  .pf .sr b,.pf .sr .c0 b{font-size:13.5px}
+  .pf .sr small{font-size:10.5px}
+  .pf .sr-more{padding:4px 12px 12px}
   .pf .sr-more .pcw{grid-template-columns:1fr}
 }
+@media (min-width:761px){.pf .sr-q{display:none}}
 .pf #div-card{display:flex;flex-direction:column}
 .pf #div-card .divs{flex:1;align-content:center}
 </style>
@@ -590,7 +594,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 <script src="js/core.js?v=6"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=8"></script>
+<script src="js/portfolio-page.js?v=9"></script>
 <script>
 Roy.data().then(function (d) {
   window.PF_CFG = d.config || {};

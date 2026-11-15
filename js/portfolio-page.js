@@ -456,11 +456,18 @@ window.pfDraw = () => {
           const q = (v) => { const x = el('span', ''); x.appendChild(el('b', noRep ? 'mut' : sc(v), noRep ? '—' : (v === null || v === undefined ? '—' : sgn(v)))); if (!noRep && h.q_period) x.appendChild(el('small', 'mut', h.q_period)); return x; };
           const rq = q(h.rev_q); rq.className = 'c3'; const nq = q(h.ni_q); nq.className = 'c4';
           const rp = el('span', 'c5');
-          if (h.next_report_date) { const rd = new Date(h.next_report_date + 'T00:00:00'), days = Math.ceil((rd - new Date()) / 86400000); rp.append(el('b', days >= 0 && days <= 7 ? 't-pur' : days < 0 ? 'mut' : '', `${rd.getDate()}.${rd.getMonth() + 1}`), el('small', 'mut', days >= 0 ? (days === 0 ? 'היום' : `עוד ${days} ימים`) : 'פורסם')); }
-          else rp.appendChild(el('b', 'mut', noRep ? 'קרן מדד' : '—'));
+          if (h.next_report_date) {
+            const rd = new Date(h.next_report_date + 'T00:00:00'), days = Math.ceil((rd - new Date()) / 86400000);
+            if (days >= 0 && days <= 30) {
+              const est = h.next_report_est === true || h.next_report_est === 'true';
+              const pl = el('span', 'rp-pill', `${est ? '~' : ''}${rd.getDate()}.${rd.getMonth() + 1}`);
+              pl.title = (est ? 'דוח משוער' : 'דוח') + (days === 0 ? ' היום' : ` בעוד ${days} ימים`); rp.appendChild(pl);
+            }
+          }
           sm.append(nm, val, pn, rq, nq, rp);
           r.appendChild(sm);
           const more = el('div', 'sr-more');
+          if (!noRep) more.appendChild(el('div', 'cap mut sr-q', `רבעון (${h.q_period}): הכנסות ${h.rev_q === null ? '—' : sgn(h.rev_q)} · רווח נקי ${h.ni_q === null ? '—' : sgn(h.ni_q)}`));
           if (!noRep) more.appendChild(el('div', 'cap mut', `12 חודשים (${h.y_period}): הכנסות ${h.rev_y === null ? '—' : sgn(h.rev_y)} · רווח נקי ${h.ni_y === null ? '—' : sgn(h.ni_y)}`));
           const pcw = el('div', 'pcw'); const ul = el('ul', 'pcl'), ul2 = el('ul', 'pcl');
           asList(h.pros).forEach(p => { const li = el('li', 'pro'); li.append(el('i', '', '+'), el('span', '', p)); ul.appendChild(li); });
