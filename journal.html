@@ -27,10 +27,11 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--fg);min-height:100vh;fon
 .big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:2px}
 .split{display:flex;gap:8px;margin-top:12px}
 .split div{flex:1;background:#F4FBF8;border-radius:14px;padding:8px 10px}
-.vs{display:block;font-size:12px;margin-top:2px}
-.h{font-size:16px;font-weight:700;letter-spacing:-.01em}
-.sum{font-size:14px;font-weight:700}
-.card .row:first-child{border-top:0}
+.box{border:1px solid #BFE9D9;background:#F6FCF9;border-radius:14px;padding:0 10px;margin:6px 0 4px}
+.box:empty{display:none}
+.box .row:first-child,.sub + div .row:first-child{border-top:0}
+.sub{font-size:12px;color:var(--muted);margin:12px 0 0}
+.sub[hidden]{display:none}
 .split b{display:block;font-size:17px;font-weight:700;margin-top:2px}
 .red{color:var(--red)}.green{color:var(--green)}
 table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
@@ -47,7 +48,7 @@ tr.tot td{font-weight:700;border-top:1px solid var(--fg)}
 .row .s{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pill{font-size:10px;background:rgba(192,138,0,.13);color:#8A6400;border-radius:99px;padding:1px 7px;margin-inline-start:4px}
 .plus{color:var(--green)}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.top{display:flex;justify-content:space-between;align-items:center}
 .clear{border:0;background:rgba(118,118,128,.12);color:var(--fg);border-radius:99px;padding:3px 10px;font:inherit;font-size:12px}
 .more{display:block;width:100%;margin-top:8px;border:0;background:none;color:var(--green);font:inherit;font-size:14px;font-weight:600;padding:6px}
 .empty{text-align:center;color:var(--muted);padding:20px 8px;line-height:1.7}
@@ -67,24 +68,21 @@ tr.tot td{font-weight:700;border-top:1px solid var(--fg)}
     <div class="label">יצא בחודש</div>
     <div class="big" id="total">—</div>
     <div class="split">
-      <div><span class="label">קבוע</span><b id="fixed">—</b><span class="vs" id="fixed-vs"></span></div>
-      <div><span class="label">חד פעמי</span><b id="once">—</b><span class="vs" id="once-vs"></span></div>
+      <div><span class="label">קבוע</span><b id="fixed">—</b></div>
+      <div><span class="label">חד פעמי</span><b id="once">—</b></div>
+      <div><span class="label">קבוע מול הרשימה</span><b id="vs">—</b></div>
     </div>
   </section>
   <section class="card">
-    <div class="top"><div class="h">תשלומים</div><div class="sum" id="inst-sum"></div></div>
-    <div id="inst"></div>
-  </section>
-  <section class="card">
-    <div class="top"><div class="h">חד פעמיות</div><div class="sum" id="once-sum"></div></div>
-    <div id="onces"></div>
-  </section>
-  <section class="card">
-    <div class="h">הוצאות קבועות לפי קטגוריה</div>
+    <div class="label">לפי קטגוריה</div>
     <table><thead><tr><th>קטגוריה</th><th>בפועל</th><th>רשימה</th><th>הפרש</th></tr></thead><tbody id="cats"></tbody></table>
   </section>
   <section class="card">
-    <div class="top"><div class="h" id="list-title">שאר ההוצאות</div><button class="clear" id="clear" type="button" hidden>הכול</button></div>
+    <div class="top"><div class="label" id="list-title">הוצאות אחרונות</div><button class="clear" id="clear" type="button" hidden>הכול</button></div>
+    <div class="box" id="inst"></div>
+    <div class="sub" id="once-h">חד פעמיות</div>
+    <div id="onces"></div>
+    <div class="sub" id="rest-h">השאר</div>
     <div id="list"></div>
     <button class="more" id="more" type="button" hidden>עוד</button>
   </section>
@@ -100,35 +98,28 @@ tr.tot td{font-weight:700;border-top:1px solid var(--fg)}
   var el = function (tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   var J = null, month = null, cat = null, all = false;
 
-  function rowEl(r, showTag) {
+  function rowEl(r) {
     var row = el('div', 'row'), n = el('div', 'n', r.n);
-    if (showTag && r.o) n.append(el('span', 'pill', 'חד פעמי'));
     n.append(el('span', 's', [r.note, r.c, r.p].filter(Boolean).join(' · ')));
     var a = Number(r.a);
     row.append(el('div', 'd', dm(r.d)), n, el('div', a > 0 ? 'plus' : '', a > 0 ? '+' + ils(a) : ils(a)));
     return row;
   }
-  function fill(box, list) { box.replaceChildren(); if (!list.length) box.append(el('div', 'empty', 'אין')); list.forEach(function (r) { box.append(rowEl(r)); }); }
-  function vsTxt(id, v, label) { var e = $(id); e.textContent = (Math.abs(v) < 0.5 ? 'בדיוק ' : v > 0 ? sgn(v) + ' מעל ' : sgn(v) + ' מתחת ל') + label; e.className = 'vs ' + (v > 0.5 ? 'red' : 'green'); }
+  function fill(box, list) { box.replaceChildren(); list.forEach(function (r) { box.append(rowEl(r)); }); }
 
   function draw() {
     var meta = J.months.find(function (m) { return m.month === month; }) || { budget: {} };
     var rows = J.rows.filter(function (r) { return r.m === month; });
     var byDate = function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; };
     var spent = function (rs) { return -rs.reduce(function (s, r) { return s + Number(r.a); }, 0); };
-    var onces = rows.filter(function (r) { return r.o; }).sort(byDate);
     var fixedRows = rows.filter(function (r) { return !r.o; });
-    var total = spent(rows), once = spent(onces), fixed = total - once;
+    var total = spent(rows), once = total - spent(fixedRows), fixed = total - once;
     var budget = Object.keys(meta.budget).reduce(function (s, k) { return s + Number(meta.budget[k]); }, 0);
-    var ob = Number(meta.oneoff_budget || 0);
     $('sub').textContent = rows.length + ' חיובים · ' + (meta.label || month);
     $('total').textContent = ils(total);
-    $('fixed').textContent = ils(fixed); vsTxt('fixed-vs', fixed - budget, 'הרשימה');
-    $('once').textContent = ils(once); if (ob) vsTxt('once-vs', once - ob, 'הממוצע'); else $('once-vs').textContent = '';
-
-    var inst = fixedRows.filter(function (r) { return r.i; }).sort(function (a, b) { return Number(a.a) - Number(b.a); });
-    fill($('inst'), inst); $('inst-sum').textContent = ils(spent(inst));
-    fill($('onces'), onces); $('once-sum').textContent = ils(once);
+    $('fixed').textContent = ils(fixed);
+    $('once').textContent = ils(once);
+    var vs = fixed - budget; $('vs').textContent = sgn(vs); $('vs').className = vs > 0 ? 'red' : 'green';
 
     var by = {};
     fixedRows.forEach(function (r) { by[r.c] = (by[r.c] || 0) - Number(r.a); });
@@ -141,16 +132,20 @@ tr.tot td{font-weight:700;border-top:1px solid var(--fg)}
       tr.onclick = function () { cat = cat === k ? null : k; all = false; draw(); };
       tb.append(tr);
     });
-    var vs = fixed - budget, tt = el('tr', 'tot');
+    var tt = el('tr', 'tot');
     tt.append(el('td', '', 'סך הכול'), el('td', '', ils(fixed)), el('td', '', ils(budget)), el('td', vs > 0 ? 'red' : 'green', sgn(vs))); tb.append(tt);
 
-    var list = fixedRows.filter(function (r) { return !r.i && (!cat || r.c === cat); }).sort(byDate);
-    $('list-title').textContent = cat ? cat + ' · ' + ils(by[cat]) : 'שאר ההוצאות';
+    var pick = function (r) { return !cat || r.c === cat; };
+    fill($('inst'), fixedRows.filter(function (r) { return r.i && pick(r); }).sort(function (a, b) { return Number(a.a) - Number(b.a); }));
+    var onces = rows.filter(function (r) { return r.o && pick(r); }).sort(byDate);
+    fill($('onces'), onces); $('once-h').hidden = !onces.length;
+    var list = fixedRows.filter(function (r) { return !r.i && pick(r); }).sort(byDate);
+    $('rest-h').hidden = !list.length;
+    $('list-title').textContent = cat ? cat + ' · ' + ils(by[cat] || 0) : 'הוצאות אחרונות';
     $('clear').hidden = !cat;
     var box = $('list'); box.replaceChildren();
-    if (!list.length) box.append(el('div', 'empty', cat ? 'הכול בתשלומים למעלה' : 'אין חיובים'));
-    list.slice(0, all ? list.length : 15).forEach(function (r) { box.append(rowEl(r)); });
-    $('more').hidden = list.length <= 15; $('more').textContent = all ? 'פחות' : 'עוד ' + (list.length - 15);
+    list.slice(0, all ? list.length : 12).forEach(function (r) { box.append(rowEl(r)); });
+    $('more').hidden = list.length <= 12; $('more').textContent = all ? 'פחות' : 'עוד ' + (list.length - 12);
   }
 
   $('more').onclick = function () { all = !all; draw(); };
