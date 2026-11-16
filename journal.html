@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>יומן הוצאות</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--fg:#0B3B2E;--muted:#5E8A7C;--line:#D3EEE4;--red:#E8435F;--green:#10A37F;--panel:#fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:Heebo,system-ui,sans-serif;color:var(--fg);min-height:100vh;font-variant-numeric:tabular-nums;
+  background:linear-gradient(180deg,#EFFBF6 0%,#ECF9F5 50%,#EAF6FB 100%);background-attachment:fixed}
+#boot{color:var(--muted);text-align:center;padding:calc(var(--top-h,0px) + 60px) 20px}
+.j{max-width:640px;margin:0 auto;padding:0 14px calc(var(--nav-h,0px) + 24px);display:flex;flex-direction:column;gap:12px}
+.head{margin:0 -14px 4px;text-align:center;padding:calc(var(--top-h,0px) + 22px) 16px 22px;position:relative;
+  background:linear-gradient(170deg,#06705A 0%,#0F9F7A 60%,#3CC9A3 100%);border-radius:0 0 32px 32px;color:#fff}
+.head h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.025em}
+.head .dt{font-size:13px;color:rgba(255,255,255,.8);margin-top:4px}
+.back{position:absolute;right:14px;top:calc(var(--top-h,0px) + 24px);background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:99px;padding:5px 12px;font-size:13px;font-weight:600}
+.seg[hidden]{display:none}
+.seg{display:flex;gap:6px;overflow-x:auto;padding:2px 0}
+.seg button{flex:0 0 auto;border:0;background:rgba(118,118,128,.12);color:var(--muted);border-radius:99px;padding:6px 14px;font:inherit;font-size:13px;font-weight:500}
+.seg button.on{background:#fff;color:var(--fg);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08),0 3px 8px rgba(0,0,0,.06)}
+.card{background:var(--panel);border-radius:22px;padding:16px;box-shadow:0 1px 2px rgba(11,59,46,.04),0 8px 26px rgba(5,150,105,.09)}
+.label{font-size:12px;color:var(--muted)}
+.big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:2px}
+.split{display:flex;gap:8px;margin-top:12px}
+.split div{flex:1;background:#F4FBF8;border-radius:14px;padding:8px 10px}
+.split b{display:block;font-size:17px;font-weight:700;margin-top:2px}
+.red{color:var(--red)}.green{color:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+th{font-size:11px;font-weight:500;color:var(--muted);text-align:left;padding:4px 0}
+th:first-child,td:first-child{text-align:right}
+td{padding:7px 0;border-top:.5px solid var(--line);text-align:left}
+tr.c{cursor:pointer}
+tr.c.on td{background:#F0FAF6}
+tr.tot td{font-weight:700;border-top:1px solid var(--fg)}
+.row{display:grid;grid-template-columns:3.2rem 1fr auto;gap:8px;align-items:center;padding:8px 0;border-top:.5px solid var(--line);font-size:14px}
+.row .d{font-size:12px;color:var(--muted)}
+.row .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{font-size:10px;background:rgba(192,138,0,.13);color:#8A6400;border-radius:99px;padding:1px 7px;margin-inline-start:4px}
+.plus{color:var(--green)}
+.top{display:flex;justify-content:space-between;align-items:center}
+.clear{border:0;background:rgba(118,118,128,.12);color:var(--fg);border-radius:99px;padding:3px 10px;font:inherit;font-size:12px}
+.more{display:block;width:100%;margin-top:8px;border:0;background:none;color:var(--green);font:inherit;font-size:14px;font-weight:600;padding:6px}
+.empty{text-align:center;color:var(--muted);padding:20px 8px;line-height:1.7}
+</style>
+<link rel="stylesheet" href="apple.css?v=1">
+</head>
+<body data-tab="journal">
+<div id="boot">טוען…</div>
+<div class="j" id="root" hidden>
+  <header class="head">
+    <button class="back" type="button" onclick="Roy.go('finance')">כספים</button>
+    <h1>יומן הוצאות</h1>
+    <div class="dt" id="sub"></div>
+  </header>
+  <div class="seg" id="months"></div>
+  <section class="card">
+    <div class="label">יצא בחודש</div>
+    <div class="big" id="total">—</div>
+    <div class="split">
+      <div><span class="label">קבוע</span><b id="fixed">—</b></div>
+      <div><span class="label">חד פעמי</span><b id="once">—</b></div>
+      <div><span class="label">מול הרשימה</span><b id="vs">—</b></div>
+    </div>
+  </section>
+  <section class="card">
+    <div class="label">לפי קטגוריה</div>
+    <table><thead><tr><th>קטגוריה</th><th>בפועל</th><th>רשימה</th><th>הפרש</th></tr></thead><tbody id="cats"></tbody></table>
+  </section>
+  <section class="card">
+    <div class="top"><div class="label" id="list-title">הוצאות אחרונות</div><button class="clear" id="clear" type="button" hidden>הכול</button></div>
+    <div id="list"></div>
+    <button class="more" id="more" type="button" hidden>עוד</button>
+  </section>
+</div>
+<script src="js/core.js?v=8"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var nf = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+  var ils = function (v) { return '₪' + nf.format(Math.abs(Math.round(v))); };
+  var sgn = function (v) { return Math.round(v) > 0 ? '⁦+' + ils(v) + '⁩' : Math.round(v) < 0 ? '⁦-' + ils(v) + '⁩' : '₪0'; };
+  var dm = function (iso) { var p = String(iso).split('-'); return p[2] + '.' + p[1]; };
+  var el = function (tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  var J = null, month = null, cat = null, all = false;
+
+  function draw() {
+    var meta = J.months.find(function (m) { return m.month === month; }) || { budget: {} };
+    var rows = J.rows.filter(function (r) { return r.m === month; });
+    var spent = function (rs) { return -rs.reduce(function (s, r) { return s + Number(r.a); }, 0); };
+    var total = spent(rows), once = spent(rows.filter(function (r) { return r.o; }));
+    var budget = Object.keys(meta.budget).reduce(function (s, k) { return s + Number(meta.budget[k]); }, 0);
+    $('sub').textContent = rows.length + ' חיובים · ' + (meta.label || month);
+    $('total').textContent = ils(total);
+    $('fixed').textContent = ils(total - once);
+    $('once').textContent = ils(once);
+    var vs = total - budget; $('vs').textContent = sgn(vs); $('vs').className = vs > 0 ? 'red' : 'green';
+
+    var by = {};
+    rows.forEach(function (r) { by[r.c] = (by[r.c] || 0) - Number(r.a); });
+    Object.keys(meta.budget).forEach(function (k) { if (!(k in by)) by[k] = 0; });
+    var tb = $('cats'); tb.replaceChildren();
+    Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) {
+      var b = Number(meta.budget[k] || 0), d = by[k] - b, tr = el('tr', 'c' + (cat === k ? ' on' : ''));
+      tr.append(el('td', '', k), el('td', '', ils(by[k])), el('td', '', b ? ils(b) : '—'));
+      var td = el('td', d > 0.5 ? 'red' : d < -0.5 ? 'green' : '', Math.abs(d) < 0.5 ? '—' : sgn(d)); tr.append(td);
+      tr.onclick = function () { cat = cat === k ? null : k; all = false; draw(); };
+      tb.append(tr);
+    });
+    var tt = el('tr', 'tot'); tt.append(el('td', '', 'סך הכול'), el('td', '', ils(total)), el('td', '', ils(budget)), el('td', vs > 0 ? 'red' : 'green', sgn(vs))); tb.append(tt);
+
+    var list = rows.filter(function (r) { return !cat || r.c === cat; }).sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });
+    $('list-title').textContent = cat ? cat + ' · ' + ils(by[cat]) : 'הוצאות אחרונות';
+    $('clear').hidden = !cat;
+    var box = $('list'); box.replaceChildren();
+    if (!list.length) box.append(el('div', 'empty', 'אין חיובים'));
+    list.slice(0, all ? list.length : 15).forEach(function (r) {
+      var row = el('div', 'row'), n = el('div', 'n', r.n);
+      if (r.o) n.append(el('span', 'pill', 'חד פעמי'));
+      n.append(el('span', 's', [r.c, r.p, r.note].filter(Boolean).join(' · ')));
+      row.append(el('div', 'd', dm(r.d)), n, el('div', Number(r.a) > 0 ? 'plus' : '', Number(r.a) > 0 ? '+' + ils(r.a) : ils(r.a)));
+      box.append(row);
+    });
+    $('more').hidden = list.length <= 15; $('more').textContent = all ? 'פחות' : 'עוד ' + (list.length - 15);
+  }
+
+  $('more').onclick = function () { all = !all; draw(); };
+  $('clear').onclick = function () { cat = null; draw(); };
+
+  Roy.data().then(function (d) {
+    J = (d.finance && d.finance.journal) || { months: [], rows: [] };
+    $('boot').hidden = true; $('root').hidden = false;
+    if (!J.months.length) { $('list').append(el('div', 'empty', 'היומן עוד ריק')); return; }
+    month = J.months[J.months.length - 1].month;
+    var seg = $('months');
+    J.months.forEach(function (m) {
+      var b = el('button', m.month === month ? 'on' : '', m.label); b.type = 'button';
+      b.onclick = function () { month = m.month; cat = null; all = false; seg.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); draw(); };
+      seg.append(b);
+    });
+    seg.hidden = J.months.length < 2;
+    draw();
+  });
+})();
+</script>
+</body>
+</html>

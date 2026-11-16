@@ -41,6 +41,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 #cash .km-led { grid-template-columns: 3rem 1fr auto auto !important; }
 #cash .km-led .d { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); align-self: center; }
 .km-add[hidden] { display: none; }
+.km-jlink { margin-top: 12px; border: 0; background: rgba(255,255,255,.2); color: #fff; border-radius: 99px; padding: 7px 16px; font: inherit; font-size: 14px; font-weight: 600; }
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -51,6 +52,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
   <header class="km-head">
     <h1 class="km-title">הכספים שלי</h1>
     <div class="dt" data-today></div>
+    <button type="button" class="km-jlink" onclick="Roy.go('journal')">יומן הוצאות וניתוח</button>
   </header>
 
   <section class="km-card" id="bank">
@@ -262,7 +264,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 </style>
 </div>
 
-<script src="js/core.js?v=7"></script>
+<script src="js/core.js?v=8"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
 <script src="js/finance-page.js?v=8"></script>
