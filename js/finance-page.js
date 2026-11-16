@@ -106,44 +106,54 @@ dash.calc('networth', {
     const want = months.some((r) => r.month === prm.extra_month) ? prm.extra_month : months[0].month;
     if (document.activeElement !== sel) sel.value = want;
     const xi = months.findIndex((r) => r.month === want);
-    const body = $('scenario-table').tBodies[0]; body.replaceChildren();
-    const cell = (v, cls) => {
-      const td = document.createElement('td'); if (cls) td.className = cls;
-      const s = document.createElement('span'); s.textContent = bal(v);
-      s.className = v < limit - 0.5 ? 'km-crit' : v < 0 ? 'km-neg' : 'km-pos';
-      td.appendChild(s); return td;
-    };
-    const shown = window.kmAll ? months.length : Math.min(3, months.length);
-    months.slice(0, shown).forEach((r, i) => {
-      const tr = document.createElement('tr'); if (X && i === xi) tr.className = 'km-x';
-      const paid = r['paid_' + sc] + T - (X && i > xi ? X : 0);
-      const end = r['bal_' + sc] + T - (X && i >= xi ? X : 0);
-      const th = document.createElement('th'); th.scope = 'row'; th.textContent = label(r);
-      tr.append(th, cell(end, 'km-end'));
-      body.appendChild(tr);
-    });
-    $('more').textContent = window.kmAll ? 'פחות' : 'עוד חודשים';
-    // room left on the card without dropping below 0 on any coming 15th
     const ends = months.map((r, i) => r['bal_' + sc] + T - (X && i >= xi ? X : 0));
-    let k = months.findIndex((r) => !r.card_known); if (k < 0) k = 0;
-    const lowAhead = Math.min(...ends.slice(k)), room = lowAhead - Math.max(limit, 0);
-    const fixedLow = k > 0 ? Math.min(...ends.slice(0, k)) : Infinity;
-    const rl = $('room-label'), rv = $('room-v');
-    const due = '15.' + (toDate(months[k].month).getUTCMonth() + 1);
-    if (fixedLow < limit - 0.5) {
-      const bi = ends.findIndex((v) => v < limit - 0.5);
-      rl.textContent = 'ב15.' + (toDate(months[bi].month).getUTCMonth() + 1) + ' תהיה מתחת למסגרת';
-      rv.textContent = bal(ends[bi]); rv.className = 'km-room-v km-neg';
-    } else if (room <= 0) {
-      rl.textContent = 'אין מקום להוצאות נוספות באשראי לחיוב ' + due;
-      rv.textContent = ils(0); rv.className = 'km-room-v km-neg';
+    drawYear(months.slice(0, 12), ends.slice(0, 12), limit, X ? xi : -1);
+    const low = $('low'); low.replaceChildren();
+    const bi = ends.findIndex((v) => v < limit - 0.5);
+    if (bi > -1) {
+      low.className = 'km-low km-neg';
+      low.append('ב15.' + (toDate(months[bi].month).getUTCMonth() + 1) + ' מתחת למסגרת: ');
+      const v = document.createElement('b'); v.textContent = bal(ends[bi]); low.append(v);
     } else {
-      rl.textContent = 'עוד מותר להוציא באשראי, לחיוב ' + due;
-      rv.textContent = ils(room); rv.className = 'km-room-v';
+      const li = ends.slice(0, 12).reduce((m, v, i, a) => (v < a[m] ? i : m), 0);
+      low.className = 'km-low' + (ends[li] < 0 ? ' km-neg' : '');
+      low.append('הנקודה הכי נמוכה: ');
+      const v = document.createElement('b'); v.textContent = bal(ends[li]); low.append(v);
+      low.append(' ב15.' + (toDate(months[li].month).getUTCMonth() + 1));
     }
+    const n = Math.min(12, ends.length) - 1;
+    if (n > 0) { low.append(' · בעוד שנה: '); const e = document.createElement('b'); e.textContent = bal(ends[n]); low.append(e); }
   }
 
-  $('more').addEventListener('click', () => { window.kmAll = !window.kmAll; const M = dash.data('months'), I = dash.data('inputs'); if (M.status === 'ok' && I.status === 'ok') drawScenario(M.data, I.data); });
+  function drawYear(months, ends, limit, xi) {
+    const box = $('yr'); box.querySelectorAll('svg').forEach((s) => s.remove());
+    const W = Math.max(260, box.clientWidth), H = 120, m = { t: 8, r: 4, b: 18, l: 4 };
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('direction', 'ltr');
+    const lo = Math.min(0, ...ends), hi = Math.max(0, ...ends);
+    const y = d3.scaleLinear([lo, hi || 1], [H - m.b, m.t]).nice();
+    const x = d3.scaleBand(d3.range(months.length), [m.l, W - m.r]).paddingInner(0.28);
+    const li = ends.reduce((k, v, i) => (v < ends[k] ? i : k), 0);
+    svg.append('g').selectAll('rect').data(ends).join('rect')
+      .attr('x', (v, i) => x(i)).attr('width', x.bandwidth())
+      .attr('y', (v) => Math.min(y(v), y(0))).attr('height', (v) => Math.max(1.5, Math.abs(y(v) - y(0))))
+      .attr('rx', 3)
+      .attr('fill', (v, i) => (v < limit - 0.5 ? 'var(--km-red)' : v < 0 ? 'color-mix(in srgb, var(--km-red) 40%, transparent)' : i === li || i === xi ? 'var(--color-ok)' : 'color-mix(in srgb, var(--color-ok) 35%, transparent)'));
+    svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', css('--cds-chart-axis'));
+    if (limit >= lo && limit < 0) svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(limit)).attr('y2', y(limit)).attr('stroke', 'var(--km-red)').attr('stroke-dasharray', '3 3').attr('opacity', .6);
+    svg.append('g').selectAll('text').data(months).join('text').attr('x', (r, i) => x(i) + x.bandwidth() / 2).attr('y', H - 4).attr('text-anchor', 'middle')
+      .attr('fill', css('--color-fg-muted')).style('font-size', '9px').text((r) => mon(toDate(r.month)));
+    const t = tip(box);
+    svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'transparent').on('pointermove pointerdown', (ev) => {
+      const [px] = d3.pointer(ev, svg.node());
+      const sx = px * (W / svg.node().getBoundingClientRect().width || 1);
+      const i = Math.max(0, Math.min(months.length - 1, Math.floor((sx - m.l) / x.step())));
+      const d = toDate(months[i].month);
+      fillTip(t, '15.' + (d.getUTCMonth() + 1) + '.' + String(d.getUTCFullYear()).slice(2), [['', bal(ends[i]), ends[i] < 0 ? 'km-neg' : '']]);
+      const scale = box.clientWidth / W;
+      placeTip(box, t, (x(i) + x.bandwidth() / 2) * scale, Math.min(y(ends[i]), y(0)) * scale);
+    }).on('pointerleave', () => { t.style.display = 'none'; });
+  }
+
 
   function saveLedger(rows) {
     const sh = (window.parent && window.parent.Roy && window.parent.Roy._sync) || (window.Roy && window.Roy._sync);
