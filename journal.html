@@ -25,32 +25,42 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--fg);min-height:100vh;fon
 .card{background:var(--panel);border-radius:22px;padding:16px;box-shadow:0 1px 2px rgba(11,59,46,.04),0 8px 26px rgba(5,150,105,.09)}
 .label{font-size:12px;color:var(--muted)}
 .big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:2px}
-.split{display:flex;gap:8px;margin-top:12px}
-.split div{flex:1;background:#F4FBF8;border-radius:14px;padding:8px 10px}
-.box{border:1px solid #BFE9D9;background:#F6FCF9;border-radius:14px;padding:0 10px;margin:6px 0 4px}
-.box:empty{display:none}
-.box .row:first-child,.sub + div .row:first-child{border-top:0}
-.sub{font-size:12px;color:var(--muted);margin:12px 0 0}
-.sub[hidden]{display:none}
-.split b{display:block;font-size:17px;font-weight:700;margin-top:2px}
+.split{display:flex;gap:8px;margin-top:10px}
+.split div{flex:1;background:#F4FBF8;border-radius:12px;padding:6px 10px}
+.split b{display:block;font-size:16px;font-weight:700}
+.split .warn{background:#FFF5F6;box-shadow:inset 0 0 0 1.5px var(--red)}
+.split .warn b{color:var(--red)}
+.split .warn.ok{background:#F4FBF8;box-shadow:inset 0 0 0 1.5px var(--green)}
+.split .warn.ok b{color:var(--green)}
 .red{color:var(--red)}.green{color:var(--green)}
-table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
-th{font-size:11px;font-weight:500;color:var(--muted);text-align:left;padding:4px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:11px;font-weight:500;color:var(--muted);text-align:left;padding:0 0 4px}
 th:first-child,td:first-child{text-align:right}
+th:last-child,td:last-child{padding-inline-start:14px;width:4.5rem}
 td{padding:7px 0;border-top:.5px solid var(--line);text-align:left}
 tr.c{cursor:pointer}
 tr.c.on td{background:#F0FAF6}
-tr.tot td{font-weight:700;border-top:1px solid var(--fg)}
-tr.tot.all td{font-size:15px;border-top:2px solid var(--fg)}
-tr.sec td{font-size:12px;color:var(--muted);padding-top:16px;border-top:0}
-.row{display:grid;grid-template-columns:3.2rem 1fr auto;gap:8px;align-items:center;padding:10px 0;border-top:.5px solid var(--line);font-size:15px;font-weight:500}
+tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
+.unx{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:0 12px}
+.unx summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:14px;font-weight:600;cursor:pointer}
+.unx summary::-webkit-details-marker{display:none}
+.unx summary span::after{content:' ▾';color:var(--muted);font-size:12px}
+.unx[open] summary span::after{content:' ▴'}
+.unx table{margin-bottom:6px}
+.final{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--fg);font-size:15px;font-weight:700}
+.final b{font-size:18px}
+.row{display:grid;grid-template-columns:3rem 1fr auto;gap:8px;align-items:center;padding:10px 6px;border-top:.5px solid var(--line);font-size:15px;font-weight:500}
+.row:first-child{border-top:0}
 .row > div:last-child{font-weight:700}
+.row.inst{background:#EEF8F3;border-top-color:#fff;border-radius:10px}
+.row.inst .n{font-weight:600}
 .row .d{font-size:12px;color:var(--muted)}
 .row .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .s{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pill{font-size:10px;background:rgba(192,138,0,.13);color:#8A6400;border-radius:99px;padding:1px 7px;margin-inline-start:4px}
+.pill{font-size:10px;font-weight:600;border-radius:99px;padding:1px 7px;margin-inline-start:6px;vertical-align:2px}
+.pill.gold{background:rgba(192,138,0,.14);color:#8A6400}
+.pill.n{background:rgba(5,150,105,.12);color:#047857}
 .plus{color:var(--green)}
-.top{display:flex;justify-content:space-between;align-items:center}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .clear{border:0;background:rgba(118,118,128,.12);color:var(--fg);border-radius:99px;padding:3px 10px;font:inherit;font-size:12px}
 .more{display:block;width:100%;margin-top:8px;border:0;background:none;color:var(--green);font:inherit;font-size:14px;font-weight:600;padding:6px}
 .empty{text-align:center;color:var(--muted);padding:20px 8px;line-height:1.7}
@@ -71,20 +81,19 @@ tr.sec td{font-size:12px;color:var(--muted);padding-top:16px;border-top:0}
     <div class="big" id="total">—</div>
     <div class="split">
       <div><span class="label">קבוע</span><b id="fixed">—</b></div>
-      <div><span class="label">חד פעמי</span><b id="once">—</b></div>
-      <div><span class="label">קבוע מול הרשימה</span><b id="vs">—</b></div>
+      <div class="warn" id="vs-box"><span class="label">הפרש</span><b id="vs">—</b></div>
+      <div><span class="label">לא צפוי</span><b id="once">—</b></div>
     </div>
   </section>
   <section class="card">
-    <div class="label">לפי קטגוריה</div>
-    <table><thead><tr><th>קטגוריה</th><th>בפועל</th><th>רשימה</th><th>הפרש</th></tr></thead><tbody id="cats"></tbody></table>
+    <table><thead><tr><th>קטגוריה</th><th>קבוע</th><th>יצא</th><th>הפרש</th></tr></thead><tbody id="cats"></tbody></table>
+    <details class="unx" id="unx"><summary><span>הוצאות לא צפויות</span><b id="unx-sum"></b></summary>
+      <table><tbody id="ocats"></tbody></table>
+    </details>
+    <div class="final"><span>סך הכול יצא</span><b id="final"></b></div>
   </section>
   <section class="card">
     <div class="top"><div class="label" id="list-title">הוצאות אחרונות</div><button class="clear" id="clear" type="button" hidden>הכול</button></div>
-    <div class="box" id="inst"></div>
-    <div class="sub" id="once-h">חד פעמיות</div>
-    <div id="onces"></div>
-    <div class="sub" id="rest-h">השאר</div>
     <div id="list"></div>
     <button class="more" id="more" type="button" hidden>עוד</button>
   </section>
@@ -101,13 +110,13 @@ tr.sec td{font-size:12px;color:var(--muted);padding-top:16px;border-top:0}
   var J = null, month = null, cat = null, all = false;
 
   function rowEl(r) {
-    var row = el('div', 'row'), n = el('div', 'n', r.n);
-    n.append(el('span', 's', [r.note, r.c, r.p].filter(Boolean).join(' · ')));
+    var row = el('div', 'row' + (r.i ? ' inst' : '')), n = el('div', 'n', r.n);
+    if (r.x) n.append(el('span', 'pill n', r.x));
+    if (r.o) n.append(el('span', 'pill gold', 'חד פעמי'));
     var a = Number(r.a);
     row.append(el('div', 'd', dm(r.d)), n, el('div', a > 0 ? 'plus' : '', a > 0 ? '+' + ils(a) : ils(a)));
     return row;
   }
-  function fill(box, list) { box.replaceChildren(); list.forEach(function (r) { box.append(rowEl(r)); }); }
 
   function draw() {
     var meta = J.months.find(function (m) { return m.month === month; }) || { budget: {} };
@@ -115,52 +124,44 @@ tr.sec td{font-size:12px;color:var(--muted);padding-top:16px;border-top:0}
     var byDate = function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; };
     var spent = function (rs) { return -rs.reduce(function (s, r) { return s + Number(r.a); }, 0); };
     var fixedRows = rows.filter(function (r) { return !r.o; });
-    var total = spent(rows), once = total - spent(fixedRows), fixed = total - once;
+    var total = spent(rows), fixed = spent(fixedRows), once = total - fixed;
     var budget = Object.keys(meta.budget).reduce(function (s, k) { return s + Number(meta.budget[k]); }, 0);
-    $('sub').textContent = rows.length + ' חיובים · ' + (meta.label || month);
+    var vs = fixed - budget;
+    $('sub').textContent = (meta.label || month);
     $('total').textContent = ils(total);
     $('fixed').textContent = ils(fixed);
+    $('vs').textContent = ils(vs); $('vs-box').className = 'warn' + (vs > 0 ? '' : ' ok');
     $('once').textContent = ils(once);
-    var vs = fixed - budget; $('vs').textContent = sgn(vs); $('vs').className = vs > 0 ? 'red' : 'green';
 
     var by = {}, ob = {};
     fixedRows.forEach(function (r) { by[r.c] = (by[r.c] || 0) - Number(r.a); });
     rows.filter(function (r) { return r.o; }).forEach(function (r) { ob[r.c] = (ob[r.c] || 0) - Number(r.a); });
     Object.keys(meta.budget).forEach(function (k) { if (!(k in by)) by[k] = 0; });
-    var tb = $('cats'); tb.replaceChildren();
-    var line = function (k, act, b, key) {
+    var line = function (tb, k, act, b, key) {
       var d = b == null ? null : act - b, tr = el('tr', 'c' + (cat === key ? ' on' : ''));
-      tr.append(el('td', '', k), el('td', '', ils(act)), el('td', '', b ? ils(b) : '—'));
-      tr.append(el('td', d == null ? '' : d > 0.5 ? 'red' : d < -0.5 ? 'green' : '', d == null || Math.abs(d) < 0.5 ? '—' : sgn(d)));
+      tr.append(el('td', '', k), el('td', '', b ? ils(b) : b === null ? '' : '—'), el('td', '', ils(act)));
+      tr.append(el('td', d == null ? '' : d > 0.5 ? 'red' : d < -0.5 ? 'green' : '', d == null ? '' : Math.abs(d) < 0.5 ? '—' : sgn(d)));
       tr.onclick = function () { cat = cat === key ? null : key; all = false; draw(); };
       tb.append(tr);
     };
-    var sub = function (k, act, b, cls) {
-      var d = b == null ? null : act - b, tr = el('tr', cls);
-      tr.append(el('td', '', k), el('td', '', ils(act)), el('td', '', b ? ils(b) : '—'), el('td', d == null ? '' : d > 0 ? 'red' : 'green', d == null ? '—' : sgn(d)));
-      tb.append(tr);
-    };
-    Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) { line(k, by[k], Number(meta.budget[k] || 0), k); });
-    sub('קבוע', fixed, budget, 'tot');
-    var ok = Object.keys(ob).sort(function (a, b) { return ob[b] - ob[a]; });
-    if (ok.length) {
-      var hr = el('tr', 'sec'); var td = el('td', '', 'חד פעמיות'); td.colSpan = 4; hr.append(td); tb.append(hr);
-      ok.forEach(function (k) { line(k, ob[k], null, '1:' + k); });
-      sub('חד פעמי', once, null, 'tot');
-    }
-    sub('סך הכול', total, null, 'tot all');
+    var tb = $('cats'); tb.replaceChildren();
+    Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) { line(tb, k, by[k], Number(meta.budget[k] || 0), k); });
+    var tt = el('tr', 'tot'); tt.append(el('td', ''), el('td', '', ils(budget)), el('td', '', ils(fixed)), el('td', '')); tb.append(tt);
+    var ot = $('ocats'); ot.replaceChildren();
+    Object.keys(ob).sort(function (a, b) { return ob[b] - ob[a]; }).forEach(function (k) { line(ot, k, ob[k], null, '1:' + k); });
+    $('unx').hidden = !once; $('unx-sum').textContent = ils(once);
+    $('final').textContent = ils(total);
 
     var pick = function (r) { if (!cat) return true; var one = cat.indexOf('1:') === 0; return one ? (r.o && r.c === cat.slice(2)) : (!r.o && r.c === cat); };
-    fill($('inst'), fixedRows.filter(function (r) { return r.i && pick(r); }).sort(function (a, b) { return Number(a.a) - Number(b.a); }));
-    var onces = rows.filter(function (r) { return r.o && pick(r); }).sort(byDate);
-    fill($('onces'), onces); $('once-h').hidden = !onces.length;
-    var list = fixedRows.filter(function (r) { return !r.i && pick(r); }).sort(byDate);
-    $('rest-h').hidden = !list.length;
-    $('list-title').textContent = cat ? (cat.indexOf('1:') === 0 ? cat.slice(2) + ' · חד פעמי · ' + ils(ob[cat.slice(2)] || 0) : cat + ' · ' + ils(by[cat] || 0)) : 'הוצאות אחרונות';
+    var inst = rows.filter(function (r) { return r.i && pick(r); }).sort(function (a, b) { return Number(a.a) - Number(b.a); });
+    var rest = rows.filter(function (r) { return !r.i && pick(r); }).sort(byDate);
+    var list = inst.concat(rest), lim = all ? list.length : inst.length + 12;
+    $('list-title').textContent = cat ? (cat.indexOf('1:') === 0 ? cat.slice(2) : cat) : 'הוצאות אחרונות';
     $('clear').hidden = !cat;
     var box = $('list'); box.replaceChildren();
-    list.slice(0, all ? list.length : 12).forEach(function (r) { box.append(rowEl(r)); });
-    $('more').hidden = list.length <= 12; $('more').textContent = all ? 'פחות' : 'עוד ' + (list.length - 12);
+    if (!list.length) box.append(el('div', 'empty', 'אין חיובים'));
+    list.slice(0, lim).forEach(function (r) { box.append(rowEl(r)); });
+    $('more').hidden = list.length <= lim && !all; $('more').textContent = all ? 'פחות' : 'עוד ' + (list.length - lim);
   }
 
   $('more').onclick = function () { all = !all; draw(); };
