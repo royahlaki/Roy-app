@@ -67,10 +67,6 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
 .pill.gold{background:rgba(192,138,0,.14);color:#8A6400}
 .pill.n{background:rgba(5,150,105,.12);color:#047857}
 .plus{color:var(--green)}
-.tg{display:inline-block;width:6px;height:6px;border-radius:50%;margin-inline-start:7px;vertical-align:2px;background:var(--green)}
-.tg.x{background:var(--red)}
-.ins{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.5}
-.ins b{font-weight:600;color:var(--fg)}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .clear{border:0;background:rgba(118,118,128,.12);color:var(--fg);border-radius:99px;padding:3px 10px;font:inherit;font-size:12px}
 .more{display:block;width:100%;margin-top:8px;border:0;background:none;color:var(--green);font:inherit;font-size:14px;font-weight:600;padding:6px}
@@ -96,7 +92,6 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
         <div class="warn" data-k="vs-box"><span class="label">הפרש</span><b data-k="vs">—</b></div>
         <div><span class="label">לא צפוי</span><b data-k="once">—</b></div>
       </div>
-      <div class="ins" data-k="ins"></div>
     </section>
     <section class="card">
       <table><thead><tr><th>קטגוריה</th><th>קבוע</th><th>יצא</th><th>הפרש</th></tr></thead><tbody data-k="cats"></tbody></table>
@@ -112,7 +107,7 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
     </section>
   </template>
 </div>
-<script src="js/core.js?v=9"></script>
+<script src="js/core.js?v=10"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -140,35 +135,19 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
     function draw() {
       var fixedRows = rows.filter(function (r) { return !r.o; });
       var total = spent(rows), fixed = spent(fixedRows), once = total - fixed;
-      Object.keys(meta.targets || {}).forEach(function (k) { if (k in meta.budget) meta.budget[k] = meta.targets[k]; });
       var budget = Object.keys(meta.budget).reduce(function (s, k) { return s + Number(meta.budget[k]); }, 0);
       var vs = fixed - budget;
       q('total').textContent = ils(total);
       q('fixed').textContent = ils(fixed);
       q('vs').textContent = ils(vs); q('vs-box').className = 'warn' + (vs > 0 ? '' : ' ok');
       q('once').textContent = ils(once);
-      var T = meta.targets, over = [], n = 0;
-      Object.keys(T).forEach(function (k) {
-        n++;
-        var a = k === 'לא צפוי' ? once : spent(fixedRows.filter(function (r) { return r.c === k; }));
-        if (a > T[k] + 0.5) over.push([k, a - T[k]]);
-      });
-      q('once').className = once > (T['לא צפוי'] == null ? Infinity : T['לא צפוי'] + 0.5) ? 'red' : '';
-      over.sort(function (a, b) { return b[1] - a[1]; });
-      var ins = q('ins'); ins.replaceChildren();
-      if (n) {
-        ins.append(el('b', '', 'יעדים ' + (n - over.length) + '/' + n));
-        ins.append(over.length ? ' · מעל היעד: ' + over.map(function (o) { return o[0] + ' ' + ils(o[1]); }).join(' · ') : ' · עמדת בכל היעדים');
-      }
       var by = {}, ob = {};
       fixedRows.forEach(function (r) { by[r.c] = (by[r.c] || 0) - Number(r.a); });
       rows.filter(function (r) { return r.o; }).forEach(function (r) { ob[r.c] = (ob[r.c] || 0) - Number(r.a); });
       Object.keys(meta.budget).forEach(function (k) { if (!(k in by)) by[k] = 0; });
       var line = function (tb, k, act, b, key) {
         var d = b == null ? null : act - b, tr = el('tr', 'c' + (cat === key ? ' on' : ''));
-        var nm = el('td', '', k), t = key === k ? meta.targets[k] : undefined;
-        if (t != null) nm.append(el('i', 'tg' + (act > t + 0.5 ? ' x' : '')));
-        tr.append(nm, el('td', '', b ? ils(b) : b === null ? '' : '—'), el('td', '', ils(act)));
+        tr.append(el('td', '', k), el('td', '', b ? ils(b) : b === null ? '' : '—'), el('td', '', ils(act)));
         tr.append(el('td', d == null ? '' : d > 0.5 ? 'red' : d < -0.5 ? 'green' : '', d == null ? '' : Math.abs(d) < 0.5 ? '—' : sgn(d)));
         tr.onclick = function () { cat = cat === key ? null : key; all = false; draw(); };
         tb.append(tr);
@@ -198,7 +177,6 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
 
   Roy.data().then(function (d) {
     var J = (d.finance && d.finance.journal) || { months: [], rows: [] };
-    var TG = (d.finance && d.finance.targets) || J.targets || {};
     if (J.months.length && J.months[0].r) {
       var rs = [];
       J.months = J.months.map(function (mm) {
@@ -206,7 +184,7 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
           var f = x[5] || '';
           rs.push({ d: x[0].length === 5 ? mm.m.slice(0, 4) + '-' + x[0] : x[0], n: x[1], a: x[2], p: x[3], c: x[4], m: mm.m, i: f.indexOf('i') > -1, o: f.indexOf('o') > -1, x: x[6] });
         });
-        return { month: mm.m, label: mm.l, budget: mm.b || J.budget, oneoff_budget: J.oneoff_budget, targets: TG };
+        return { month: mm.m, label: mm.l, budget: mm.b || J.budget, oneoff_budget: J.oneoff_budget };
       });
       J.rows = rs;
     }

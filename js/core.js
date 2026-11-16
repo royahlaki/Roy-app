@@ -111,7 +111,7 @@
   var TS = 'roy-ts:';
   var DATA_PATHS = ['datasets.account', 'datasets.holdings', 'datasets.decisions', 'datasets.plan', 'datasets.research',
     'datasets.scenarios', 'datasets.theses', 'datasets.trades', 'finance.expenses', 'finance.history', 'finance.inputs',
-    'finance.oneoffs', 'finance.ledger', 'finance.cash', 'finance.journal', 'finance.targets', 'lab'];
+    'finance.oneoffs', 'finance.ledger', 'finance.cash', 'finance.journal', 'lab'];
   var cfg = null, queue = {}, timer = null;
   var ls = window.localStorage, rawSet = Storage.prototype.setItem;
 
