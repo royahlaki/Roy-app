@@ -18,13 +18,20 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--fg);min-height:100vh;fon
 .head h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.025em}
 .head .dt{font-size:13px;color:rgba(255,255,255,.8);margin-top:4px}
 .back{position:absolute;right:14px;top:calc(var(--top-h,0px) + 24px);background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:99px;padding:5px 12px;font-size:13px;font-weight:600}
-.seg[hidden]{display:none}
 .seg{display:flex;gap:6px;overflow-x:auto;padding:2px 0}
 .seg button{flex:0 0 auto;border:0;background:rgba(118,118,128,.12);color:var(--muted);border-radius:99px;padding:6px 14px;font:inherit;font-size:13px;font-weight:500}
 .seg button.on{background:#fff;color:var(--fg);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08),0 3px 8px rgba(0,0,0,.06)}
 .card{background:var(--panel);border-radius:22px;padding:16px;box-shadow:0 1px 2px rgba(11,59,46,.04),0 8px 26px rgba(5,150,105,.09)}
 .label{font-size:12px;color:var(--muted)}
 .big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:2px}
+.mon{display:flex;flex-direction:column;gap:12px}
+.mon > summary{list-style:none;display:flex;justify-content:space-between;align-items:center;background:var(--panel);border-radius:18px;padding:14px 16px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgba(11,59,46,.04),0 6px 18px rgba(5,150,105,.08)}
+.mon > summary::-webkit-details-marker{display:none}
+.mon > summary span::after{content:' ▾';color:var(--muted);font-size:12px;font-weight:500}
+.mon[open] > summary span::after{content:' ▴'}
+.mon[open] > summary{background:#E6F6EF}
+.mon-body{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+#months{display:flex;flex-direction:column;gap:10px}
 .split{display:flex;gap:8px;margin-top:10px}
 .split div{flex:1;background:#F4FBF8;border-radius:12px;padding:6px 10px}
 .split b{display:block;font-size:16px;font-weight:700}
@@ -75,28 +82,30 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
     <h1>יומן הוצאות</h1>
     <div class="dt" id="sub"></div>
   </header>
-  <div class="seg" id="months"></div>
-  <section class="card">
-    <div class="label">יצא בחודש</div>
-    <div class="big" id="total">—</div>
-    <div class="split">
-      <div><span class="label">קבוע</span><b id="fixed">—</b></div>
-      <div class="warn" id="vs-box"><span class="label">הפרש</span><b id="vs">—</b></div>
-      <div><span class="label">לא צפוי</span><b id="once">—</b></div>
-    </div>
-  </section>
-  <section class="card">
-    <table><thead><tr><th>קטגוריה</th><th>קבוע</th><th>יצא</th><th>הפרש</th></tr></thead><tbody id="cats"></tbody></table>
-    <details class="unx" id="unx"><summary><span>הוצאות לא צפויות</span><b id="unx-sum"></b></summary>
-      <table><tbody id="ocats"></tbody></table>
-    </details>
-    <div class="final"><span>סך הכול יצא</span><b id="final"></b></div>
-  </section>
-  <section class="card">
-    <div class="top"><div class="label" id="list-title">הוצאות אחרונות</div><button class="clear" id="clear" type="button" hidden>הכול</button></div>
-    <div id="list"></div>
-    <button class="more" id="more" type="button" hidden>עוד</button>
-  </section>
+  <div id="months"></div>
+  <template id="tpl">
+    <section class="card">
+      <div class="label">יצא בחודש</div>
+      <div class="big" data-k="total">—</div>
+      <div class="split">
+        <div><span class="label">קבוע</span><b data-k="fixed">—</b></div>
+        <div class="warn" data-k="vs-box"><span class="label">הפרש</span><b data-k="vs">—</b></div>
+        <div><span class="label">לא צפוי</span><b data-k="once">—</b></div>
+      </div>
+    </section>
+    <section class="card">
+      <table><thead><tr><th>קטגוריה</th><th>קבוע</th><th>יצא</th><th>הפרש</th></tr></thead><tbody data-k="cats"></tbody></table>
+      <details class="unx" data-k="unx"><summary><span>הוצאות לא צפויות</span><b data-k="unx-sum"></b></summary>
+        <table><tbody data-k="ocats"></tbody></table>
+      </details>
+      <div class="final"><span>סך הכול יצא</span><b data-k="final"></b></div>
+    </section>
+    <section class="card">
+      <div class="top"><div class="label" data-k="list-title">הוצאות אחרונות</div><button class="clear" data-k="clear" type="button" hidden>הכול</button></div>
+      <div data-k="list"></div>
+      <button class="more" data-k="more" type="button" hidden>עוד</button>
+    </section>
+  </template>
 </div>
 <script src="js/core.js?v=8"></script>
 <script>
@@ -118,68 +127,70 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
     return row;
   }
 
-  function draw() {
-    var meta = J.months.find(function (m) { return m.month === month; }) || { budget: {} };
-    var rows = J.rows.filter(function (r) { return r.m === month; });
+  function render(meta, rows, root) {
+    var q = function (k) { return root.querySelector('[data-k="' + k + '"]'); };
+    var cat = null, all = false;
     var byDate = function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; };
     var spent = function (rs) { return -rs.reduce(function (s, r) { return s + Number(r.a); }, 0); };
-    var fixedRows = rows.filter(function (r) { return !r.o; });
-    var total = spent(rows), fixed = spent(fixedRows), once = total - fixed;
-    var budget = Object.keys(meta.budget).reduce(function (s, k) { return s + Number(meta.budget[k]); }, 0);
-    var vs = fixed - budget;
-    $('sub').textContent = (meta.label || month);
-    $('total').textContent = ils(total);
-    $('fixed').textContent = ils(fixed);
-    $('vs').textContent = ils(vs); $('vs-box').className = 'warn' + (vs > 0 ? '' : ' ok');
-    $('once').textContent = ils(once);
-
-    var by = {}, ob = {};
-    fixedRows.forEach(function (r) { by[r.c] = (by[r.c] || 0) - Number(r.a); });
-    rows.filter(function (r) { return r.o; }).forEach(function (r) { ob[r.c] = (ob[r.c] || 0) - Number(r.a); });
-    Object.keys(meta.budget).forEach(function (k) { if (!(k in by)) by[k] = 0; });
-    var line = function (tb, k, act, b, key) {
-      var d = b == null ? null : act - b, tr = el('tr', 'c' + (cat === key ? ' on' : ''));
-      tr.append(el('td', '', k), el('td', '', b ? ils(b) : b === null ? '' : '—'), el('td', '', ils(act)));
-      tr.append(el('td', d == null ? '' : d > 0.5 ? 'red' : d < -0.5 ? 'green' : '', d == null ? '' : Math.abs(d) < 0.5 ? '—' : sgn(d)));
-      tr.onclick = function () { cat = cat === key ? null : key; all = false; draw(); };
-      tb.append(tr);
-    };
-    var tb = $('cats'); tb.replaceChildren();
-    Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) { line(tb, k, by[k], Number(meta.budget[k] || 0), k); });
-    var tt = el('tr', 'tot'); tt.append(el('td', ''), el('td', '', ils(budget)), el('td', '', ils(fixed)), el('td', '')); tb.append(tt);
-    var ot = $('ocats'); ot.replaceChildren();
-    Object.keys(ob).sort(function (a, b) { return ob[b] - ob[a]; }).forEach(function (k) { line(ot, k, ob[k], null, '1:' + k); });
-    $('unx').hidden = !once; $('unx-sum').textContent = ils(once);
-    $('final').textContent = ils(total);
-
-    var pick = function (r) { if (!cat) return true; var one = cat.indexOf('1:') === 0; return one ? (r.o && r.c === cat.slice(2)) : (!r.o && r.c === cat); };
-    var inst = rows.filter(function (r) { return r.i && pick(r); }).sort(function (a, b) { return Number(a.a) - Number(b.a); });
-    var rest = rows.filter(function (r) { return !r.i && pick(r); }).sort(byDate);
-    var list = inst.concat(rest), lim = all ? list.length : inst.length + 12;
-    $('list-title').textContent = cat ? (cat.indexOf('1:') === 0 ? cat.slice(2) : cat) : 'הוצאות אחרונות';
-    $('clear').hidden = !cat;
-    var box = $('list'); box.replaceChildren();
-    if (!list.length) box.append(el('div', 'empty', 'אין חיובים'));
-    list.slice(0, lim).forEach(function (r) { box.append(rowEl(r)); });
-    $('more').hidden = list.length <= lim && !all; $('more').textContent = all ? 'פחות' : 'עוד ' + (list.length - lim);
+    function draw() {
+      var fixedRows = rows.filter(function (r) { return !r.o; });
+      var total = spent(rows), fixed = spent(fixedRows), once = total - fixed;
+      var budget = Object.keys(meta.budget).reduce(function (s, k) { return s + Number(meta.budget[k]); }, 0);
+      var vs = fixed - budget;
+      q('total').textContent = ils(total);
+      q('fixed').textContent = ils(fixed);
+      q('vs').textContent = ils(vs); q('vs-box').className = 'warn' + (vs > 0 ? '' : ' ok');
+      q('once').textContent = ils(once);
+      var by = {}, ob = {};
+      fixedRows.forEach(function (r) { by[r.c] = (by[r.c] || 0) - Number(r.a); });
+      rows.filter(function (r) { return r.o; }).forEach(function (r) { ob[r.c] = (ob[r.c] || 0) - Number(r.a); });
+      Object.keys(meta.budget).forEach(function (k) { if (!(k in by)) by[k] = 0; });
+      var line = function (tb, k, act, b, key) {
+        var d = b == null ? null : act - b, tr = el('tr', 'c' + (cat === key ? ' on' : ''));
+        tr.append(el('td', '', k), el('td', '', b ? ils(b) : b === null ? '' : '—'), el('td', '', ils(act)));
+        tr.append(el('td', d == null ? '' : d > 0.5 ? 'red' : d < -0.5 ? 'green' : '', d == null ? '' : Math.abs(d) < 0.5 ? '—' : sgn(d)));
+        tr.onclick = function () { cat = cat === key ? null : key; all = false; draw(); };
+        tb.append(tr);
+      };
+      var tb = q('cats'); tb.replaceChildren();
+      Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) { line(tb, k, by[k], Number(meta.budget[k] || 0), k); });
+      var tt = el('tr', 'tot'); tt.append(el('td', ''), el('td', '', ils(budget)), el('td', '', ils(fixed)), el('td', '')); tb.append(tt);
+      var ot = q('ocats'); ot.replaceChildren();
+      Object.keys(ob).sort(function (a, b) { return ob[b] - ob[a]; }).forEach(function (k) { line(ot, k, ob[k], null, '1:' + k); });
+      q('unx').hidden = !once; q('unx-sum').textContent = ils(once);
+      q('final').textContent = ils(total);
+      var pick = function (r) { if (!cat) return true; var one = cat.indexOf('1:') === 0; return one ? (r.o && r.c === cat.slice(2)) : (!r.o && r.c === cat); };
+      var inst = rows.filter(function (r) { return r.i && pick(r); }).sort(function (a, b) { return Number(a.a) - Number(b.a); });
+      var rest = rows.filter(function (r) { return !r.i && pick(r); }).sort(byDate);
+      var list = inst.concat(rest), lim = all ? list.length : inst.length + 12;
+      q('list-title').textContent = cat ? (cat.indexOf('1:') === 0 ? cat.slice(2) : cat) : 'הוצאות אחרונות';
+      q('clear').hidden = !cat;
+      var box = q('list'); box.replaceChildren();
+      if (!list.length) box.append(el('div', 'empty', 'אין חיובים'));
+      list.slice(0, lim).forEach(function (r) { box.append(rowEl(r)); });
+      q('more').hidden = list.length <= lim && !all; q('more').textContent = all ? 'פחות' : 'עוד ' + (list.length - lim);
+    }
+    q('more').onclick = function () { all = !all; draw(); };
+    q('clear').onclick = function () { cat = null; draw(); };
+    draw();
   }
 
-  $('more').onclick = function () { all = !all; draw(); };
-  $('clear').onclick = function () { cat = null; draw(); };
-
   Roy.data().then(function (d) {
-    J = (d.finance && d.finance.journal) || { months: [], rows: [] };
+    var J = (d.finance && d.finance.journal) || { months: [], rows: [] };
     $('boot').hidden = true; $('root').hidden = false;
-    if (!J.months.length) { $('list').append(el('div', 'empty', 'היומן עוד ריק')); return; }
-    month = J.months[J.months.length - 1].month;
-    var seg = $('months');
-    J.months.forEach(function (m) {
-      var b = el('button', m.month === month ? 'on' : '', m.label); b.type = 'button';
-      b.onclick = function () { month = m.month; cat = null; all = false; seg.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); draw(); };
-      seg.append(b);
+    var box = $('months');
+    if (!J.months.length) { box.append(el('div', 'empty', 'היומן עוד ריק')); return; }
+    $('sub').textContent = J.months.length + ' חודשים';
+    J.months.slice().sort(function (a, b) { return a.month < b.month ? 1 : -1; }).forEach(function (m, i) {
+      var rows = J.rows.filter(function (r) { return r.m === m.month; });
+      var det = el('details', 'mon'), sum = el('summary');
+      sum.append(el('span', '', m.label), el('b', '', ils(-rows.reduce(function (s, r) { return s + Number(r.a); }, 0))));
+      det.append(sum);
+      var body = el('div', 'mon-body'); body.append($('tpl').content.cloneNode(true)); det.append(body);
+      render(m, rows, body);
+      if (i === 0) det.open = true;
+      box.append(det);
     });
-    seg.hidden = J.months.length < 2;
-    draw();
   });
 })();
 </script>
