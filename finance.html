@@ -154,6 +154,8 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
     </div>
     <div class="km-list" id="subs-list"></div>
   </section>
+
+  <section class="km-card an" id="analysis" hidden></section>
 </div>
 
 <style>
@@ -261,6 +263,56 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-low b { color: var(--color-fg); font-weight: 600; }
 .km-low.km-neg b, .km-low.km-neg { color: var(--km-red); }
 .km-fhead { margin-top: 18px; align-items: center; }
+
+/* Analysis block: wide screens only */
+#analysis { display: none !important; }
+@media (min-width: 1024px) {
+  #analysis:not([hidden]) { display: block !important; grid-column: 1 / -1; padding: 22px 24px; }
+}
+.an-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.an-head span { font-size: 20px; font-weight: 800; }
+.an-head small { font-size: 13px; color: var(--color-fg-muted); }
+.an-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1300px) { .an-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.an-p { background: #F7FCFA; border: 1px solid var(--color-border-line); border-radius: 14px; padding: 16px; min-width: 0; display: flex; flex-direction: column; }
+.an-h { font-size: 14px; font-weight: 700; color: var(--color-fg); }
+.an-big { font-size: 30px; font-weight: 800; line-height: 1.15; margin-top: 6px; }
+.an-sub { font-size: 12px; color: var(--color-fg-muted); margin: 2px 0 10px; }
+.an-red { color: var(--km-red); }
+.an-green { color: var(--color-ok); }
+.an-ax { font-size: 11px; fill: var(--color-fg-muted); font-family: Heebo, sans-serif; }
+.an-val { font-size: 10px; fill: var(--color-fg); font-weight: 600; font-family: Heebo, sans-serif; }
+.an-fc { font-size: 13px; margin-top: 10px; line-height: 1.6; }
+.an-fc b { font-weight: 700; }
+.an-note { font-size: 11.5px; color: var(--color-fg-muted); margin-top: 6px; line-height: 1.5; }
+.an-mini { font-size: 12px; color: var(--color-fg-muted); margin: 10px 0 4px; }
+.an-row { display: grid; grid-template-columns: 8.5rem 1fr 3.4rem; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; }
+.an-row span i { font-style: normal; font-size: 10px; color: #C08A00; margin-inline-start: 4px; }
+.an-row b { text-align: left; font-weight: 600; color: var(--km-red); }
+.an-track { height: 6px; background: var(--color-border-line); border-radius: 3px; overflow: hidden; }
+.an-track i { display: block; height: 100%; background: var(--km-red); border-radius: 3px; }
+.an-hab { margin-top: 8px; }
+.an-hab-t { display: flex; justify-content: space-between; font-size: 13px; }
+.an-hab-t b { font-size: 18px; font-weight: 800; }
+.an-hbar { position: relative; height: 10px; background: var(--color-border-line); border-radius: 5px; margin: 6px 0 4px; }
+.an-hbar i { position: absolute; top: 0; bottom: 0; right: 0; background: #ff8a98; border-radius: 5px; }
+.an-hbar u { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--color-fg); text-decoration: none; }
+.an-hab-s { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-fg-muted); }
+.an-eq { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: auto; padding-top: 14px; }
+.an-eq div { background: #fff; border: 1px solid var(--color-border-line); border-radius: 10px; padding: 8px; text-align: center; }
+.an-eq b { display: block; font-size: 17px; font-weight: 800; }
+.an-eq span { display: block; font-size: 11px; color: var(--color-fg-muted); line-height: 1.3; margin-top: 2px; }
+.an-cal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.an-tile { background: #fff; border: 1px solid var(--color-border-line); border-radius: 10px; padding: 7px 8px; min-height: 64px; }
+.an-tile.h2 { background: #FFE7EA; border-color: #FFC2CA; }
+.an-tile.h3 { background: #ff4d63; border-color: #ff4d63; color: #fff; }
+.an-tile.lt { background: #E3F7EF; border-color: #A9E5CF; }
+.an-tm { font-size: 11px; opacity: .75; }
+.an-ta { font-size: 15px; font-weight: 700; }
+.an-tn { font-size: 10px; line-height: 1.3; margin-top: 2px; opacity: .9; }
+.an-leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-fg-muted); margin-top: 8px; }
+.an-leg span { width: 10px; height: 10px; border-radius: 3px; margin-inline-start: 6px; }
+.an-leg span.h3 { background: #ff4d63; } .an-leg span.h2 { background: #FFE7EA; border: 1px solid #FFC2CA; } .an-leg span.lt { background: #E3F7EF; border: 1px solid #A9E5CF; }
 </style>
 </div>
 
@@ -268,6 +320,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
 <script src="js/finance-page.js?v=11"></script>
+<script src="js/analysis.js?v=1"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
@@ -275,6 +328,7 @@ Roy.data().then(function (d) {
   document.getElementById('boot').hidden = true;
   document.getElementById('dash-root').hidden = false;
   financeMain();
+  try { financeAnalysis(f); } catch (e) { console.error(e); }
 }, function () { document.getElementById('boot').textContent = 'הכספים לא נטענו. נסה לרענן.'; });
 </script>
 </body>
