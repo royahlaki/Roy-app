@@ -41,6 +41,8 @@ td{padding:7px 0;border-top:.5px solid var(--line);text-align:left}
 tr.c{cursor:pointer}
 tr.c.on td{background:#F0FAF6}
 tr.tot td{font-weight:700;border-top:1px solid var(--fg)}
+tr.tot.all td{font-size:15px;border-top:2px solid var(--fg)}
+tr.sec td{font-size:12px;color:var(--muted);padding-top:16px;border-top:0}
 .row{display:grid;grid-template-columns:3.2rem 1fr auto;gap:8px;align-items:center;padding:10px 0;border-top:.5px solid var(--line);font-size:15px;font-weight:500}
 .row > div:last-child{font-weight:700}
 .row .d{font-size:12px;color:var(--muted)}
@@ -121,27 +123,40 @@ tr.tot td{font-weight:700;border-top:1px solid var(--fg)}
     $('once').textContent = ils(once);
     var vs = fixed - budget; $('vs').textContent = sgn(vs); $('vs').className = vs > 0 ? 'red' : 'green';
 
-    var by = {};
+    var by = {}, ob = {};
     fixedRows.forEach(function (r) { by[r.c] = (by[r.c] || 0) - Number(r.a); });
+    rows.filter(function (r) { return r.o; }).forEach(function (r) { ob[r.c] = (ob[r.c] || 0) - Number(r.a); });
     Object.keys(meta.budget).forEach(function (k) { if (!(k in by)) by[k] = 0; });
     var tb = $('cats'); tb.replaceChildren();
-    Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) {
-      var b = Number(meta.budget[k] || 0), d = by[k] - b, tr = el('tr', 'c' + (cat === k ? ' on' : ''));
-      tr.append(el('td', '', k), el('td', '', ils(by[k])), el('td', '', b ? ils(b) : '—'));
-      tr.append(el('td', d > 0.5 ? 'red' : d < -0.5 ? 'green' : '', Math.abs(d) < 0.5 ? '—' : sgn(d)));
-      tr.onclick = function () { cat = cat === k ? null : k; all = false; draw(); };
+    var line = function (k, act, b, key) {
+      var d = b == null ? null : act - b, tr = el('tr', 'c' + (cat === key ? ' on' : ''));
+      tr.append(el('td', '', k), el('td', '', ils(act)), el('td', '', b ? ils(b) : '—'));
+      tr.append(el('td', d == null ? '' : d > 0.5 ? 'red' : d < -0.5 ? 'green' : '', d == null || Math.abs(d) < 0.5 ? '—' : sgn(d)));
+      tr.onclick = function () { cat = cat === key ? null : key; all = false; draw(); };
       tb.append(tr);
-    });
-    var tt = el('tr', 'tot');
-    tt.append(el('td', '', 'סך הכול'), el('td', '', ils(fixed)), el('td', '', ils(budget)), el('td', vs > 0 ? 'red' : 'green', sgn(vs))); tb.append(tt);
+    };
+    var sub = function (k, act, b, cls) {
+      var d = b == null ? null : act - b, tr = el('tr', cls);
+      tr.append(el('td', '', k), el('td', '', ils(act)), el('td', '', b ? ils(b) : '—'), el('td', d == null ? '' : d > 0 ? 'red' : 'green', d == null ? '—' : sgn(d)));
+      tb.append(tr);
+    };
+    Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) { line(k, by[k], Number(meta.budget[k] || 0), k); });
+    sub('קבוע', fixed, budget, 'tot');
+    var ok = Object.keys(ob).sort(function (a, b) { return ob[b] - ob[a]; });
+    if (ok.length) {
+      var hr = el('tr', 'sec'); var td = el('td', '', 'חד פעמיות'); td.colSpan = 4; hr.append(td); tb.append(hr);
+      ok.forEach(function (k) { line(k, ob[k], null, '1:' + k); });
+      sub('חד פעמי', once, null, 'tot');
+    }
+    sub('סך הכול', total, null, 'tot all');
 
-    var pick = function (r) { return !cat || r.c === cat; };
+    var pick = function (r) { if (!cat) return true; var one = cat.indexOf('1:') === 0; return one ? (r.o && r.c === cat.slice(2)) : (!r.o && r.c === cat); };
     fill($('inst'), fixedRows.filter(function (r) { return r.i && pick(r); }).sort(function (a, b) { return Number(a.a) - Number(b.a); }));
     var onces = rows.filter(function (r) { return r.o && pick(r); }).sort(byDate);
     fill($('onces'), onces); $('once-h').hidden = !onces.length;
     var list = fixedRows.filter(function (r) { return !r.i && pick(r); }).sort(byDate);
     $('rest-h').hidden = !list.length;
-    $('list-title').textContent = cat ? cat + ' · ' + ils(by[cat] || 0) : 'הוצאות אחרונות';
+    $('list-title').textContent = cat ? (cat.indexOf('1:') === 0 ? cat.slice(2) + ' · חד פעמי · ' + ils(ob[cat.slice(2)] || 0) : cat + ' · ' + ils(by[cat] || 0)) : 'הוצאות אחרונות';
     $('clear').hidden = !cat;
     var box = $('list'); box.replaceChildren();
     list.slice(0, all ? list.length : 12).forEach(function (r) { box.append(rowEl(r)); });
