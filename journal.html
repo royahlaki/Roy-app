@@ -24,13 +24,13 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--fg);min-height:100vh;fon
 .card{background:var(--panel);border-radius:22px;padding:16px;box-shadow:0 1px 2px rgba(11,59,46,.04),0 8px 26px rgba(5,150,105,.09)}
 .label{font-size:12px;color:var(--muted)}
 .big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:2px}
-.mon{display:flex;flex-direction:column;gap:12px}
+.mon{display:block}
 .mon > summary{list-style:none;display:flex;justify-content:space-between;align-items:center;background:var(--panel);border-radius:18px;padding:14px 16px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 1px 2px rgba(11,59,46,.04),0 6px 18px rgba(5,150,105,.08)}
 .mon > summary::-webkit-details-marker{display:none}
 .mon > summary span::after{content:' ▾';color:var(--muted);font-size:12px;font-weight:500}
 .mon[open] > summary span::after{content:' ▴'}
 .mon[open] > summary{background:#E6F6EF}
-.mon-body{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.mon-body{display:flex;flex-direction:column;gap:12px;margin:12px 0 6px}
 #months{display:flex;flex-direction:column;gap:10px}
 .split{display:flex;gap:8px;margin-top:10px}
 .split div{flex:1;background:#F4FBF8;border-radius:12px;padding:6px 10px}
@@ -177,6 +177,17 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
 
   Roy.data().then(function (d) {
     var J = (d.finance && d.finance.journal) || { months: [], rows: [] };
+    if (J.months.length && J.months[0].r) {
+      var rs = [];
+      J.months = J.months.map(function (mm) {
+        mm.r.forEach(function (x) {
+          var f = x[5] || '';
+          rs.push({ d: x[0].length === 5 ? mm.m.slice(0, 4) + '-' + x[0] : x[0], n: x[1], a: x[2], p: x[3], c: x[4], m: mm.m, i: f.indexOf('i') > -1, o: f.indexOf('o') > -1, x: x[6] });
+        });
+        return { month: mm.m, label: mm.l, budget: mm.b || J.budget, oneoff_budget: J.oneoff_budget };
+      });
+      J.rows = rs;
+    }
     $('boot').hidden = true; $('root').hidden = false;
     var box = $('months');
     if (!J.months.length) { box.append(el('div', 'empty', 'היומן עוד ריק')); return; }
