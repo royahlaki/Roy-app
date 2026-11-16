@@ -91,12 +91,11 @@ dash.calc('networth', {
     lines.forEach(([k, v, cls]) => { const r = document.createElement('div'); r.textContent = (k ? k + ' ' : '') + v; if (cls) r.className = cls; t.appendChild(r); });
   };
 
-  document.querySelectorAll('.km-seg button').forEach((btn) => btn.addEventListener('click', () => dash.setParams({ scenario: btn.dataset.s })));
 
   function drawScenario(months, inputs) {
     const p = inputs[0], prm = dash.params(), limit = Number(p.limit);
     const T = Number(prm.transfer) || 0, X = Number(prm.vacation) || 0;
-    const sc = prm.scenario === 'c' ? 'cautious' : 'normal';
+    const sc = 'normal';
     const sel = $('w-month');
     const label = (r) => mon(toDate(r.month)) + ' ' + String(toDate(r.month).getUTCFullYear()).slice(2);
     if (sel.options.length !== months.length || sel.options[0].value !== months[0].month) {
@@ -108,21 +107,6 @@ dash.calc('networth', {
     const xi = months.findIndex((r) => r.month === want);
     const ends = months.map((r, i) => r['bal_' + sc] + T - (X && i >= xi ? X : 0));
     drawYear(months.slice(0, 12), ends.slice(0, 12), limit, X ? xi : -1);
-    const low = $('low'); low.replaceChildren();
-    const bi = ends.findIndex((v) => v < limit - 0.5);
-    if (bi > -1) {
-      low.className = 'km-low km-neg';
-      low.append('ב15.' + (toDate(months[bi].month).getUTCMonth() + 1) + ' מתחת למסגרת: ');
-      const v = document.createElement('b'); v.textContent = bal(ends[bi]); low.append(v);
-    } else {
-      const li = ends.slice(0, 12).reduce((m, v, i, a) => (v < a[m] ? i : m), 0);
-      low.className = 'km-low' + (ends[li] < 0 ? ' km-neg' : '');
-      low.append('הנקודה הכי נמוכה: ');
-      const v = document.createElement('b'); v.textContent = bal(ends[li]); low.append(v);
-      low.append(' ב15.' + (toDate(months[li].month).getUTCMonth() + 1));
-    }
-    const n = Math.min(12, ends.length) - 1;
-    if (n > 0) { low.append(' · בעוד שנה: '); const e = document.createElement('b'); e.textContent = bal(ends[n]); low.append(e); }
   }
 
   function drawYear(months, ends, limit, xi) {
@@ -137,7 +121,7 @@ dash.calc('networth', {
       .attr('x', (v, i) => x(i)).attr('width', x.bandwidth())
       .attr('y', (v) => Math.min(y(v), y(0))).attr('height', (v) => Math.max(1.5, Math.abs(y(v) - y(0))))
       .attr('rx', 3)
-      .attr('fill', (v, i) => (v < limit - 0.5 ? 'var(--km-red)' : v < 0 ? 'color-mix(in srgb, var(--km-red) 40%, transparent)' : i === li || i === xi ? 'var(--color-ok)' : 'color-mix(in srgb, var(--color-ok) 35%, transparent)'));
+      .attr('fill', (v, i) => (v < limit - 0.5 ? 'var(--km-red)' : v < 0 ? 'color-mix(in srgb, var(--km-red) 40%, transparent)' : i === li || i === xi ? '#2F80C9' : 'rgba(47,128,201,.28)'));
     svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', css('--cds-chart-axis'));
     if (limit >= lo && limit < 0) svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(limit)).attr('y2', y(limit)).attr('stroke', 'var(--km-red)').attr('stroke-dasharray', '3 3').attr('opacity', .6);
     svg.append('g').selectAll('text').data(months).join('text').attr('x', (r, i) => x(i) + x.bandwidth() / 2).attr('y', H - 4).attr('text-anchor', 'middle')
@@ -224,14 +208,10 @@ dash.calc('networth', {
     const sorted = rows.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
     const have = sorted.reduce((s, r) => s + (r.kind === 'in' ? 1 : -1) * Number(r.amount), 0);
     const el = $('cash-now'); el.textContent = bal(have); el.className = 'km-big' + (have < 0 ? ' km-neg' : '');
-    const ym = todayIso().slice(0, 7), cats = {};
+    const ym = todayIso().slice(0, 7);
     let month = 0;
-    sorted.forEach((r) => { if (r.kind === 'out' && String(r.date).slice(0, 7) === ym) { month += Number(r.amount); cats[r.cat || 'אחר'] = (cats[r.cat || 'אחר'] || 0) + Number(r.amount); } });
+    sorted.forEach((r) => { if (r.kind === 'out' && String(r.date).slice(0, 7) === ym) { month += Number(r.amount); } });
     $('cash-month').textContent = ils(month);
-    const chips = $('cash-cats'); chips.replaceChildren();
-    Object.keys(cats).sort((a, b) => cats[b] - cats[a]).forEach((c) => {
-      const sp = document.createElement('span'); sp.textContent = c; const b = document.createElement('b'); b.textContent = ils(cats[c]); sp.appendChild(b); chips.appendChild(sp);
-    });
     const list = $('cash-list'); list.replaceChildren();
     const shown = window.kmCashAll ? sorted.slice().reverse() : sorted.slice(-4).reverse();
     shown.forEach((r) => {
@@ -240,9 +220,23 @@ dash.calc('networth', {
       const d = document.createElement('span'); d.className = 'd'; d.textContent = dm(toDate(r.date));
       const n = document.createElement('span'); n.className = 'n'; n.textContent = r.kind === 'in' ? (r.note || 'משיכה') : (r.cat || 'אחר') + (r.note ? ' · ' + r.note : '');
       const a = document.createElement('span'); a.className = r.kind === 'in' ? 'a km-ok' : 'a'; a.textContent = (r.kind === 'in' ? '+' : '⁦-') + ils(v) + (r.kind === 'in' ? '' : '⁩');
-      const x = document.createElement('button'); x.type = 'button'; x.className = 'km-x-btn'; x.setAttribute('aria-label', 'מחיקה'); x.textContent = '×';
-      x.addEventListener('click', () => { if (!confirmDel(r)) return; const i = rows.indexOf(r); if (i > -1) { rows.splice(i, 1); saveCash(rows); } });
-      row.append(d, n, a, x); list.appendChild(row);
+      row.addEventListener('click', () => { window.kmCashOpen = window.kmCashOpen === r ? null : r; drawCash(rows); });
+      row.append(d, n, a); list.appendChild(row);
+      if (window.kmCashOpen === r) {
+        row.classList.add('on');
+        const act = document.createElement('div'); act.className = 'km-act';
+        const ed = document.createElement('button'); ed.type = 'button'; ed.textContent = 'שנה';
+        ed.addEventListener('click', () => {
+          const tab = r.kind === 'in' ? 'in' : 'out';
+          document.querySelector('.km-cash-tabs button[data-m="' + tab + '"]').click();
+          if (tab === 'out') { $('cash-amt').value = nf.format(v); $('cash-cat').value = r.cat || 'אחר'; $('cash-note').value = r.note || ''; $('cash-out-btn').textContent = 'שמור'; $('cash-amt').focus(); }
+          else { $('cash-in-amt').value = nf.format(v); $('cash-in-btn').textContent = 'שמור'; $('cash-in-amt').focus(); }
+          window.kmCashEdit = r;
+        });
+        const del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = 'מחק';
+        del.addEventListener('click', () => { if (!confirmDel(r)) return; const i = rows.indexOf(r); if (i > -1) { rows.splice(i, 1); window.kmCashOpen = null; saveCash(rows); } });
+        act.append(ed, del); list.appendChild(act);
+      }
     });
     $('cash-more').hidden = sorted.length <= 4;
     $('cash-more').textContent = window.kmCashAll ? 'פחות' : 'עוד';
@@ -256,6 +250,13 @@ dash.calc('networth', {
   $('cash-out-btn').addEventListener('click', () => {
     const rows = window.kmCashRows; if (!rows) return;
     const amt = num($('cash-amt').value); if (!amt) return;
+    const ed = window.kmCashEdit;
+    if (ed && ed.kind !== 'in') {
+      Object.assign(ed, { amount: amt, cat: $('cash-cat').value, note: $('cash-note').value.trim() });
+      window.kmCashEdit = null; window.kmCashOpen = null; $('cash-out-btn').textContent = 'הוסף';
+      $('cash-amt').value = ''; $('cash-note').value = '';
+      saveCash(rows); return;
+    }
     rows.push({ date: todayIso(), kind: 'out', amount: amt, cat: $('cash-cat').value, note: $('cash-note').value.trim() });
     $('cash-amt').value = ''; $('cash-note').value = '';
     saveCash(rows);
@@ -263,6 +264,11 @@ dash.calc('networth', {
   $('cash-in-btn').addEventListener('click', () => {
     const rows = window.kmCashRows; if (!rows) return;
     const amt = num($('cash-in-amt').value), fee = num($('cash-fee').value); if (!amt) return;
+    const ed = window.kmCashEdit;
+    if (ed && ed.kind === 'in') {
+      ed.amount = amt; window.kmCashEdit = null; window.kmCashOpen = null; $('cash-in-btn').textContent = 'הוסף';
+      $('cash-in-amt').value = ''; saveCash(rows); return;
+    }
     const date = todayIso();
     rows.push({ date, kind: 'in', amount: amt, note: 'משיכה' });
     const led = window.kmLedgerRows;
@@ -533,8 +539,6 @@ dash.calc('networth', {
     const C = dash.data('cash');
     if (C.status === 'ok' && Array.isArray(C.data)) drawCash(C.data);
     if (ok(M) && ok(I)) {
-      const sc = dash.params().scenario === 'c' ? 'c' : 'n';
-      document.querySelectorAll('.km-seg button').forEach((b) => b.classList.toggle('on', b.dataset.s === sc));
       drawScenario(M.data, I.data);
     }
   });

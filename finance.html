@@ -38,7 +38,13 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-cash-tabs { margin-top: 12px; }
 .km-cash-add { grid-template-columns: 1fr 1.1fr 1.2fr auto; }
 .km-cash-hint { align-self: center; font-size: 12px; color: var(--color-fg-muted); }
-#cash .km-led { grid-template-columns: 3rem 1fr auto auto !important; }
+#cash .km-led { grid-template-columns: 3rem 1fr auto !important; cursor: pointer; }
+#cash .km-led.on { background: color-mix(in srgb, var(--color-ok) 7%, transparent); border-radius: 10px; }
+.km-act { display: flex; gap: 8px; justify-content: flex-end; padding: 2px 0 8px; }
+.km-act button { border: 0; border-radius: 999px; padding: 5px 14px; font: inherit; font-size: 13px; font-weight: 600; background: var(--color-bg); color: var(--color-fg); }
+.km-act button.del { color: var(--km-red); background: color-mix(in srgb, var(--km-red) 10%, transparent); }
+#year.km-yr-card { background: linear-gradient(180deg, #EAF3FC, #F8FBFE 75%) !important; box-shadow: 0 6px 22px rgba(47,128,201,.10); }
+.km-yr-card .km-whatif { margin-top: 10px; }
 #cash .km-led .d { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); align-self: center; }
 .km-add[hidden] { display: none; }
 .km-jlink { margin-top: 12px; border: 0; background: rgba(255,255,255,.2); color: #fff; border-radius: 99px; padding: 7px 16px; font: inherit; font-size: 14px; font-weight: 600; }
@@ -71,12 +77,10 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
       </div>
     </details>
     <div class="km-on15" id="on15"><span>ב15 לחודש</span><b id="on15-v">—</b></div>
-    <div class="km-row km-fhead">
-      <div class="km-label">בנק ב15, שנה קדימה</div>
-      <div class="km-seg" role="group" aria-label="תרחיש"><button type="button" data-s="n">רגיל</button><button type="button" data-s="c">זהיר</button></div>
-    </div>
+  </section>
+
+  <section class="km-card km-yr-card" id="year">
     <div class="km-yr" id="yr"></div>
-    <div class="km-low" id="low"></div>
     <div class="km-whatif" id="whatif">
       <label class="km-field"><span>הוספה לחשבון</span><span class="km-inp"><input id="w-transfer" type="text" inputmode="numeric" placeholder="0" aria-label="הוספה לחשבון"><i>₪</i></span></label>
       <label class="km-field"><span>הוצאה חריגה</span><span class="km-inp"><input id="w-vacation" type="text" inputmode="numeric" placeholder="0" aria-label="הוצאה חריגה"><i>₪</i></span></label>
@@ -92,7 +96,6 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
       </div>
       <div class="km-cash-month"><span class="km-label" id="cash-month-label">יצא החודש</span><b id="cash-month">—</b></div>
     </div>
-    <div class="km-chips" id="cash-cats"></div>
     <div class="km-ledger" id="cash-list"></div>
     <button type="button" class="km-more" id="cash-more" hidden>עוד</button>
     <div class="km-cash-tabs km-seg" role="tablist">
@@ -210,8 +213,8 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-chart-sm { min-height: 150px; margin-top: 4px; }
 .km-low { text-align: start; min-width: 9.5rem; }
 .km-neg-fill { fill: var(--color-bad); }
-#bank .km-whatif { grid-template-columns: 1fr 1fr 1.2fr; gap: 8px; margin-top: 10px; }
-#bank .km-inp { border-color: transparent; background: color-mix(in srgb, var(--color-fg) 5%, transparent); }
+#year .km-whatif { grid-template-columns: 1fr 1fr 1.2fr; gap: 8px; margin-top: 10px; }
+#year .km-inp { border-color: transparent; background: color-mix(in srgb, var(--color-fg) 5%, transparent); }
 #bank .km-inp input, .km-inp select { font-size: 16px; padding: 7px 0; }
 .km-inp select { flex: 1; min-width: 0; width: 100%; border: 0; background: transparent; color: var(--color-fg); font: inherit; outline: none; -webkit-appearance: none; appearance: none; }
 .km-tablebox { margin-top: 14px; }
@@ -260,7 +263,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/core.js?v=10"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/finance-page.js?v=9"></script>
+<script src="js/finance-page.js?v=10"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
