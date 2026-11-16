@@ -31,6 +31,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-seg button.on{background:#fff!important;color:#047857!important;box-shadow:0 0 0 1px #9FE3CB!important}
 .km-bar i{box-shadow:none!important}
 .km-cash-month { text-align: left; }
+.km-range { display: block; font-size: 11px; color: var(--color-fg-muted); margin-top: 2px; }
 .km-cash-month b { display: block; font-weight: 600; font-size: var(--cds-font-size-heading); margin-top: 2px; }
 .km-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .km-chips span { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--color-bg); color: var(--color-fg-muted); }
@@ -94,7 +95,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
         <div class="km-label">מזומן ביד</div>
         <div class="km-big" id="cash-now">—</div>
       </div>
-      <div class="km-cash-month"><span class="km-label" id="cash-month-label">יצא החודש</span><b id="cash-month">—</b></div>
+      <div class="km-cash-month"><span class="km-label" id="cash-month-label">יצא החודש</span><b id="cash-month">—</b><small id="cash-range" class="km-range"></small></div>
     </div>
     <div class="km-ledger" id="cash-list"></div>
     <button type="button" class="km-more" id="cash-more" hidden>עוד</button>
@@ -213,9 +214,12 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-chart-sm { min-height: 150px; margin-top: 4px; }
 .km-low { text-align: start; min-width: 9.5rem; }
 .km-neg-fill { fill: var(--color-bad); }
-#year .km-whatif { grid-template-columns: 1fr 1fr 1.2fr; gap: 8px; margin-top: 10px; }
+#year .km-whatif { grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
 #year .km-inp { border-color: transparent; background: color-mix(in srgb, var(--color-fg) 5%, transparent); }
-#bank .km-inp input, .km-inp select { font-size: 16px; padding: 7px 0; }
+#year .km-inp { height: 44px !important; min-height: 44px; box-sizing: border-box; }
+.km-led .a.km-neg { color: var(--km-red); }
+.km-led .a.km-ok { color: var(--color-ok); }
+#year .km-inp input, .km-inp select { font-size: 16px; padding: 7px 0; }
 .km-inp select { flex: 1; min-width: 0; width: 100%; border: 0; background: transparent; color: var(--color-fg); font: inherit; outline: none; -webkit-appearance: none; appearance: none; }
 .km-tablebox { margin-top: 14px; }
 .km-tbl { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-body); }
@@ -263,7 +267,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/core.js?v=10"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/finance-page.js?v=10"></script>
+<script src="js/finance-page.js?v=11"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};

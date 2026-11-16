@@ -148,8 +148,8 @@ dash.calc('networth', {
     const v = Number(o.amount);
     const r = document.createElement('div'); r.className = 'km-led' + (cls ? ' ' + cls : '');
     const n = document.createElement('span'); n.className = 'n'; n.textContent = o.name || '';
-    const a = document.createElement('span'); a.className = 'a';
-    a.textContent = cls === 'km-first' ? '' : (v < 0 ? '⁦-' + ils(v) + '⁩' : '+' + ils(v));
+    const a = document.createElement('span'); a.className = 'a ' + (v < 0 ? 'km-neg' : 'km-ok');
+    a.textContent = cls === 'km-first' ? '' : ils(v);
     const b = document.createElement('span'); b.className = 'b' + (run < 0 ? ' km-neg' : ''); b.textContent = bal(run);
     r.append(n, a, b);
     if (onCancel) {
@@ -208,10 +208,14 @@ dash.calc('networth', {
     const sorted = rows.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
     const have = sorted.reduce((s, r) => s + (r.kind === 'in' ? 1 : -1) * Number(r.amount), 0);
     const el = $('cash-now'); el.textContent = bal(have); el.className = 'km-big' + (have < 0 ? ' km-neg' : '');
-    const ym = todayIso().slice(0, 7);
+    const t = new Date(), sm = t.getDate() >= 16 ? t.getMonth() : t.getMonth() - 1;
+    const from = new Date(t.getFullYear(), sm, 16), to = new Date(t.getFullYear(), sm + 1, 15);
+    const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const f0 = iso(from), f1 = iso(to);
     let month = 0;
-    sorted.forEach((r) => { if (r.kind === 'out' && String(r.date).slice(0, 7) === ym) { month += Number(r.amount); } });
+    sorted.forEach((r) => { const d = String(r.date).slice(0, 10); if (r.kind === 'out' && d >= f0 && d <= f1) month += Number(r.amount); });
     $('cash-month').textContent = ils(month);
+    $('cash-range').textContent = from.getDate() + '.' + (from.getMonth() + 1) + ' עד ' + to.getDate() + '.' + (to.getMonth() + 1);
     const list = $('cash-list'); list.replaceChildren();
     const shown = window.kmCashAll ? sorted.slice().reverse() : sorted.slice(-4).reverse();
     shown.forEach((r) => {
@@ -219,7 +223,7 @@ dash.calc('networth', {
       const row = document.createElement('div'); row.className = 'km-led';
       const d = document.createElement('span'); d.className = 'd'; d.textContent = dm(toDate(r.date));
       const n = document.createElement('span'); n.className = 'n'; n.textContent = r.kind === 'in' ? (r.note || 'משיכה') : (r.cat || 'אחר') + (r.note ? ' · ' + r.note : '');
-      const a = document.createElement('span'); a.className = r.kind === 'in' ? 'a km-ok' : 'a'; a.textContent = (r.kind === 'in' ? '+' : '⁦-') + ils(v) + (r.kind === 'in' ? '' : '⁩');
+      const a = document.createElement('span'); a.className = r.kind === 'in' ? 'a km-ok' : 'a km-neg'; a.textContent = ils(v);
       row.addEventListener('click', () => { window.kmCashOpen = window.kmCashOpen === r ? null : r; drawCash(rows); });
       row.append(d, n, a); list.appendChild(row);
       if (window.kmCashOpen === r) {
