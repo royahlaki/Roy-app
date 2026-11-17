@@ -185,6 +185,16 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 .m4 .lt{position:absolute;top:5px;left:5px;width:6px;height:6px}
 .sheet .acts{margin-top:10px}
 .sheet .acts .btn{padding:10px}
+
+/* desktop: two columns so the whole card fits one screen */
+@media (min-width:820px){
+  .sheet{max-width:960px;border-radius:20px 20px 0 0;padding:18px 22px calc(var(--nav-h,0px) + 14px)}
+  .lay{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);column-gap:18px;row-gap:8px;align-items:start;
+    grid-template-areas:"hd chart" "seg chart" "note chart" "vd chart" "m4 duo" "acts duo";grid-template-rows:auto auto auto 1fr auto auto}
+  .lay>*{margin-top:0!important}
+  .lay .hd{grid-area:hd} .lay .seg4{grid-area:seg} .lay #note{grid-area:note} .lay .vd2,.lay .sh-d{grid-area:vd}
+  .lay .chart{grid-area:chart;height:auto;min-height:200px;align-self:stretch} .lay .duo{grid-area:duo} .lay .m4{grid-area:m4} .lay .acts{grid-area:acts}
+}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -506,12 +516,12 @@ function openSheet(k,noteOpen){
     card=`<div class="sh-d">${st[2]}</div><div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>`;
   }
   const hasNote=!!(w&&w.n&&w.n.trim());
-  document.getElementById("sheet").innerHTML=`
+  document.getElementById("sheet").innerHTML=`<div class="lay">
     <div class="hd"><span class="tk">${k}</span><span class="nm">${st[1]}</span>${tags}<button class="x" id="x">✕</button></div>
     <div class="seg4"><div class="sg">${STATUS.map(s=>`<button class="sb ${SCLS[s]}${w&&w.s===s?" on":""}" data-s="${s}">${s}</button>`).join("")}</div><button class="nb${hasNote?" has":""}" id="addn" title="הערה">✎</button></div>
     <textarea id="note" class="${noteOpen||hasNote?"on":""}" placeholder="למה היא מעניינת אותך? מה צריך לבדוק">${esc(w?w.n:"")}</textarea>
     ${card}
-    <div class="acts"><button class="btn pri" id="tolab">למעבדה</button></div>`;
+    <div class="acts"><button class="btn pri" id="tolab">למעבדה</button></div></div>`;
   const sh=document.getElementById("sheet"); sh.scrollTop=0;
   document.getElementById("ov").classList.add("on");
   document.getElementById("x").onclick=closeSheet;
