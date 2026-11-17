@@ -621,6 +621,13 @@ html,body{background:#F6F8FD!important}
 .pf .card,.pf .kpi{background:rgba(255,255,255,.78)!important;border:1px solid rgba(255,255,255,.9)!important;
   box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 30px rgba(15,23,42,.07)!important;-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
 .pf .total{background:linear-gradient(90deg,#0F172A,#3730A3);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* Open stock row: framed card; closing it removes the frame */
+.pf .srw{transition:margin .2s ease,box-shadow .2s ease,border-radius .2s ease}
+.pf .srw[open]{position:relative;z-index:1;margin:8px;border-radius:16px;overflow:hidden;background:#fff;
+  box-shadow:0 0 0 2px #8B5CF6,0 12px 28px rgba(99,102,241,.20)}
+.pf .srw[open] + .srw,.pf .srw + .srw[open]{border-top-color:transparent}
+.pf .srw[open] summary,.pf .srw[open] .sr-more{background:linear-gradient(180deg,#F7F5FF,#FFFFFF)}
+.pf .srw[open] .sr-more{background:#FFFFFF}
 </style>
 <script src="js/core.js?v=12"></script>
 <script src="js/d3.min.js"></script>
