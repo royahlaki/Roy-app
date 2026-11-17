@@ -162,7 +162,7 @@ ESLT:"אלביט",NXSN:"נקסטויז׳ן",TASE:"הבורסה לני״ע",POLI:
 MP:"MP Materials",TDY:"Teledyne",LHX:"L3Harris",GD:"General Dynamics",RHM:"Rheinmetall",LMT:"Lockheed Martin",RTX:"RTX",NOC:"Northrop Grumman",
 DSCT:"דיסקונט",MZTF:"מזרחי טפחות",HARL:"הראל",PHOE:"הפניקס",CLIS:"כלל ביטוח",
 ZIM:"צים",UPS:"UPS",FDX:"FedEx",ADS:"Adidas",LULU:"Lululemon",ONON:"On",DECK:"Deckers (Hoka)",DKS:"Dick's",WMT:"Walmart",
-XOM:"ExxonMobil",CVX:"Chevron",NWMD:"ניומד",CCJ:"Cameco",NEE:"NextEra",ENLT:"אנלייט",FSLR:"First Solar",VLO:"Valero",MPC:"Marathon Petroleum",RDW:"Redwire",RKLB:"Rocket Lab",SPACEX:"SpaceX (פרטית)",ASTS:"AST SpaceMobile",IRDM:"Iridium",GILT:"גילת",PL:"Planet Labs",BKSY:"BlackSky"};
+XOM:"ExxonMobil",CVX:"Chevron",NWMD:"ניומד",CCJ:"Cameco",NEE:"NextEra",ENLT:"אנלייט",FSLR:"First Solar",VLO:"Valero",MPC:"Marathon Petroleum",RDW:"Redwire",RKLB:"Rocket Lab",SPCX:"SpaceX",ASTS:"AST SpaceMobile",IRDM:"Iridium",GILT:"גילת",PL:"Planet Labs",BKSY:"BlackSky"};
 const THESIS=new Set(["TSM","NVDA","AVGO","VST","CEG","VRT","DLR"]);
 const ISR=new Set(["GILT","NVMI","CAMT","TSEM","ESLT","NXSN","TASE","POLI","LUMI","TA125","DSCT","MZTF","HARL","PHOE","CLIS","ZIM","NWMD","ENLT"]);
 const SALES={GILT:"מפעילי לוויינים, צבאות וחברות תקשורת בעולם",NVMI:"יצרניות שבבים בטייוואן, קוריאה וארה״ב",CAMT:"יצרניות שבבים ואריזה באסיה",TSEM:"לקוחות בארה״ב, אירופה ואסיה",
@@ -262,10 +262,10 @@ const SPACE={
   sat:{t:"יצרני לוויינים",s:"מתכננים ובונים",k:["LMT","NOC","RKLB","ESLT"],
    what:"בונים את הלוויינים עצמם, מלוויני ענק צבאיים ועד לוויינים קטנים שמשוגרים באלפים. גם אלביט והתעשייה האווירית (פרטית) בונות לוויינים.",
    gone:"אין מה לשגר. יש כמה יצרנים, והתחום מתרחב."},
-  launch:{t:"שיגור",s:"להגיע למסלול",k:["SPACEX","RKLB"],choke:1,
-   what:"SpaceX משגרת את רוב המטען לחלל בעולם, והטילים הממוחזרים שלה הורידו את המחיר בצורה דרמטית. Rocket Lab היא המתחרה הציבורית הבולטת.",
+  launch:{t:"שיגור",s:"להגיע למסלול",k:["SPCX","RKLB"],choke:1,
+   what:"SpaceX משגרת את רוב המטען לחלל בעולם, והטילים הממוחזרים שלה הורידו את המחיר בצורה דרמטית. מאז ההנפקה ביוני 2026 היא נסחרת בנאסד"ק (SPCX). Rocket Lab היא המתחרה הקטנה.",
    gone:"הכל נשאר על הקרקע. התלות ב SpaceX היא צוואר הבקבוק של כל התעשייה."},
-  comm:{t:"תקשורת ואינטרנט",s:"אינטרנט וסלולר מהחלל",k:["ASTS","IRDM","GILT"],
+  comm:{t:"תקשורת ואינטרנט",s:"אינטרנט וסלולר מהחלל",k:["SPCX","ASTS","IRDM","GILT"],
    what:"אינטרנט מלוויינים (Starlink של SpaceX), סלולר ישירות לטלפון (AST SpaceMobile), ותחנות קרקע (גילת).",
    gone:"אזורים מרוחקים, אוניות, מטוסים וצבאות בלי תקשורת."},
   eo:{t:"צילום ומידע",s:"תצפית על כדור הארץ",k:["PL","BKSY"],
@@ -276,7 +276,7 @@ const SPACE={
    gone:"צבא בלי עיניים ובלי GPS. לכן התקציבים כאן יציבים."},
   users:{t:"צרכנים ועסקים",s:"אינטרנט, ניווט",k:[],
    what:"כל מי שמשתמש ב GPS, באינטרנט לווייני או בתחזית מזג אוויר.",
-   gone:"השוק הצומח, אבל רובו כרגע בידי SpaceX הפרטית."},
+   gone:"השוק הצומח, אבל רובו כרגע בידי SpaceX דרך Starlink."},
   telco:{t:"חברות סלולר",s:"שותפות לכיסוי",k:[],
    what:"חברות הסלולר משתפות פעולה עם חברות הלוויין כדי לכסות אזורים בלי אנטנות.",
    gone:"פחות לקוחות לתקשורת הלוויינית."},
@@ -285,7 +285,7 @@ const SPACE={
    gone:"רוב החברות הקטנות תלויות בחוזים ממשלתיים כדי לשרוד."}
  },
  edges:[["comp","sat","c"],["sat","launch","c"],["launch","comm","c"],["launch","eo","c"],["launch","mil","c"],["comm","users","s"],["comm","telco","s"],["eo","gov","s"],["mil","gov","c"]],
- extra:`<div class="money"><p><b>שים לב:</b> השחקנים הגדולים ביותר בחלל פרטיים (SpaceX, התעשייה האווירית), לכן בבורסה נשארים בעיקר שחקנים קטנים, יקרים ותנודתיים. החלל מתחבר לשרשרת הביטחון דרך החלל הצבאי, ולשרשרת ה AI דרך השבבים וניתוח המידע.</p></div>`
+ extra:`<div class="money"><p><b>שים לב:</b> SpaceX, השחקנית הגדולה בחלל, נסחרת מיוני 2026 (SPCX) ושוקלת יותר מכל שאר התעשייה. מלבדה, בבורסה נשארים בעיקר שחקנים קטנים, יקרים ותנודתיים, והתעשייה האווירית עדיין פרטית. החלל מתחבר לשרשרת הביטחון דרך החלל הצבאי, ולשרשרת ה AI דרך השבבים וניתוח המידע.</p></div>`
 };
 
 /* ===== Finance chain ===== */
