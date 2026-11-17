@@ -114,37 +114,10 @@ footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-he
 #pane{animation:fade .25s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}}
 
-/* stock card */
+/* stock card link */
 .tk.has{cursor:pointer}
 .tk.has:active{transform:scale(.98)}
 .tk .go{color:var(--neon);font-size:15px;font-weight:700;margin-inline-start:2px}
-.cbk{background:none;border:0;color:var(--neon);font:600 13px Heebo;padding:0 0 10px;cursor:pointer}
-.chd{display:flex;align-items:baseline;gap:10px}
-.chd .sym{font:700 26px Oswald;letter-spacing:.03em;direction:ltr}
-.chd .nm{font-size:15px;color:#cfd8d2;font-weight:600}
-.cq{color:var(--mut);font-size:11.5px;margin-top:2px}
-.verdict{display:flex;align-items:center;gap:10px;margin-top:12px;border-radius:14px;padding:10px 12px;border:1px solid}
-.verdict b{font-size:16px;font-weight:900}
-.verdict span{font-size:12px;color:#cfd8d2}
-.verdict.G{background:rgba(195,245,60,.09);border-color:rgba(195,245,60,.45)} .verdict.G b{color:var(--neon)}
-.verdict.Y{background:rgba(255,176,32,.09);border-color:rgba(255,176,32,.45)} .verdict.Y b{color:var(--strong)}
-.verdict.R{background:rgba(255,92,122,.09);border-color:rgba(255,92,122,.45)} .verdict.R b{color:var(--crit)}
-.sbar{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;margin-top:4px}
-.sbar i{display:block;height:100%}
-.slist{margin-top:8px;display:grid;gap:4px}
-.slist div{display:flex;align-items:center;gap:8px;font-size:13px}
-.slist i{width:9px;height:9px;border-radius:3px;flex:none}
-.slist b{margin-inline-start:auto;font:600 13px Oswald;direction:ltr}
-.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.met{background:rgba(255,255,255,.04);border:.5px solid var(--line2);border-radius:12px;padding:8px 10px;position:relative}
-.met .v{font:700 21px Oswald;direction:ltr;text-align:right;line-height:1.2}
-.met .l{font-size:11.5px;color:var(--mut)}
-.met .dot{position:absolute;top:10px;left:10px;width:9px;height:9px;border-radius:50%}
-.dot.G{background:var(--neon);box-shadow:0 0 8px rgba(195,245,60,.6)} .dot.Y{background:var(--strong)} .dot.R{background:var(--crit)}
-.met .v.G{color:var(--txt)}
-.take{font-size:13px;color:#d6ded9;line-height:1.55;border-inline-start:3px solid var(--neon);padding-inline-start:9px}
-.lab{display:block;width:100%;margin-top:16px;background:var(--neon);border:0;color:#0a0d08;font:800 15px Heebo;border-radius:12px;padding:12px;cursor:pointer}
-.src{color:var(--mut);font-size:10.5px;text-align:center;margin-top:8px}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -500,31 +473,6 @@ const TABS=[
  {id:"ene",t:"אנרגיה",h:"שרשרת האנרגיה",s:"מהנפט והאורניום ועד מרכזי הנתונים והבית.",G:ENE}
 ];
 
-/* ===== Stock cards: quick filter before the lab. Pilot: satellite builders. Data from Q3 2026 reports. ===== */
-const CARD_UPD="דוח Q3 2026";
-const CARDS={
- LMT:{q:"רבעון 3, 2026",seg:[["מטוסים (F‑35)",8214],["טילים ובקרת אש",4501],["מסוקים ומערכות",4511],["חלל",3485]],
-  g:11,m:11.8,d:1.3,pe:19,
-  take:"הביקוש לטילי יירוט (PAC‑3) מושך את הצמיחה. צבר הזמנות שיא של 292 מיליארד דולר."},
- NOC:{q:"רבעון 3, 2026",seg:[["מטוסים (B‑21)",3575],["מערכות משימה",3155],["חלל",2749],["מערכות הגנה",2307]],
-  g:7,m:11.4,d:1.8,pe:19,
-  take:"צמיחה איטית יותר, אבל צבר שיא של 110 מיליארד דולר ומפציץ B‑21 שנכנס לייצור."},
- RKLB:{q:"רבעון 3, 2026",seg:[["מערכות חלל (לוויינים ורכיבים)",214.8],["שיגורים",53.1]],
-  g:73,m:-29.6,d:null,cash:"$4.7B",pe:null,
-  take:"צומחת מהר מאוד אבל עדיין מפסידה. הסיכון המרכזי: טיל Neutron נדחה ל־2027, ועסקת Iridium תוסיף חוב."},
- ESLT:{q:"רבעון 3, 2026",seg:[["יבשה ותחמושת",758.7],["אווירונאוטיקה",498.9],["מודיעין ול״א",449.7],["פעילות בארה״ב",446.7],["פיקוד ושליטה וסייבר",269.7]],
-  g:17,m:10.3,d:null,cash:"$0.9B",pe:40,
-  take:"צמיחה חזקה וצבר שיא של 33 מיליארד דולר, 74% ממנו מחו״ל. המחיר כבר יקר מאוד."}
-};
-const SEGC=["#C3F53C","#3DDCC0","#4DA3FF","#FFB020","#C77DFF"];
-/* Traffic light rules: green / yellow / red */
-function lt(kind,v,c){
-  if(kind==="g") return v>=10?"G":v>=5?"Y":"R";
-  if(kind==="m") return v>=10?"G":v>=0?"Y":"R";
-  if(kind==="d") return (v==null&&c.cash)?"G":v<2?"G":v<3?"Y":"R";
-  if(kind==="pe") return v==null?"R":v<20?"G":v<35?"Y":"R";
-}
-
 /* ===== Graph engine ===== */
 const LV={c:"הכרחי, לא מתקיים בלי",s:"תלות חזקה",w:"קשר חלש"};
 const LC={c:"var(--crit)",s:"var(--strong)",w:"var(--weak)"};
@@ -587,7 +535,7 @@ function openSheet(id){
   const from=G.edges.filter(e=>e[1]===id), to=G.edges.filter(e=>e[0]===id);
   const line=(o,lv)=>`<div class="lnk" data-go="${o}"><i style="background:${LC[lv]}"></i>${G.nodes[o].t}<small>${LV[lv]}</small></div>`;
   const tks=n.k.map(k=>{ const tags=(OWN.has(k)?'<span class="tag own">בתיק</span>':"")+(THESIS.has(k)?'<span class="tag th">מועמדת לתזה</span>':"")+"";
-    const il=ISR.has(k); return `<div class="tk${il?" il":""}${CARDS[k]?" has":""}" data-k="${k}"><span class="sym">${il?"":(isTk(k)?k:"")}</span><span class="nm">${NAMES[k]||k}${il&&SALES[k]?`<span class="sales">מוכרת ל: ${SALES[k]}</span>`:""}</span>${tags}${CARDS[k]?'<span class="go">›</span>':""}</div>`; }).join("");
+    const il=ISR.has(k); return `<div class="tk${il?" il":""}${isTk(k)||ISR.has(k)?" has":""}" data-k="${k}"><span class="sym">${il?"":(isTk(k)?k:"")}</span><span class="nm">${NAMES[k]||k}${il&&SALES[k]?`<span class="sales">מוכרת ל: ${SALES[k]}</span>`:""}</span>${tags}${isTk(k)||ISR.has(k)?'<span class="go">›</span>':""}</div>`; }).join("");
   $("sheet").innerHTML=`<div class="grab"></div><h3>${n.t}</h3><div class="what">${n.what}</div>
    ${from.length?`<div class="blk"><h4>${n.f?"מושפע מ":"תלוי ב"}</h4>${from.map(e=>line(e[0],e[2])).join("")}</div>`:""}
    ${to.length?`<div class="blk"><h4>${n.f?"משפיע על":"מזין את"}</h4>${to.map(e=>line(e[1],e[2])).join("")}</div>`:""}
@@ -597,38 +545,9 @@ function openSheet(id){
   $("ov").classList.add("on"); $("sheet").scrollTop=0;
   $("cls").onclick=closeSheet;
   document.querySelectorAll(".lnk").forEach(l=>l.onclick=()=>{ select(l.dataset.go); });
-  document.querySelectorAll(".tk.has").forEach(t=>t.onclick=()=>openCard(t.dataset.k,id));
+  document.querySelectorAll(".tk.has").forEach(t=>t.onclick=()=>{ closeSheet(); Roy.go("sectors","#k-"+t.dataset.k); });
 }
 
-function openCard(k,back){
-  const c=CARDS[k], tot=c.seg.reduce((a,x)=>a+x[1],0), own=OWN.has(k);
-  const L={g:lt("g",c.g,c),m:lt("m",c.m,c),d:lt("d",c.d,c),pe:lt("pe",c.pe,c)};
-  const greens=Object.values(L).filter(x=>x==="G").length, reds=Object.values(L).filter(x=>x==="R").length;
-  const V=greens>=3?["G","שווה לחקור","עוברת "+greens+" מתוך 4 בדיקות"]:greens>=2&&reds<=1?["Y","גבולי","עוברת "+greens+" מתוך 4, כדאי לבדוק מה חסר"]:["R","לא עכשיו","עוברת רק "+greens+" מתוך 4"];
-  const fmt=v=>v>=1000?(v/1000).toFixed(1)+"B$":Math.round(v)+"M$";
-  const pct=v=>Math.round(v/tot*100)+"%";
-  const sign=v=>(v>0?"+":"")+v+"%";
-  $("sheet").innerHTML=`<div class="grab"></div>
-   <button class="cbk" id="cbk">› ${cur.G.nodes[back].t}</button>
-   <div class="chd"><span class="sym">${isTk(k)?k:""}</span><span class="nm">${NAMES[k]||k}</span>${own?'<span class="tag own">בתיק</span>':""}</div>
-   <div class="cq">${c.q} · הכנסות ${fmt(tot)} ברבעון</div>
-   <div class="verdict ${V[0]}"><span class="dot ${V[0]}" style="width:11px;height:11px;border-radius:50%;flex:none"></span><b>${V[1]}</b><span>${V[2]}</span></div>
-   <div class="blk"><h4>מאיפה הכסף מגיע</h4>
-    <div class="sbar">${c.seg.map((x,i)=>`<i style="width:${x[1]/tot*100}%;background:${SEGC[i]}"></i>`).join("")}</div>
-    <div class="slist">${c.seg.map((x,i)=>`<div><i style="background:${SEGC[i]}"></i>${x[0]}<b>${pct(x[1])}</b></div>`).join("")}</div></div>
-   <div class="blk"><h4>4 הבדיקות</h4><div class="mgrid">
-    <div class="met"><span class="dot ${L.g}"></span><div class="v">${sign(c.g)}</div><div class="l">צמיחה בהכנסות</div></div>
-    <div class="met"><span class="dot ${L.m}"></span><div class="v">${c.m}%</div><div class="l">שולי רווח תפעולי</div></div>
-    <div class="met"><span class="dot ${L.d}"></span><div class="v">${c.d==null?c.cash:c.d+"x"}</div><div class="l">${c.d==null?"מזומן נטו, בלי חוב":"חוב נטו ביחס לרווח"}</div></div>
-    <div class="met"><span class="dot ${L.pe}"></span><div class="v" style="${c.pe==null?"font-size:17px;padding-top:3px;direction:rtl":""}">${c.pe==null?"אין רווח":"~"+c.pe}</div><div class="l">מכפיל רווח עתידי</div></div>
-   </div></div>
-   <div class="blk"><div class="take">${c.take}</div></div>
-   <button class="lab" id="tolab">שלח למעבדה ›</button>
-   <div class="src">${CARD_UPD} · מכפילים בקירוב · לא המלצה</div>`;
-  $("sheet").scrollTop=0;
-  $("cbk").onclick=()=>openSheet(back);
-  $("tolab").onclick=()=>{ closeSheet(); Roy.go("lab",(own?"#h-":"#t-")+k); };
-}
 function closeSheet(){ $("ov").classList.remove("on"); sel=null; mark(); }
 $("ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeSheet(); });
 

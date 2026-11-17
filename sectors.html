@@ -90,6 +90,43 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
   .tiles{grid-template-columns:repeat(3,1fr)}
   .t .tk{font-size:14px}
 }
+
+/* sheet v2 */
+.sheet{max-height:86vh;overflow:auto}
+.sh-top .tk{font-size:26px}
+.sh-row{font-size:11.5px}
+.vd{display:flex;align-items:center;gap:9px;margin-top:12px;border-radius:12px;padding:8px 12px;border:1px solid}
+.vd b{font-size:15px;font-weight:900}
+.vd span{font-size:12px;color:#cfd8d2;margin-inline-start:auto}
+.vd.G{background:rgba(195,245,60,.09);border-color:rgba(195,245,60,.45)} .vd.G b{color:var(--neon)}
+.vd.Y{background:rgba(255,176,32,.09);border-color:rgba(255,176,32,.45)} .vd.Y b{color:var(--hot)}
+.vd.R{background:rgba(255,92,122,.09);border-color:rgba(255,92,122,.45)} .vd.R b{color:var(--spec)}
+.lt{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+.lt.G{background:var(--neon);box-shadow:0 0 8px rgba(195,245,60,.6)} .lt.Y{background:var(--hot)} .lt.R{background:var(--spec)}
+.chart{margin-top:12px;height:150px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);border:.5px solid var(--line2)}
+.chart iframe{width:100%;height:100%;border:0;display:block}
+.blk2{margin-top:14px}
+.blk2 h4{font-size:11.5px;color:var(--mut);font-weight:600;margin-bottom:6px}
+.sbar{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px}
+.sbar i{display:block;height:100%}
+.slist{margin-top:7px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.slist div{display:flex;align-items:center;gap:6px;font-size:12.5px}
+.slist i{width:8px;height:8px;border-radius:3px;flex:none}
+.slist b{font:600 12.5px Oswald;direction:ltr;color:var(--mut)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.met{background:rgba(255,255,255,.04);border:.5px solid var(--line2);border-radius:11px;padding:7px 10px;display:flex;align-items:center;gap:8px}
+.met .v{font:700 18px Oswald;direction:ltr;line-height:1.2}
+.met .v.tx{font:700 15px Heebo;direction:rtl}
+.met .l{font-size:11px;color:var(--mut);line-height:1.25}
+.met .lt{margin-inline-start:auto}
+.warn{margin-top:6px;font-size:12px;color:var(--spec);display:flex;gap:6px;align-items:center}
+.take{margin-top:12px;font-size:13.5px;color:#d6ded9;line-height:1.55;border-inline-start:3px solid var(--neon);padding-inline-start:9px}
+.stt{margin-top:14px;align-items:center}
+.addn{border:0;background:none;color:var(--mut);font:600 12px Heebo;cursor:pointer;margin-inline-start:auto;padding:4px 2px}
+.addn.has{color:var(--neon)}
+#note{display:none}
+#note.on{display:block}
+.acts .btn{padding:12px;font-size:14px}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -129,6 +166,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
 <script src="js/core.js?v=11"></script>
+<script src="js/cards.js?v=1"></script>
 <script>
 const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
 // tags: il = ישראלית, spec = ספקולטיבית, etf = קרן סל. "בתיק" comes from the encrypted data.
@@ -367,27 +405,54 @@ function render(){
 }
 
 function find(k){ for(const sec of S) for(const r of sec.rows) for(const st of r.s) if(st[0]===k) return {st,r,sec}; }
-function openSheet(k){
-  const {st,r}=find(k), tg=st[3]||[], w=watch.get(k);
-  const tags=[isOwn(st)?'<span class="tag own">בתיק</span>':"",tg.includes("il")?'<span class="tag il">ישראלית: מוסיפה לחשיפה לישראל</span>':"",tg.includes("spec")?'<span class="tag spec">ספקולטיבית</span>':"",tg.includes("etf")?'<span class="tag etf">קרן סל</span>':""].join("");
-  const y=YAHOO_TA[k]||k;
+const SEGC=["#C3F53C","#3DDCC0","#4DA3FF","#FFB020"];
+const TV_EX={ESLT:"NASDAQ:ESLT",RHM:"XETR:RHM"};
+function tvSym(k){ if(TV_EX[k]) return TV_EX[k]; if(YAHOO_TA[k]&&YAHOO_TA[k].endsWith(".TA")) return "TASE:"+k; return k; }
+function chartSrc(k){
+  const cfg={symbol:tvSym(k),width:"100%",height:"100%",locale:"he_IL",dateRange:"12M",colorTheme:"dark",isTransparent:true,autosize:true,largeChartUrl:"",noTimeScale:false,chartOnly:false,trendLineColor:"rgba(195,245,60,1)",underLineColor:"rgba(195,245,60,0.15)",underLineBottomColor:"rgba(195,245,60,0)"};
+  return "https://s.tradingview.com/embed-widget/mini-symbol-overview/?locale=he_IL#"+encodeURIComponent(JSON.stringify(cfg));
+}
+function segHtml(c){
+  let seg=c.seg.slice().sort((a,b)=>b[1]-a[1]);
+  if(seg.length>4){ const rest=seg.slice(3).reduce((a,x)=>a+x[1],0); seg=seg.slice(0,3).concat([["אחר",rest]]); }
+  const tot=seg.reduce((a,x)=>a+x[1],0), fmt=v=>v>=1000?"$"+(v/1000).toFixed(1)+"B":"$"+Math.round(v)+"M";
+  return `<div class="blk2"><h4>מאיפה הכסף מגיע · ${fmt(tot)} ברבעון</h4>
+    <div class="sbar">${seg.map((x,i)=>`<i style="width:${x[1]/tot*100}%;background:${SEGC[i]}"></i>`).join("")}</div>
+    <div class="slist">${seg.map((x,i)=>`<div><i style="background:${SEGC[i]}"></i>${x[0]} <b>${Math.round(x[1]/tot*100)}%</b></div>`).join("")}</div></div>`;
+}
+function openSheet(k,noteOpen){
+  const {st,r}=find(k), tg=st[3]||[], w=watch.get(k), own=isOwn(st), c=CARDS[k];
+  const tags=[own?'<span class="tag own">בתיק</span>':"",tg.includes("il")?'<span class="tag il">ישראלית</span>':"",tg.includes("spec")?'<span class="tag spec">ספקולטיבית</span>':"",tg.includes("etf")?'<span class="tag etf">קרן סל</span>':""].join("");
+  let card="";
+  if(c){
+    const V=cardVerdict(c);
+    card=`<div class="vd ${V.cls}"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך 4 בירוק · ${c.q}</span></div>
+     <div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>
+     ${segHtml(c)}
+     <div class="blk2"><h4>4 הבדיקות</h4><div class="mgrid">${CARD_TESTS.map((t,i)=>{ const val=t.v(c[t.k]), tx=/[א-ת]/.test(val);
+       return `<div class="met"><div><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div><i class="lt ${V.lights[i]}"></i></div>`; }).join("")}</div>
+     ${(c.warn||[]).map(x=>`<div class="warn"><i class="lt R"></i>${x}</div>`).join("")}</div>
+     <div class="take">${c.take}</div>`;
+  } else {
+    card=`<div class="sh-d">${st[2]}</div><div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>`;
+  }
+  const hasNote=!!(w&&w.n&&w.n.trim());
   document.getElementById("sheet").innerHTML=`
     <div class="sh-top"><div class="tk">${k}</div><div><div class="sh-nm">${st[1]}</div><div class="sh-row">${r.t}</div></div><button class="x" id="x">✕</button></div>
-    <div class="sh-d">${st[2]}</div>
     ${tags?`<div class="tags">${tags}</div>`:""}
-    <div class="stt">${STATUS.map(s=>`<button class="sb ${SCLS[s]}${w&&w.s===s?" on":""}" data-s="${s}">${s}</button>`).join("")}${w?'<button class="sb rm" data-s="">הסר ממעקב</button>':""}</div>
-    <textarea id="note" placeholder="למה היא מעניינת אותך? מה התזה ומה צריך לבדוק">${esc(w?w.n:"")}</textarea>
-    ${w&&w.u?`<div class="sh-row">עודכן ${esc(w.u)}</div>`:""}
-    <div class="acts">
-      <a class="btn pri" href="${LAB}#${isOwn(st)?"h":"t"}-${k}">למעבדה</a>
-      <a class="btn" href="https://finance.yahoo.com/quote/${y}">גרף ונתונים</a>
-    </div>`;
+    ${card}
+    <div class="stt">${STATUS.map(s=>`<button class="sb ${SCLS[s]}${w&&w.s===s?" on":""}" data-s="${s}">${s}</button>`).join("")}<button class="addn${hasNote?" has":""}" id="addn">${hasNote?"ההערה שלי":"+ הערה"}</button></div>
+    <textarea id="note" class="${noteOpen||hasNote?"on":""}" placeholder="למה היא מעניינת אותך? מה צריך לבדוק">${esc(w?w.n:"")}</textarea>
+    <div class="acts"><button class="btn pri" id="tolab">למעבדה</button></div>`;
+  const sh=document.getElementById("sheet"); sh.scrollTop=0;
   document.getElementById("ov").classList.add("on");
   document.getElementById("x").onclick=closeSheet;
+  document.getElementById("tolab").onclick=()=>{ closeSheet(); Roy.go("lab",(own?"#h-":"#t-")+k); };
+  document.getElementById("addn").onclick=()=>{ const n=document.getElementById("note"); n.classList.toggle("on"); if(n.classList.contains("on")) n.focus(); };
   document.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{
     const s=b.dataset.s, cur=watch.get(k);
-    if(!s) watch.delete(k); else watch.set(k,{s,n:cur?cur.n:"",u:today()});
-    saveLocal(); render(); openSheet(k); });
+    if(cur&&cur.s===s){ if(cur.n&&cur.n.trim()) return; watch.delete(k); } else watch.set(k,{s,n:cur?cur.n:"",u:today()});
+    const y=sh.scrollTop; saveLocal(); render(); openSheet(k); sh.scrollTop=y; });
   document.getElementById("note").addEventListener("input",e=>{
     const v=e.target.value, cur=watch.get(k);
     if(!cur && !v.trim()) return;
@@ -400,6 +465,7 @@ document.getElementById("app").addEventListener("click",e=>{ const b=e.target.cl
 document.querySelectorAll(".f").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".f").forEach(x=>x.classList.remove("on")); b.classList.add("on"); filter=b.dataset.f; render(); });
 document.getElementById("q").addEventListener("input",e=>{ query=e.target.value.trim(); render(); });
 render();
+{ const m=(location.hash||"").match(/^#k-([A-Za-z0-9.-]+)$/); if(m&&find(m[1].toUpperCase())) openSheet(m[1].toUpperCase()); }
 Roy.data().then(d=>{
   ownSet=new Set(((d.datasets&&d.datasets.holdings)||[]).map(h=>String(h.ticker).toUpperCase()));
   render();
