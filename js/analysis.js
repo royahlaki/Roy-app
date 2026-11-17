@@ -1,4 +1,4 @@
-/* Finance page: the wide analysis block (desktop only). Four small panels:
+/* Finance page: the wide analysis block (Mac: one wide row; iPhone: stacked). Four small panels:
    heavy months ahead, where the salary went, loan fund vs loan balance, last month's leakage vs plan. */
 function financeAnalysis(f) {
   var root = document.getElementById('analysis');
