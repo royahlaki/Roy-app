@@ -233,7 +233,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 
 /* strongest verdict */
 .vd2.S{background:rgba(195,245,60,.14);border-color:var(--neon);box-shadow:0 0 18px rgba(195,245,60,.25)} .vd2.S b{color:var(--neon)}
-.lt.S{background:var(--neon);box-shadow:0 0 10px rgba(195,245,60,.9)} .lt.N{background:#5b6170}
+.lt.S{background:var(--neon);box-shadow:0 0 10px rgba(195,245,60,.9)} .lt.N{background:#5b6170} .vd2.N{background:rgba(140,150,170,.08);border-color:rgba(140,150,170,.4)} .vd2.N b{color:#c9d1e0}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -273,7 +273,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
 <script src="js/core.js?v=12"></script>
-<script src="js/cards.js?v=20"></script>
+<script src="js/cards.js?v=21"></script>
 <script>
 const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
 // tags: il = ישראלית, spec = ספקולטיבית, etf = קרן סל. "בתיק" comes from the encrypted data.
@@ -558,12 +558,12 @@ function openSheet(k,noteOpen){
   let card="";
   if(c){
     const V=cardVerdict(c);
-    card=`<div class="vd2 ${V.cls}"><div class="r"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך ${V.lights.filter(x=>x!=="N").length} בירוק · ${c.q}</span></div></div>
+    card=`<div class="vd2 ${V.cls}"><div class="r"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${c.etf?(c.lbl?"תלויה במחיר הביטקוין":"אין דוחות, עוקבת אחרי נכס"):V.greens+" מתוך "+V.lights.filter(x=>x!=="N").length+" בירוק"} · ${c.q}</span></div></div>
      <div class="tk2"><div class="take">${c.take}</div>${(c.warn||[]).map(x=>`<div class="wl">⚠ <b>${x[0]}:</b> ${x[1]}</div>`).join("")}</div>
      <div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>
      <div class="duo">${segHtml(c)}${flowHtml(c)}</div>
-     <div class="m4">${CARD_TESTS.map((t,i)=>{ const val=c[t.k]==="na"?"לא רלוונטי":t.v(c[t.k]), tx=/[א-ת]/.test(val);
-       return `<div><i class="lt ${V.lights[i]}"></i><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div>`; }).join("")}</div>`;
+     ${c.etf?`<div class="m4">${c.facts.map(x=>`<div><div class="v${/[א-ת]/.test(x[1])?" tx":""}">${x[1]}</div><div class="l">${x[0]}</div></div>`).join("")}</div>`:`<div class="m4">${CARD_TESTS.map((t,i)=>{ const val=c[t.k]==="na"?"לא רלוונטי":t.v(c[t.k]), tx=/[א-ת]/.test(val);
+       return `<div><i class="lt ${V.lights[i]}"></i><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div>`; }).join("")}</div>`}`;
   } else {
     card=`${st[2]?`<div class="sh-d">${esc(st[2])}</div>`:`<div class="sh-d" style="color:var(--mut);font-size:12.5px">עוד אין ניתוח למניה הזו. בקש מ־Claude לנתח אותה.</div>`}<div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>`;
   }
