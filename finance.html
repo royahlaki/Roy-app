@@ -51,6 +51,31 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .km-jlink { margin-top: 12px; border: 0; background: rgba(255,255,255,.2); color: #fff; border-radius: 99px; padding: 7px 16px; font: inherit; font-size: 14px; font-weight: 600; }
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
+<style id="theme-v2">
+/* ===== Theme v2 light: the home page style (glow, glass, teal to green) in a light version ===== */
+:root{--color-fg:#0F1E3D;--color-fg-muted:#64748B;--color-border-line:rgba(15,30,61,.08);--color-ok:#0FA67E;
+  --acc:linear-gradient(135deg,#06B6D4,#22C55E);--cds-chart-axis:rgba(15,30,61,.18);--cds-chart-muted:#D5E3EE}
+body{background:radial-gradient(90% 45% at 100% 0%,rgba(34,211,238,.18),transparent 60%),radial-gradient(80% 45% at 0% 30%,rgba(74,222,128,.16),transparent 60%),radial-gradient(90% 50% at 100% 100%,rgba(99,102,241,.10),transparent 60%),#F6F9FC!important;background-attachment:fixed!important}
+body[data-tab=finance] .km-head{position:relative;overflow:hidden;background:linear-gradient(165deg,#FFFFFF 0%,#EEF7FB 100%)!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 10px 30px rgba(15,30,61,.08);border-bottom:1px solid rgba(15,30,61,.05)}
+body[data-tab=finance] .km-head::before{content:"";position:absolute;inset:auto -20% -80% -20%;height:190%;pointer-events:none;
+  background:radial-gradient(50% 40% at 50% 60%,rgba(74,222,128,.38),rgba(34,211,238,.22) 45%,transparent 70%)}
+body[data-tab=finance] .km-head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,#22D3EE,#4ADE80,transparent);opacity:.7}
+.km-head>*{position:relative}
+.km-title{background:linear-gradient(90deg,#0F1E3D,#0E7490 70%,#15803D);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+.km-head .dt{color:#64748B}
+.km-jlink{background:var(--acc)!important;color:#fff!important;box-shadow:0 6px 18px rgba(6,182,212,.30)}
+body[data-tab=finance] .km-card{background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.9)!important;
+  box-shadow:0 1px 2px rgba(15,30,61,.04),0 10px 30px rgba(15,30,61,.07)!important;-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
+#year.km-yr-card{background:rgba(255,255,255,.78)!important;box-shadow:0 1px 2px rgba(15,30,61,.04),0 10px 30px rgba(6,182,212,.12)!important}
+body[data-tab=finance] .km-bar{background:rgba(15,30,61,.07)}
+.km-bar i,.km-room-bar i{background:var(--acc)!important}
+.km-add button,#add-btn,#cash-out-btn,#cash-in-btn{background:var(--acc)!important;color:#fff!important;border:0!important;box-shadow:0 4px 14px rgba(6,182,212,.28)}
+.km-add input,.km-add select,.km-inp{background:rgba(15,30,61,.045)!important;border-color:transparent!important}
+.km-chips span{background:rgba(15,30,61,.05)}
+.km-act button{background:rgba(15,30,61,.05)}
+body[data-tab=finance] .km-seg button.on{color:#0E7490!important}
+</style>
 </head>
 <body data-tab="finance">
 <div id="boot">טוען…</div>
@@ -374,7 +399,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/core.js?v=12"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/finance-page.js?v=13"></script>
+<script src="js/finance-page.js?v=14"></script>
 <script src="js/analysis.js?v=8"></script>
 <script>
 Roy.data().then(function (d) {

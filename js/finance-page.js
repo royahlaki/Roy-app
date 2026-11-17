@@ -121,7 +121,7 @@ dash.calc('networth', {
       .attr('x', (v, i) => x(i)).attr('width', x.bandwidth())
       .attr('y', (v) => Math.min(y(v), y(0))).attr('height', (v) => Math.max(1.5, Math.abs(y(v) - y(0))))
       .attr('rx', 3)
-      .attr('fill', (v, i) => (v < limit - 0.5 ? 'var(--km-red)' : v < 0 ? 'color-mix(in srgb, var(--km-red) 40%, transparent)' : i === li || i === xi ? '#2F80C9' : 'rgba(47,128,201,.28)'));
+      .attr('fill', (v, i) => (v < limit - 0.5 ? 'var(--km-red)' : v < 0 ? 'color-mix(in srgb, var(--km-red) 40%, transparent)' : i === li || i === xi ? '#14B8A6' : 'rgba(20,184,166,.30)'));
     svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', css('--cds-chart-axis'));
     if (limit >= lo && limit < 0) svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(limit)).attr('y2', y(limit)).attr('stroke', 'var(--km-red)').attr('stroke-dasharray', '3 3').attr('opacity', .6);
     svg.append('g').selectAll('text').data(months).join('text').attr('x', (r, i) => x(i) + x.bandwidth() / 2).attr('y', H - 4).attr('text-anchor', 'middle')
