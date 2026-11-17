@@ -62,7 +62,12 @@
     return new Promise(function () {});
   };
   Roy.go = function (tab, hash) {
-    if (Roy.inShell()) window.parent.roy.go(tab, hash || '');
+    if (Roy.inShell()) {
+      /* An old cached shell may not know a newer tab and would fall back to home: reload it fresh, straight to the tab */
+      var p = window.parent, tabs = p.roy.tabs;
+      if (!tabs || tabs.indexOf(tab) === -1) { p.location.replace(p.location.pathname + '?v=' + Date.now() + '#' + tab); return; }
+      p.roy.go(tab, hash || '');
+    }
     else location.href = './#' + tab;
   };
 
