@@ -428,6 +428,17 @@ dash.calc('networth', {
     if (loan) {
       const left = Number(loan.left_after_current) + 1, l0 = Number(p.loan_start), l = Number(p.loan_principal);
       add('סילוק הלוואה', dmy(addMonths(p.first_charge, left - 1)), l0 ? 1 - l / l0 : 0, 'נשאר ' + ils(l) + ' · נשארו ' + left + ' תשלומים');
+      if (p.loan_fund != null) {
+        const fund = Number(p.loan_fund) || 0, mon = Number(p.loan_fund_monthly) || 0, from = String(p.loan_fund_from || ''), amort = l / left;
+        let f = fund, when = null;
+        for (let m = 0; m < left; m++) {
+          const d = addMonths(p.first_charge, m), ym = String(d instanceof Date ? d.toISOString() : d).slice(0, 7);
+          if (from && ym >= from) f += mon;
+          if (ym === String(p.loan_fund_extra_month || '')) f += Number(p.loan_fund_extra) || 0;
+          if (f >= l - amort * (m + 1)) { when = d; break; }
+        }
+        add('פיקדון לסגירת ההלוואה', when ? dmy(when) : '—', l ? fund / l : 0, 'בפיקדון ' + ils(fund) + ' מתוך ' + ils(l));
+      }
     }
   }
 
