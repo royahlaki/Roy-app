@@ -132,7 +132,9 @@ footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-he
 .tbl .lnk{padding:6px 0;font-size:12.5px;gap:7px}
 .tbl .lnk i{width:7px;height:7px}
 .tbl .lnk small{font-size:10.5px}
-.tbl .row.gx .lb{color:var(--crit)}
+.tbl .row.gx{margin:6px;border:1px solid rgba(255,92,122,.5);border-radius:9px;background:rgba(255,92,122,.07);grid-template-columns:57px 1fr}
+.tbl .row.gx .lb{color:var(--crit);background:none;white-space:nowrap;padding-inline:8px 6px;border-inline-end-color:rgba(255,92,122,.3)}
+.tbl .row.gx+.row{border-top:0}
 .tbl .gn{padding:7px 0;font-size:12px;line-height:1.5;color:#d6ded9}
 .tbl .tks{gap:0}
 .tbl .tk{background:none;border:0;border-top:.5px solid var(--line);border-radius:0;padding:6px 0}
