@@ -73,6 +73,30 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
 .empty{text-align:center;color:var(--muted);padding:20px 8px;line-height:1.7}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
+<style id="theme-v2">
+/* ===== Theme v2 light, same as the finance tab ===== */
+:root{--fg:#0F1E3D;--muted:#64748B;--line:rgba(15,30,61,.08);--green:#0FA67E;--acc:linear-gradient(135deg,#06B6D4,#22C55E)}
+body{background:radial-gradient(90% 45% at 100% 0%,rgba(34,211,238,.18),transparent 60%),radial-gradient(80% 45% at 0% 30%,rgba(74,222,128,.16),transparent 60%),radial-gradient(90% 50% at 100% 100%,rgba(99,102,241,.10),transparent 60%),#F6F9FC!important;background-attachment:fixed!important}
+.head{overflow:hidden;color:var(--fg);background:linear-gradient(165deg,#FFFFFF 0%,#EEF7FB 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 10px 30px rgba(15,30,61,.08);border-bottom:1px solid rgba(15,30,61,.05)}
+.head::before{content:"";position:absolute;inset:auto -20% -80% -20%;height:190%;pointer-events:none;
+  background:radial-gradient(50% 40% at 50% 60%,rgba(74,222,128,.38),rgba(34,211,238,.22) 45%,transparent 70%)}
+.head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,#22D3EE,#4ADE80,transparent);opacity:.7}
+.head h1,.head .dt{position:relative}
+.head h1{background:linear-gradient(90deg,#0F1E3D,#0E7490 70%,#15803D);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head .dt{color:#64748B}
+.back{z-index:1;background:var(--acc);color:#fff;box-shadow:0 4px 14px rgba(6,182,212,.30)}
+.card,.mon > summary{background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 1px 2px rgba(15,30,61,.04),0 10px 30px rgba(15,30,61,.07);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
+.mon[open] > summary{background:#fff;box-shadow:0 0 0 2px #14B8A6,0 10px 26px rgba(6,182,212,.18)}
+.seg button.on{color:#0E7490}
+.split div{background:rgba(15,30,61,.04)}
+.split .warn.ok{background:rgba(15,163,126,.06)}
+tr.c.on td{background:rgba(34,211,238,.08)}
+.row.inst{background:linear-gradient(90deg,rgba(34,211,238,.08),rgba(74,222,128,.10))}
+.pill.n{background:rgba(20,184,166,.14);color:#0E7490}
+.more{color:#0E9488}
+</style>
 </head>
 <body data-tab="journal">
 <div id="boot">טוען…</div>

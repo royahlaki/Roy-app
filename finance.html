@@ -75,6 +75,8 @@ body[data-tab=finance] .km-bar{background:rgba(15,30,61,.07)}
 .km-chips span{background:rgba(15,30,61,.05)}
 .km-act button{background:rgba(15,30,61,.05)}
 body[data-tab=finance] .km-seg button.on{color:#0E7490!important}
+.an-p{background:rgba(255,255,255,.7)!important;border-color:rgba(15,30,61,.06)!important}
+.an-way{border-color:rgba(20,184,166,.35)!important;background:linear-gradient(90deg,rgba(34,211,238,.10),rgba(74,222,128,.12))!important}
 </style>
 </head>
 <body data-tab="finance">
@@ -299,9 +301,13 @@ body[data-tab=finance] .km-seg button.on{color:#0E7490!important}
 .km-fhead { margin-top: 18px; align-items: center; }
 
 /* Analysis block: wide screens only */
-#analysis { display: none !important; }
-@media (min-width: 1024px) {
-  #analysis:not([hidden]) { display: block !important; grid-column: 1 / -1; padding: 14px !important; }
+#analysis:not([hidden]) { display: block !important; padding: 14px !important; }
+@media (min-width: 1024px) { #analysis:not([hidden]) { grid-column: 1 / -1; } }
+/* iPhone: the analysis panels stack one per row; the subscriptions block is hidden (still shown on the Mac) */
+@media (max-width: 700px) {
+  .an-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .an-head { flex-direction: column; gap: 2px; align-items: flex-start; }
+  #subs { display: none !important; }
 }
 .an-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
 .an-head span { font-size: 20px; font-weight: 800; }
