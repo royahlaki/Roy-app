@@ -29,10 +29,10 @@ var CARDS = {
 
 /* Traffic light per test: G / Y / R */
 var CARD_TESTS = [
-  { k: "g", l: "צמיחה בהכנסות", f: function (v) { return v >= 10 ? "G" : v >= 5 ? "Y" : "R"; }, v: function (v) { return (v > 0 ? "+" : "") + v + "%"; } },
-  { k: "fcf", l: "תזרים חופשי מההכנסות", f: function (v) { return v == null ? "R" : v >= 8 ? "G" : v >= 0 ? "Y" : "R"; }, v: function (v) { return v == null ? "שלילי" : "~" + v + "%"; } },
+  { k: "g", l: "צמיחה", f: function (v) { return v >= 10 ? "G" : v >= 5 ? "Y" : "R"; }, v: function (v) { return (v > 0 ? "+" : "") + v + "%"; } },
+  { k: "fcf", l: "תזרים חופשי", f: function (v) { return v == null ? "R" : v >= 8 ? "G" : v >= 0 ? "Y" : "R"; }, v: function (v) { return v == null ? "שלילי" : "~" + v + "%"; } },
   { k: "roic", l: "תשואה על ההון", f: function (v) { return v == null ? "R" : v >= 15 ? "G" : v >= 8 ? "Y" : "R"; }, v: function (v) { return v == null ? "שלילית" : "~" + v + "%"; } },
-  { k: "pe", l: "מכפיל רווח עתידי", f: function (v) { return v == null ? "R" : v < 20 ? "G" : v < 35 ? "Y" : "R"; }, v: function (v) { return v == null ? "אין רווח" : "~" + v; } }
+  { k: "pe", l: "מכפיל רווח", f: function (v) { return v == null ? "R" : v < 20 ? "G" : v < 35 ? "Y" : "R"; }, v: function (v) { return v == null ? "אין רווח" : "~" + v; } }
 ];
 
 /* Score: green 2, yellow 1, red 0. 6+ worth researching, 4-5 borderline, else not now. */

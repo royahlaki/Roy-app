@@ -146,6 +146,45 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 .fleg div{display:flex;align-items:center;gap:6px;font-size:12.5px}
 .fleg i{width:8px;height:8px;border-radius:3px;flex:none}
 .fleg b{font:600 12.5px Oswald;direction:ltr;color:var(--mut)}
+
+/* sheet v4: compact, fits one screen */
+.sheet{padding-top:14px}
+.seg4{display:flex;gap:6px;margin-top:10px;align-items:stretch}
+.seg4 .sg{flex:1;display:flex;background:rgba(118,118,128,.18);border-radius:10px;padding:2px}
+.seg4 .sg button{flex:1;border:0;background:none;color:var(--mut);font:600 12px Heebo;padding:6px 2px;border-radius:8px;cursor:pointer}
+.seg4 .sg button.on.s0{background:var(--s0);color:#14051f} .seg4 .sg button.on.s1{background:var(--s1);color:#1f1400}
+.seg4 .sg button.on.s2{background:var(--s2);color:#04201b} .seg4 .sg button.on.s3{background:var(--s3);color:#fff}
+.seg4 .nb{flex:none;width:36px;border-radius:10px;border:0;background:rgba(118,118,128,.18);color:var(--mut);font-size:15px;cursor:pointer}
+.seg4 .nb.has{color:var(--neon)}
+.sheet #note{margin-top:8px;min-height:56px}
+.vd2{margin-top:10px;border-radius:12px;padding:8px 11px;border:1px solid}
+.vd2 .r{display:flex;align-items:center;gap:8px}
+.vd2 b{font-size:15px;font-weight:900}
+.vd2 .r span{font-size:11.5px;color:var(--mut);margin-inline-start:auto}
+.vd2 p{font-size:12.5px;color:#d6ded9;line-height:1.45;margin-top:4px}
+.vd2.G{background:rgba(195,245,60,.08);border-color:rgba(195,245,60,.4)} .vd2.G b{color:var(--neon)}
+.vd2.Y{background:rgba(255,176,32,.08);border-color:rgba(255,176,32,.4)} .vd2.Y b{color:var(--hot)}
+.vd2.R{background:rgba(255,92,122,.08);border-color:rgba(255,92,122,.4)} .vd2.R b{color:var(--spec)}
+.vd2 .w{margin-top:5px;font-size:12px;color:var(--spec)}
+.sheet .chart{height:170px;margin-top:8px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.mini{background:rgba(255,255,255,.04);border:.5px solid var(--line2);border-radius:11px;padding:7px 9px}
+.mini h5{font-size:11px;color:var(--mut);font-weight:600;margin-bottom:5px}
+.mini .sbar{height:6px;border-radius:3px;margin-bottom:5px}
+.mini .ln{display:flex;align-items:center;gap:5px;font-size:11.5px;line-height:1.55;white-space:nowrap}
+.mini .ln i{width:7px;height:7px;border-radius:2px;flex:none}
+.mini .ln span{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.mini .ln b{margin-inline-start:auto;font:600 12px Oswald;direction:ltr;color:#cfd8d2;padding-inline-start:4px}
+.mini .ln.tot{border-top:.5px solid var(--line2);margin-top:3px;padding-top:3px;font-weight:700}
+.mini .ln.pos b{color:var(--neon)} .mini .ln.neg b,.mini .ln.neg{color:var(--spec)}
+.m4{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:6px}
+.m4>div{background:rgba(255,255,255,.04);border:.5px solid var(--line2);border-radius:10px;padding:6px 6px 5px;position:relative;text-align:center}
+.m4 .v{font:700 15px Oswald;direction:ltr;line-height:1.2}
+.m4 .v.tx{font:700 12.5px Heebo;direction:rtl;line-height:1.45}
+.m4 .l{font-size:10px;color:var(--mut);line-height:1.2;margin-top:1px}
+.m4 .lt{position:absolute;top:5px;left:5px;width:6px;height:6px}
+.sheet .acts{margin-top:10px}
+.sheet .acts .btn{padding:10px}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -185,7 +224,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
 <script src="js/core.js?v=11"></script>
-<script src="js/cards.js?v=2"></script>
+<script src="js/cards.js?v=3"></script>
 <script>
 const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
 // tags: il = ישראלית, spec = ספקולטיבית, etf = קרן סל. "בתיק" comes from the encrypted data.
@@ -429,32 +468,27 @@ const TV_EX={ESLT:"NASDAQ:ESLT",RHM:"XETR:RHM"};
 function tvSym(k){ if(TV_EX[k]) return TV_EX[k]; if(YAHOO_TA[k]&&YAHOO_TA[k].endsWith(".TA")) return "TASE:"+k; return k; }
 function chartSrc(k){
   const q=new URLSearchParams({symbol:tvSym(k),interval:"D",range:"12M",theme:"dark",style:"1",locale:"he_IL",timezone:"Asia/Jerusalem",
-    hide_top_toolbar:"1",hide_side_toolbar:"1",hide_legend:"0",withdateranges:"1",allow_symbol_change:"0",save_image:"0",
+    hide_top_toolbar:"1",hide_side_toolbar:"1",hide_legend:"1",hide_volume:"1",withdateranges:"0",allow_symbol_change:"0",save_image:"0",
     backgroundColor:"rgba(30,38,34,1)",gridColor:"rgba(255,255,255,0.05)"});
   return "https://s.tradingview.com/widgetembed/?"+q.toString();
 }
+function money(v){ const a=Math.abs(v); return (v<0?"−":"")+(a>=1000?"$"+(a/1000).toFixed(1)+"B":"$"+Math.round(a)+"M"); }
 function segHtml(c){
   let seg=c.seg.slice().sort((a,b)=>b[1]-a[1]);
   if(seg.length>4){ const rest=seg.slice(3).reduce((a,x)=>a+x[1],0); seg=seg.slice(0,3).concat([["אחר",rest]]); }
-  const tot=seg.reduce((a,x)=>a+x[1],0), fmt=v=>v>=1000?"$"+(v/1000).toFixed(1)+"B":"$"+Math.round(v)+"M";
-  return `<div class="blk2"><h4>מאיפה הכסף מגיע · ${fmt(tot)} ברבעון</h4>
+  const tot=seg.reduce((a,x)=>a+x[1],0);
+  return `<div class="mini"><h5>מאיפה הכסף מגיע</h5>
     <div class="sbar">${seg.map((x,i)=>`<i style="width:${x[1]/tot*100}%;background:${SEGC[i]}"></i>`).join("")}</div>
-    <div class="slist">${seg.map((x,i)=>`<div><i style="background:${SEGC[i]}"></i>${x[0]} <b>${Math.round(x[1]/tot*100)}%</b></div>`).join("")}</div></div>`;
+    ${seg.map((x,i)=>`<div class="ln"><i style="background:${SEGC[i]}"></i><span>${x[0]}</span><b>${Math.round(x[1]/tot*100)}%</b></div>`).join("")}</div>`;
 }
 function flowHtml(c){
   const o=c.out; if(!o) return "";
-  const rev=c.seg.reduce((a,x)=>a+x[1],0), spend=o.cost+o.opex+o.other, max=Math.max(rev,spend);
-  const fmt=v=>{v=Math.abs(v); return v>=1000?"$"+(v/1000).toFixed(1)+"B":"$"+Math.round(v)+"M";};
-  const parts=[["עלות המוצר",o.cost,"#6B7A70"],["הוצאות תפעול",o.opex,"#FFB020"],["מס, ריבית ואחר",o.other,"#4DA3FF"]].filter(x=>x[1]>0.5);
-  if(o.net>0) parts.push(["רווח נקי",o.net,"#C3F53C"]);
-  const pct=v=>(v/max*100)+"%";
-  return `<div class="blk2"><h4>לאן הכסף הולך</h4>
-   <div class="flow">
-    <span class="fl">הכנסות</span><div class="fb"><i style="width:${pct(rev)};background:#3DDCC0"></i></div>
-    <span class="fl">${o.net<0?"הוצאות":"מתחלק ל"}</span><div class="fb">${parts.map(x=>`<i style="width:${pct(x[1])};background:${x[2]}"></i>`).join("")}</div>
-   </div>
-   <div class="fleg">${parts.map(x=>`<div><i style="background:${x[2]}"></i>${x[0]} <b>${Math.round(x[1]/rev*100)}%</b></div>`).join("")}
-    ${o.net<0?`<div style="color:var(--spec)"><i style="background:var(--spec)"></i>הפסד <b style="color:var(--spec)">${fmt(o.net)}</b></div>`:""}</div></div>`;
+  const rev=c.seg.reduce((a,x)=>a+x[1],0), spend=rev-o.net, m=Math.round(o.net/rev*100);
+  return `<div class="mini"><h5>הרבעון במספרים</h5>
+    <div class="ln"><span>הכנסות</span><b>${money(rev)}</b></div>
+    <div class="ln"><span>הוצאות</span><b>${money(spend)}</b></div>
+    <div class="ln tot ${o.net<0?"neg":"pos"}"><span>${o.net<0?"הפסד":"רווח נקי"}</span><b>${money(o.net)}</b></div>
+    <div class="ln" style="color:var(--mut)"><span>שולי רווח נקי</span><b style="color:var(--mut)">${m}%</b></div></div>`;
 }
 function openSheet(k,noteOpen){
   const {st}=find(k), tg=st[3]||[], w=watch.get(k), own=isOwn(st), c=CARDS[k];
@@ -462,21 +496,19 @@ function openSheet(k,noteOpen){
   let card="";
   if(c){
     const V=cardVerdict(c);
-    card=`<div class="vd ${V.cls}"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך 4 בירוק · ${c.q}</span></div>
-     ${(c.warn||[]).map(x=>`<div class="wr"><b>⚠ ${x[0]}</b><span>${x[1]}</span></div>`).join("")}
+    card=`<div class="vd2 ${V.cls}"><div class="r"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך 4 בירוק · ${c.q}</span></div>
+       <p>${c.take}</p>${(c.warn||[]).map(x=>`<div class="w">⚠ <b style="font-size:12px;color:var(--spec)">${x[0]}:</b> ${x[1]}</div>`).join("")}</div>
      <div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>
-     ${segHtml(c)}
-     ${flowHtml(c)}
-     <div class="blk2"><div class="mgrid">${CARD_TESTS.map((t,i)=>{ const val=t.v(c[t.k]), tx=/[א-ת]/.test(val);
-       return `<div class="met"><div style="flex:1"><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div><i class="lt ${V.lights[i]}"></i></div>`; }).join("")}</div></div>
-     <div class="take">${c.take}</div>`;
+     <div class="duo">${segHtml(c)}${flowHtml(c)}</div>
+     <div class="m4">${CARD_TESTS.map((t,i)=>{ const val=t.v(c[t.k]), tx=/[א-ת]/.test(val);
+       return `<div><i class="lt ${V.lights[i]}"></i><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div>`; }).join("")}</div>`;
   } else {
     card=`<div class="sh-d">${st[2]}</div><div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>`;
   }
   const hasNote=!!(w&&w.n&&w.n.trim());
   document.getElementById("sheet").innerHTML=`
     <div class="hd"><span class="tk">${k}</span><span class="nm">${st[1]}</span>${tags}<button class="x" id="x">✕</button></div>
-    <div class="stt">${STATUS.map(s=>`<button class="sb ${SCLS[s]}${w&&w.s===s?" on":""}" data-s="${s}">${s}</button>`).join("")}<button class="addn${hasNote?" has":""}" id="addn">${hasNote?"ההערה שלי":"+ הערה"}</button></div>
+    <div class="seg4"><div class="sg">${STATUS.map(s=>`<button class="sb ${SCLS[s]}${w&&w.s===s?" on":""}" data-s="${s}">${s}</button>`).join("")}</div><button class="nb${hasNote?" has":""}" id="addn" title="הערה">✎</button></div>
     <textarea id="note" class="${noteOpen||hasNote?"on":""}" placeholder="למה היא מעניינת אותך? מה צריך לבדוק">${esc(w?w.n:"")}</textarea>
     ${card}
     <div class="acts"><button class="btn pri" id="tolab">למעבדה</button></div>`;
