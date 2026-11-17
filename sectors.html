@@ -103,7 +103,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 .vd.R{background:rgba(255,92,122,.09);border-color:rgba(255,92,122,.45)} .vd.R b{color:var(--spec)}
 .lt{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
 .lt.G{background:var(--neon);box-shadow:0 0 8px rgba(195,245,60,.6)} .lt.Y{background:var(--hot)} .lt.R{background:var(--spec)}
-.chart{margin-top:12px;height:150px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);border:.5px solid var(--line2)}
+.chart{margin-top:12px;height:280px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);border:.5px solid var(--line2)}
 .chart iframe{width:100%;height:100%;border:0;display:block}
 .blk2{margin-top:14px}
 .blk2 h4{font-size:11.5px;color:var(--mut);font-weight:600;margin-bottom:6px}
@@ -409,8 +409,10 @@ const SEGC=["#C3F53C","#3DDCC0","#4DA3FF","#FFB020"];
 const TV_EX={ESLT:"NASDAQ:ESLT",RHM:"XETR:RHM"};
 function tvSym(k){ if(TV_EX[k]) return TV_EX[k]; if(YAHOO_TA[k]&&YAHOO_TA[k].endsWith(".TA")) return "TASE:"+k; return k; }
 function chartSrc(k){
-  const cfg={symbol:tvSym(k),width:"100%",height:"100%",locale:"he_IL",dateRange:"12M",colorTheme:"dark",isTransparent:true,autosize:true,largeChartUrl:"",noTimeScale:false,chartOnly:false,trendLineColor:"rgba(195,245,60,1)",underLineColor:"rgba(195,245,60,0.15)",underLineBottomColor:"rgba(195,245,60,0)"};
-  return "https://s.tradingview.com/embed-widget/mini-symbol-overview/?locale=he_IL#"+encodeURIComponent(JSON.stringify(cfg));
+  const q=new URLSearchParams({symbol:tvSym(k),interval:"D",range:"12M",theme:"dark",style:"1",locale:"he_IL",timezone:"Asia/Jerusalem",
+    hide_top_toolbar:"1",hide_side_toolbar:"1",hide_legend:"0",withdateranges:"1",allow_symbol_change:"0",save_image:"0",
+    backgroundColor:"rgba(30,38,34,1)",gridColor:"rgba(255,255,255,0.05)"});
+  return "https://s.tradingview.com/widgetembed/?"+q.toString();
 }
 function segHtml(c){
   let seg=c.seg.slice().sort((a,b)=>b[1]-a[1]);
