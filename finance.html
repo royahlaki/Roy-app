@@ -275,8 +275,12 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .an-head span { font-size: 20px; font-weight: 800; }
 .an-head small { font-size: 13px; color: var(--color-fg-muted); }
 .an-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-@media (max-width: 1300px) { .an-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.an-p { background: #F7FCFA; border: 1px solid var(--color-border-line); border-radius: 14px; padding: 16px; min-width: 0; display: flex; flex-direction: column; }
+@media (max-width: 1150px) { .an-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 900px; margin: 0 auto; } }
+.an-p { background: #F7FCFA; border: 1px solid var(--color-border-line); border-radius: 14px; padding: 14px 16px; min-width: 0; display: flex; flex-direction: column; }
+.an-p .an-h { text-align: center; font-size: 15px; margin-bottom: 10px; }
+.an-p .an-big { text-align: center; font-size: 24px; margin: 0 0 8px; }
+.an-p .an-leg { justify-content: center; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.an-p svg { display: block; max-height: 170px; }
 .an-h { font-size: 14px; font-weight: 700; color: var(--color-fg); }
 .an-big { font-size: 30px; font-weight: 800; line-height: 1.15; margin-top: 6px; }
 .an-sub { font-size: 12px; color: var(--color-fg-muted); margin: 2px 0 10px; }
@@ -288,7 +292,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .an-fc b { font-weight: 700; }
 .an-note { font-size: 11.5px; color: var(--color-fg-muted); margin-top: 6px; line-height: 1.5; }
 .an-mini { font-size: 12px; color: var(--color-fg-muted); margin: 10px 0 4px; }
-.an-row { display: grid; grid-template-columns: 8.5rem 1fr 3.4rem; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; }
+.an-row { display: grid; grid-template-columns: 7.5rem 1fr 3rem; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; }
 .an-row span i { font-style: normal; font-size: 10px; color: #C08A00; margin-inline-start: 4px; }
 .an-row b { text-align: left; font-weight: 600; color: var(--km-red); }
 .an-track { height: 6px; background: var(--color-border-line); border-radius: 3px; overflow: hidden; }
@@ -306,7 +310,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .an-eq b { display: block; font-size: 17px; font-weight: 800; }
 .an-eq span { display: block; font-size: 11px; color: var(--color-fg-muted); line-height: 1.3; margin-top: 2px; }
 .an-cal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.an-tile { background: #fff; border: 1px solid var(--color-border-line); border-radius: 10px; padding: 7px 8px; min-height: 64px; }
+.an-tile { background: #fff; border: 1px solid var(--color-border-line); border-radius: 10px; padding: 6px 8px; text-align: center; }
 .an-tile.h2 { background: #FFE3E7; border-color: #FFB3BE; }
 .an-tile.h3 { background: #ff4d63; border-color: #ff4d63; color: #fff; }
 .an-tile.lt { background: #E3F7EF; border-color: #A9E5CF; }
@@ -314,8 +318,6 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .an-ta { font-size: 15px; font-weight: 700; }
 .an-tn { font-size: 10px; line-height: 1.3; margin-top: 2px; opacity: .9; }
 .an-leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-fg-muted); margin-top: 8px; }
-.an-months .an-h { text-align: center; font-size: 16px; margin-bottom: 14px; }
-.an-months .an-leg { justify-content: center; gap: 22px; margin-top: 14px; }
 .an-leg i { display: inline-flex; align-items: center; gap: 6px; font-style: normal; }
 .an-leg i span { margin: 0 !important; }
 .an-leg span { width: 10px; height: 10px; border-radius: 3px; margin-inline-start: 6px; }
@@ -365,7 +367,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
 <script src="js/finance-page.js?v=13"></script>
-<script src="js/analysis.js?v=7"></script>
+<script src="js/analysis.js?v=8"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};

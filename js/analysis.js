@@ -1,5 +1,5 @@
-/* Finance page: the wide analysis block (desktop only). Four views built from the expense journal,
-   the ledger and the month-by-month forecast: monthly result, leakage vs plan, yearly habit cost, heavy months. */
+/* Finance page: the wide analysis block (desktop only). Four small panels:
+   heavy months ahead, where the salary went, loan fund vs loan balance, last month's leakage vs plan. */
 function financeAnalysis(f) {
   var root = document.getElementById('analysis');
   if (!root) return;
@@ -8,119 +8,91 @@ function financeAnalysis(f) {
 
   var nf = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
   var ils = function (v) { return '₪' + nf.format(Math.abs(Math.round(v))); };
-  var sgn = function (v) { return Math.round(v) < 0 ? '<bdi dir="ltr">-' + ils(v) + '</bdi>' : ils(v); };
   var MON = ['ינו', 'פבר', 'מרץ', 'אפר', 'מאי', 'יוני', 'יולי', 'אוג', 'ספט', 'אוק', 'נוב', 'דצמ'];
   var MONL = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
   var monOf = function (ym) { return MON[Number(String(ym).slice(5, 7)) - 1]; };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var budget = J.budget || {};
-  var planTotal = Object.keys(budget).reduce(function (s, k) { return s + Number(budget[k]); }, 0);
+  var fl = function (r) { return String(r[5] || ''); };
+  var leg = function (items) { return '<div class="an-leg">' + items.map(function (x) { return '<i><span style="background:' + x[1] + '"></span>' + x[0] + '</i>'; }).join('') + '</div>'; };
 
-  /* Per journal month: total out, one-offs, by category, salary. */
+  /* ---------- where the salary went ---------- */
   var hist = {}; (f.history || []).forEach(function (h) { hist[h.month] = h; });
   var ledSalary = (f.ledger || []).filter(function (r) { return /משכורת/.test(r.name); });
-  var months = J.months.map(function (m) {
-    var out = 0, one = 0, by = {};
+  var C = { com: '#0E7C66', day: '#8FD3BE', one: '#F2B84B', left: '#E3F7EF' };
+  var sm = J.months.map(function (m) {
+    var com = 0, day = 0, one = 0;
     (m.r || []).forEach(function (r) {
       var a = -Number(r[2]); if (!isFinite(a)) return;
-      out += a; if (r[5] === 'o') one += a;
-      by[r[4]] = (by[r[4]] || 0) + a;
+      if (fl(r).indexOf('o') > -1) one += a;
+      else if (fl(r).indexOf('i') > -1 || r[4] === 'מנויים') com += a;
+      else day += a;
     });
-    var sal = hist[m.m] && hist[m.m].salary_in, est = false;
+    var sal = hist[m.m] && hist[m.m].salary_in;
     if (!sal) { var l = ledSalary.find(function (r) { return String(r.date).slice(0, 7) === m.m; }); sal = l && Number(l.amount); }
-    if (!sal) { sal = Number(inputs.salary_normal) || 0; est = true; }
-    return { m: m.m, out: out, one: one, by: by, sal: sal, est: est, res: sal - out, plan: Number((m.b && Object.keys(m.b).reduce(function (s, k) { return s + Number(m.b[k]); }, 0)) || planTotal) };
+    if (!sal) sal = Number(inputs.salary_normal) || 0;
+    return { m: m.m, com: com, day: day, one: one, sal: sal };
   });
-  var n = months.length;
-  var avg = function (fn) { return months.reduce(function (s, x) { return s + fn(x); }, 0) / n; };
-  var span = monOf(months[0].m) + ' עד ' + monOf(months[n - 1].m);
-
-  /* ---------- 1. monthly result ---------- */
-  function bars(vals, opt) {
-    var W = 320, H = 150, pad = 18, lo = Math.min(0, Math.min.apply(null, vals)), hi = Math.max(0, Math.max.apply(null, vals));
-    if (opt.ref != null) hi = Math.max(hi, opt.ref);
-    var rng = (hi - lo) || 1, y = function (v) { return pad + (hi - v) / rng * (H - 2 * pad); };
-    var step = W / vals.length, bw = step * 0.56, s = '';
-    vals.forEach(function (v, i) {
-      var x = i * step + (step - bw) / 2;
-      s += opt.bar(v, i, x, bw, y);
+  var W = 300, H = 150, top = 10, mx = Math.max.apply(null, sm.map(function (x) { return Math.max(x.sal, x.com + x.day + x.one); })) || 1;
+  var yv = function (v) { return H - v / mx * (H - top); };
+  var step = W / sm.length, bw = step * 0.5, svg = '';
+  sm.forEach(function (x, i) {
+    var bx = i * step + (step - bw) / 2, acc = 0;
+    [['com', x.com], ['day', x.day], ['one', x.one]].forEach(function (p) {
+      if (p[1] <= 0) return;
+      svg += '<rect x="' + bx + '" y="' + yv(acc + p[1]) + '" width="' + bw + '" height="' + (yv(acc) - yv(acc + p[1])) + '" fill="' + C[p[0]] + '"/>';
+      acc += p[1];
     });
-    if (opt.zero !== false) s += '<line x1="0" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="rgba(11,59,46,.25)"/>';
-    if (opt.ref != null) s += '<line x1="0" x2="' + W + '" y1="' + y(opt.ref) + '" y2="' + y(opt.ref) + '" stroke="#5E8A7C" stroke-dasharray="4 4"/>';
-    return '<svg viewBox="0 0 ' + W + ' ' + (H + 16) + '" width="100%" style="max-height:190px" direction="ltr">' + s +
-      vals.map(function (v, i) { return '<text x="' + (i * step + step / 2) + '" y="' + (H + 12) + '" text-anchor="middle" class="an-ax">' + opt.labels[i] + '</text>'; }).join('') + '</svg>';
-  }
-  /* oldest to newest, left to right, like the forecast chart above */
-  var ordered = months, labels = months.map(function (x) { return monOf(x.m); });
-
-  var aRes = avg(function (x) { return x.res; }), aOne = avg(function (x) { return x.one; });
-  var bank = (f.ledger && f.ledger.length) ? f.ledger.reduce(function (s, r) { return s + Number(r.amount); }, 0) : Number(inputs.bank_balance);
-  var limit = Number(inputs.limit) || -5000;
-  var now = new Date(), fc = '';
-  var when = function (k) { var d = new Date(now.getFullYear(), now.getMonth() + k, 1); return 'סוף ' + MONL[d.getMonth()]; };
-  if (aRes < 0) {
-    var k0 = bank > 0 ? Math.ceil(bank / -aRes) : 0, k1 = Math.ceil((bank - limit) / -aRes);
-    fc = '<div class="an-fc">בקצב הזה הבנק (' + sgn(bank) + ' היום)' +
-      (bank > 0 ? ' יורד מתחת ל־0 ב<b>' + when(k0) + '</b> ו' : ' ') +
-      'מתחת למסגרת ב<b class="an-red">' + when(Math.max(1, k1)) + '</b>.</div>' +
-      '<div class="an-note">כדי להתאזן צריך לחתוך כ־' + ils(-aRes) + ' בחודש. מזה, חד פעמיים: כ־' + ils(aOne) + ' בחודש.</div>';
-  } else {
-    fc = '<div class="an-fc">בקצב הזה הבנק עולה בכ־<b class="an-green">' + ils(aRes) + '</b> בחודש.</div>';
-  }
-  var p1 = '<div class="an-p"><div class="an-h">התוצאה החודשית</div>' +
-    '<div class="an-big ' + (aRes < 0 ? 'an-red' : 'an-green') + '">' + sgn(aRes) + '</div><div class="an-sub">ממוצע לחודש, משכורת פחות כל מה שיצא (' + span + ')</div>' +
-    '<div class="an-split"><span>שוטף בלבד <b class="' + (aRes + aOne < 0 ? 'an-red' : 'an-green') + '">' + sgn(aRes + aOne) + '</b></span><span>חד פעמיים <b class="an-red">' + sgn(-aOne) + '</b></span></div>' +
-    bars(ordered.map(function (x) { return x.res; }), {
-      labels: labels,
-      bar: function (v, i, x, bw, y) {
-        var top = Math.min(y(v), y(0)), h = Math.max(2, Math.abs(y(v) - y(0)));
-        return '<rect x="' + x + '" y="' + top + '" width="' + bw + '" height="' + h + '" rx="4" fill="' + (v < 0 ? '#ff4d63' : '#10A37F') + '"' + (ordered[i].est ? ' opacity=".55"' : '') + '/>' +
-          '<text x="' + (x + bw / 2) + '" y="' + (v < 0 ? top + h + 11 : top - 4) + '" text-anchor="middle" class="an-val">' + (Math.round(v / 100) === 0 ? '0' : (v < 0 ? '-' : '+') + nf.format(Math.abs(Math.round(v / 100) * 100))) + '</text>';
-      }
-    }) + fc + (months.some(function (x) { return x.est; }) ? '<div class="an-note">עמודה בהירה: המשכורת באותו חודש לא ידועה, נלקחה הרגילה.</div>' : '') + '</div>';
-
-  /* ---------- 2. leakage ---------- */
-  var aLeak = avg(function (x) { return x.out - x.plan; });
-  var cats = {};
-  months.forEach(function (x) { Object.keys(x.by).forEach(function (c) { cats[c] = (cats[c] || 0) + x.by[c] / n; }); });
-  Object.keys(budget).forEach(function (c) { if (!(c in cats)) cats[c] = 0; });
-  var leaks = Object.keys(cats).map(function (c) { return { c: c, v: cats[c] - Number(budget[c] || 0), planned: c in budget }; })
-    .filter(function (x) { return x.v > 20; }).sort(function (a, b) { return b.v - a.v; }).slice(0, 4);
-  var maxLeak = leaks.length ? leaks[0].v : 1;
-  var p2 = '<div class="an-p"><div class="an-h">הדליפה</div>' +
-    '<div class="an-big an-red">' + ils(aLeak) + '</div><div class="an-sub">בחודש מעל התכנון של ' + ils(planTotal) + '</div>' +
-    bars(ordered.map(function (x) { return x.out; }), {
-      labels: labels, ref: planTotal, zero: false,
-      bar: function (v, i, x, bw, y) {
-        var p = Math.min(v, ordered[i].plan), s = '<rect x="' + x + '" y="' + y(p) + '" width="' + bw + '" height="' + (y(0) - y(p)) + '" rx="4" fill="#CFE6DE"/>';
-        if (v > p) s += '<rect x="' + x + '" y="' + y(v) + '" width="' + bw + '" height="' + (y(p) - y(v)) + '" rx="4" fill="#ff4d63"/>';
-        return s + '<text x="' + (x + bw / 2) + '" y="' + (y(v) - 4) + '" text-anchor="middle" class="an-val">' + nf.format(Math.round(v / 100) * 100) + '</text>';
-      }
-    }) +
-    '<div class="an-mini">איפה זה דולף, ממוצע לחודש</div>' +
-    leaks.map(function (x) {
-      return '<div class="an-row"><span>' + esc(x.c) + (x.planned ? '' : ' <i>לא בתכנון</i>') + '</span><span class="an-track"><i style="width:' + Math.round(x.v / maxLeak * 100) + '%"></i></span><b>+' + nf.format(Math.round(x.v)) + '</b></div>';
-    }).join('') + '</div>';
-
-  /* ---------- 3. yearly cost of habits ---------- */
-  var habits = [{ c: 'סיגריות ואלכוהול', t: 'סיגריות ואלכוהול' }, { c: 'אוכל', t: 'אוכל בחוץ ובעבודה' }].map(function (h) {
-    var m = avg(function (x) { return x.by[h.c] || 0; });
-    return { t: h.t, now: m * 12, goal: Number(budget[h.c] || 0) * 12 };
+    if (x.sal > acc) svg += '<rect x="' + bx + '" y="' + yv(x.sal) + '" width="' + bw + '" height="' + (yv(acc) - yv(x.sal)) + '" fill="' + C.left + '"/>';
+    svg += '<line x1="' + (bx - 4) + '" x2="' + (bx + bw + 4) + '" y1="' + yv(x.sal) + '" y2="' + yv(x.sal) + '" stroke="#0B3B2E" stroke-width="1.5"/>';
+    svg += '<text x="' + (i * step + step / 2) + '" y="' + (H + 14) + '" text-anchor="middle" class="an-ax">' + monOf(x.m) + '</text>';
   });
-  var tot = habits.reduce(function (s, h) { return s + h.now; }, 0), save = habits.reduce(function (s, h) { return s + Math.max(0, h.now - h.goal); }, 0);
-  var loanPay = 0; (f.expenses || []).forEach(function (e) { if (/הלווא/.test(e.name)) loanPay = Number(e.amount); });
-  var cushion = Number(inputs.cushion_target) || 20000;
-  var hmax = Math.max.apply(null, habits.map(function (h) { return Math.max(h.now, h.goal); })) || 1;
-  var p3 = '<div class="an-p"><div class="an-h">מחיר ההרגלים בשנה</div>' +
-    '<div class="an-big">' + ils(tot) + '</div><div class="an-sub">בשנה בקצב של ' + span + '</div>' +
-    habits.map(function (h) {
-      return '<div class="an-hab"><div class="an-hab-t"><span>' + h.t + '</span><b>' + ils(h.now) + '</b></div>' +
-        '<div class="an-hbar"><i style="width:' + Math.round(h.now / hmax * 100) + '%"></i><em style="width:' + Math.round(Math.min(h.now, h.goal) / hmax * 100) + '%"></em><u style="right:' + Math.round(h.goal / hmax * 100) + '%"></u></div>' +
-        '<div class="an-hab-s"><span>ביעד: ' + ils(h.goal) + '</span>' + (h.now > h.goal ? '<span class="an-green">חוסך ' + ils(h.now - h.goal) + '</span>' : '<span class="an-green">בתוך היעד</span>') + '</div></div>';
-    }).join('') +
-    '<div class="an-eq"><div><b>' + (tot / cushion * 100 >= 100 ? 'יותר מכל' : Math.round(tot / cushion * 100) + '%') + '</b><span>' + (tot >= cushion ? 'כרית הביטחון (' + ils(cushion) + ')' : 'מכרית הביטחון') + '</span></div>' +
-    (loanPay ? '<div><b>' + (tot / loanPay).toFixed(1) + '</b><span>תשלומי הלוואת רכב</span></div>' : '') +
-    '<div><b class="an-green">' + ils(save) + '</b><span>נשאר אצלך אם עומדים ביעדים</span></div></div></div>';
+  var pSal = '<div class="an-p"><div class="an-h">המשכורת</div>' +
+    '<svg viewBox="0 0 ' + W + ' ' + (H + 18) + '" width="100%" direction="ltr">' + svg + '</svg>' +
+    leg([['התחייבויות', C.com], ['יומיום', C.day], ['חד פעמי', C.one], ['נשאר', C.left]]) + '</div>';
+
+  /* ---------- loan fund vs loan balance ---------- */
+  var pFund = '';
+  var loanE = (f.expenses || []).find(function (e) { return /הלווא/.test(e.name); });
+  var l0 = Number(inputs.loan_principal) || 0;
+  if (loanE && l0 && inputs.first_charge && inputs.loan_fund != null) {
+    var left = Number(loanE.left_after_current) + 1, amort = l0 / left;
+    var fy0 = Number(String(inputs.first_charge).slice(0, 4)), fm0 = Number(String(inputs.first_charge).slice(5, 7)) - 1;
+    var fund = Number(inputs.loan_fund) || 0, mon = Number(inputs.loan_fund_monthly) || 0, from = String(inputs.loan_fund_from || '');
+    var pts = [{ ym: null, loan: l0, fund: fund }], meet = -1;
+    for (var k = 0; k < left; k++) {
+      var d = new Date(Date.UTC(fy0, fm0 + k, 1)), ym = d.toISOString().slice(0, 7);
+      if (from && ym >= from) fund += mon;
+      if (ym === String(inputs.loan_fund_extra_month || '')) fund += Number(inputs.loan_fund_extra) || 0;
+      var lb = Math.max(0, l0 - amort * (k + 1));
+      pts.push({ ym: ym, loan: lb, fund: fund });
+      if (meet < 0 && fund >= lb) { meet = k + 1; break; }
+    }
+    var n2 = pts.length - 1 || 1, X = function (i) { return 8 + i / n2 * (W - 16); }, Y = function (v) { return H - v / l0 * (H - top); };
+    var line = function (key) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[key]).toFixed(1); }).join(' '); };
+    var s2 = '<path d="' + line('loan') + '" fill="none" stroke="#ff4d63" stroke-width="2.5" stroke-linecap="round"/>' +
+      '<path d="' + line('fund') + '" fill="none" stroke="#10A37F" stroke-width="2.5" stroke-linecap="round"/>';
+    if (meet > 0) {
+      var mp = pts[meet];
+      s2 += '<circle cx="' + X(meet) + '" cy="' + Y(mp.fund) + '" r="5" fill="#0B3B2E"/>' +
+        '<text x="' + Math.min(W - 30, X(meet)) + '" y="' + (Y(mp.fund) - 10) + '" text-anchor="middle" class="an-val">' + MONL[Number(mp.ym.slice(5, 7)) - 1] + ' ' + mp.ym.slice(2, 4) + '</text>';
+    }
+    pFund = '<div class="an-p"><div class="an-h">פיקדון מול הלוואה</div>' +
+      '<svg viewBox="0 0 ' + W + ' ' + (H + 6) + '" width="100%" direction="ltr">' + s2 + '</svg>' +
+      leg([['הלוואה', '#ff4d63'], ['פיקדון', '#10A37F']]) + '</div>';
+  }
+
+  /* ---------- last month's leakage ---------- */
+  var lm = J.months[J.months.length - 1], by = {};
+  (lm.r || []).forEach(function (r) { var a = -Number(r[2]); if (isFinite(a)) by[r[4]] = (by[r[4]] || 0) + a; });
+  var lk = Object.keys(by).map(function (c) { return { c: c, v: by[c] - Number(budget[c] || 0) }; })
+    .filter(function (x) { return x.v > 20; }).sort(function (a, b) { return b.v - a.v; });
+  var lsum = lk.reduce(function (t, x) { return t + x.v; }, 0), lmax = lk.length ? lk[0].v : 1;
+  var pLeak = '<div class="an-p"><div class="an-h">הדליפה, ' + MONL[Number(lm.m.slice(5, 7)) - 1] + '</div>' +
+    '<div class="an-big an-red">' + ils(lsum) + '</div>' +
+    lk.slice(0, 5).map(function (x) {
+      return '<div class="an-row"><span>' + esc(x.c) + '</span><span class="an-track"><i style="width:' + Math.round(x.v / lmax * 100) + '%"></i></span><b>' + nf.format(Math.round(x.v)) + '</b></div>';
+    }).join('') + '</div>';
 
   /* ---------- 4. heavy months ---------- */
   var fm = (window.dash && dash.data('months').data) || [];
@@ -155,44 +127,7 @@ function financeAnalysis(f) {
   }
 
   /* ---------- the way out: what each step does to the monthly result ---------- */
-  var CAP = 1000, capGain = Math.max(0, aOne - CAP), habGain = save / 12;
-  var loanEnd = null;
-  (f.expenses || []).forEach(function (e) {
-    if (/הלווא/.test(e.name) && e.left_after_current !== null && e.left_after_current !== '' && inputs.first_charge) {
-      var fc0 = String(inputs.first_charge), d = new Date(Date.UTC(Number(fc0.slice(0, 4)), Number(fc0.slice(5, 7)) - 1 + Number(e.left_after_current) + 1, 1));
-      loanEnd = MONL[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
-    }
-  });
-  var st = [
-    { t: 'היום', v: aRes, d: 'ממוצע ' + span },
-    { t: 'תקרה לחד פעמיים', v: aRes + capGain, d: 'עד ' + ils(CAP) + ' בחודש' },
-    { t: 'הרגלים ביעד', v: aRes + capGain + habGain, d: 'סיגריות, אלכוהול ואוכל' }
-  ];
-  if (loanPay && loanEnd) st.push({ t: 'ההלוואה נגמרת', v: aRes + capGain + habGain + loanPay, d: 'מ' + loanEnd });
-  var way = '<div class="an-way"><div class="an-way-h">הדרך החוצה <small>מה כל צעד עושה לתוצאה החודשית</small></div><div class="an-steps">' +
-    st.map(function (x, i) {
-      return (i ? '<div class="an-arr">←</div>' : '') + '<div class="an-step ' + (x.v < 0 ? 'neg' : 'pos') + '"><span>' + x.t + '</span><b>' + sgn(x.v) + '</b><small>' + esc(x.d) + '</small></div>';
-    }).join('') + '</div></div>';
-  /* ---------- one-off cap meter: the next three charge months ---------- */
-  var capHtml = '';
-  if (inputs.first_charge) {
-    var f0 = String(inputs.first_charge), cy = Number(f0.slice(0, 4)), cm = Number(f0.slice(5, 7));
-    var cms = [0, 1, 2].map(function (k) {
-      var d = new Date(Date.UTC(cy, cm - 1 + k, 1)), ym = d.toISOString().slice(0, 7), items = [];
-      (f.oneoffs || []).forEach(function (o) { if (o.kind !== 'card_total' && String(o.date).slice(0, 7) === ym && Number(o.amount) < 0) items.push({ n: String(o.name).split(/[:(]/)[0].replace(/,.*$/, '').trim(), a: -Number(o.amount) }); });
-      J.months.forEach(function (m) { if (m.m === ym) (m.r || []).forEach(function (r) { if (r[5] === 'o' && Number(r[2]) < 0) items.push({ n: String(r[1]).split(',')[0], a: -Number(r[2]) }); }); });
-      var used = items.reduce(function (t, x) { return t + x.a; }, 0);
-      return { label: MONL[d.getUTCMonth()], used: used, items: items };
-    });
-    capHtml = '<div class="an-cap"><div class="an-way-h">תקרת חד פעמיים <small>' + ils(CAP) + ' בחודש, כולל הוצאות לא צפויות. לפי חודש החיוב</small></div><div class="an-capm">' +
-      cms.map(function (c) {
-        var left = CAP - c.used, pct = Math.min(100, c.used / CAP * 100), over = left < 0;
-        return '<div class="an-capc' + (over ? ' over' : '') + '"><div class="an-capt"><span>' + c.label + '</span><b>' + (over ? 'חריגה ' + ils(-left) : 'נשאר ' + ils(left)) + '</b></div>' +
-          '<div class="an-capbar"><i style="width:' + pct + '%"></i></div>' +
-          '<div class="an-capl">' + (c.items.length ? c.items.map(function (x) { return '<span>' + esc(x.n) + ' ' + ils(x.a) + '</span>'; }).join('') : '<span>עוד לא נוצל כלום</span>') + '</div></div>';
-      }).join('') + '</div></div>';
-  }
-  root.innerHTML = '<div class="an-head"><span>ניתוחים</span><small>לפי היומן, ' + span + '</small></div><div class="an-grid">' + p1 + p2 + p3 + p4 + '</div>' + capHtml + way;
+  root.innerHTML = '<div class="an-grid">' + p4 + pSal + pFund + pLeak + '</div>';
   root.hidden = false;
 }
 
