@@ -118,6 +118,29 @@ footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-he
 .tk.has{cursor:pointer}
 .tk.has:active{transform:scale(.98)}
 .tk .go{color:var(--neon);font-size:15px;font-weight:700;margin-inline-start:2px}
+
+/* compact sheet */
+.sheet{padding:12px 16px calc(var(--nav-h,0px) + 14px)}
+.grab{width:34px;height:4px;margin-bottom:10px}
+.sheet h3{font-size:17px;font-weight:800}
+.sheet .what{font-size:12.5px;color:#cfd8d2;line-height:1.55;margin-top:6px;border-inline-start:2px solid var(--neon);padding-inline-start:10px}
+.tbl{margin-top:12px;border:.5px solid var(--line2);border-radius:12px;overflow:hidden}
+.tbl .row{display:grid;grid-template-columns:64px 1fr;border-top:.5px solid var(--line)}
+.tbl .row:first-child{border-top:0}
+.tbl .lb{padding:8px 9px;font-size:11px;font-weight:600;color:var(--mut);background:rgba(255,255,255,.025);border-inline-end:.5px solid var(--line)}
+.tbl .vl{padding:0 10px;min-width:0}
+.tbl .lnk{padding:6px 0;font-size:12.5px;gap:7px}
+.tbl .lnk i{width:7px;height:7px}
+.tbl .lnk small{font-size:10.5px}
+.tbl .row.gx .lb{color:var(--crit)}
+.tbl .gn{padding:7px 0;font-size:12px;line-height:1.5;color:#d6ded9}
+.tbl .tks{gap:0}
+.tbl .tk{background:none;border:0;border-top:.5px solid var(--line);border-radius:0;padding:6px 0}
+.tbl .tk:first-child{border-top:0}
+.tbl .tk.il{border-color:var(--line)}
+.tbl .tk .sym{font-size:12.5px;min-width:46px}
+.tbl .tk .nm{font-size:12px}
+.close{margin-top:12px;padding:8px;font-size:13px;border-radius:10px;border-width:.5px}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -263,7 +286,7 @@ const SPACE={
    what:"בונים את הלוויינים עצמם, מלוויני ענק צבאיים ועד לוויינים קטנים שמשוגרים באלפים. גם אלביט והתעשייה האווירית (פרטית) בונות לוויינים.",
    gone:"אין מה לשגר. יש כמה יצרנים, והתחום מתרחב."},
   launch:{t:"שיגור",s:"להגיע למסלול",k:["SPCX","RKLB"],choke:1,
-   what:"SpaceX משגרת את רוב המטען לחלל בעולם, והטילים הממוחזרים שלה הורידו את המחיר בצורה דרמטית. מאז ההנפקה ביוני 2026 היא נסחרת בנאסד"ק (SPCX). Rocket Lab היא המתחרה הקטנה.",
+   what:"SpaceX משגרת את רוב המטען לחלל בעולם, והטילים הממוחזרים שלה הורידו את המחיר בצורה דרמטית. מאז יוני 2026 היא גם נסחרת בבורסה. Rocket Lab היא המתחרה הקטנה.",
    gone:"הכל נשאר על הקרקע. התלות ב SpaceX היא צוואר הבקבוק של כל התעשייה."},
   comm:{t:"תקשורת ואינטרנט",s:"אינטרנט וסלולר מהחלל",k:["SPCX","ASTS","IRDM","GILT"],
    what:"אינטרנט מלוויינים (Starlink של SpaceX), סלולר ישירות לטלפון (AST SpaceMobile), ותחנות קרקע (גילת).",
@@ -536,11 +559,14 @@ function openSheet(id){
   const line=(o,lv)=>`<div class="lnk" data-go="${o}"><i style="background:${LC[lv]}"></i>${G.nodes[o].t}<small>${LV[lv]}</small></div>`;
   const tks=n.k.map(k=>{ const tags=(OWN.has(k)?'<span class="tag own">בתיק</span>':"")+(THESIS.has(k)?'<span class="tag th">מועמדת לתזה</span>':"")+"";
     const il=ISR.has(k); return `<div class="tk${il?" il":""}${isTk(k)||ISR.has(k)?" has":""}" data-k="${k}"><span class="sym">${il?"":(isTk(k)?k:"")}</span><span class="nm">${NAMES[k]||k}${il&&SALES[k]?`<span class="sales">מוכרת ל: ${SALES[k]}</span>`:""}</span>${tags}${isTk(k)||ISR.has(k)?'<span class="go">›</span>':""}</div>`; }).join("");
+  const row=(lb,vl,c="")=>`<div class="row${c}"><div class="lb">${lb}</div><div class="vl">${vl}</div></div>`;
   $("sheet").innerHTML=`<div class="grab"></div><h3>${n.t}</h3><div class="what">${n.what}</div>
-   ${from.length?`<div class="blk"><h4>${n.f?"מושפע מ":"תלוי ב"}</h4>${from.map(e=>line(e[0],e[2])).join("")}</div>`:""}
-   ${to.length?`<div class="blk"><h4>${n.f?"משפיע על":"מזין את"}</h4>${to.map(e=>line(e[1],e[2])).join("")}</div>`:""}
-   <div class="blk"><div class="gone"><b>${n.gl||"אם הוא נעלם"}: </b>${n.gone}</div></div>
-   ${tks?`<div class="blk"><h4>המניות כאן</h4><div class="tks">${tks}</div></div>`:""}
+   <div class="tbl">
+   ${from.length?row(n.f?"מושפע מ":"תלוי ב",from.map(e=>line(e[0],e[2])).join("")):""}
+   ${to.length?row(n.f?"משפיע על":"מזין את",to.map(e=>line(e[1],e[2])).join("")):""}
+   ${row(n.gl||"אם נעלם",`<div class="gn">${n.gone}</div>`," gx")}
+   ${tks?row("המניות",`<div class="tks">${tks}</div>`," stx"):""}
+   </div>
    <button class="close" id="cls">סגור</button>`;
   $("ov").classList.add("on"); $("sheet").scrollTop=0;
   $("cls").onclick=closeSheet;
