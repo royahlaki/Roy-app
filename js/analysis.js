@@ -199,31 +199,58 @@ function financeAnalysis(f) {
   root.hidden = false;
 }
 
-/* Top of the finance page (phone and desktop): how much can be spent until the next card charge
-   without the bank going below zero, beyond the fixed expense list. Follows the what-if fields and expected items. */
-function financeRoom() {
+/* Top of the finance page: card spending so far this cycle vs the usual pace by the same day
+   (from the journal). Without a fresh card figure it shows the bank on the next 15th. */
+function financeRoom(f) {
   var box = document.getElementById('room');
   if (!box || !window.dash) return;
+  f = f || {};
   var nf = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
   var ils = function (v) { return '₪' + nf.format(Math.abs(Math.round(v))); };
+  var START = 13, DAY = 864e5;
+  var now = new Date(); now.setHours(0, 0, 0, 0);
+  var cs = new Date(now.getFullYear(), now.getMonth() - (now.getDate() >= START ? 0 : 1), START);
+  var elapsed = Math.round((now - cs) / DAY);
+  var J = f.journal || {}, typ = 0, full = 0, n = 0;
+  (J.months || []).forEach(function (m) {
+    var y = Number(m.m.slice(0, 4)), mo = Number(m.m.slice(5, 7)) - 1;
+    var s0 = new Date(y, mo - 1, START), lim = new Date(s0.getTime() + (elapsed + 1) * DAY);
+    var so = 0, all = 0;
+    (m.r || []).forEach(function (x) {
+      if (String(x[3]).indexOf('ויזה') < 0) return;
+      var v = -Number(x[2]); all += v;
+      var md = String(x[0]).length === 5 ? x[0] : String(x[0]).slice(5);
+      var dt = new Date(y, Number(md.slice(0, 2)) - 1, Number(md.slice(3, 5)));
+      if (dt > new Date(y, mo + 1, 1)) dt = new Date(y - 1, dt.getMonth(), dt.getDate());
+      if (String(x[5] || '').indexOf('i') > -1 || dt < lim) so += v;
+    });
+    if (all > 0) { typ += so; full += all; n++; }
+  });
+  if (n) { typ /= n; full /= n; }
   dash.onData(function () {
-    var M = dash.data('months').data || [], I = (dash.data('inputs').data || [])[0] || {};
+    var I = (dash.data('inputs').data || [])[0] || {};
+    var cn = Number(I.card_now), ca = I.card_now_as_of ? new Date(I.card_now_as_of + 'T00:00:00') : null;
+    var fresh = cn > 0 && ca && ca >= cs && n;
+    if (fresh) {
+      var over = cn > typ * 1.05, max = Math.max(full, cn) || 1;
+      box.className = 'km-card km-room ' + (over ? 'bad' : 'ok');
+      box.innerHTML =
+        '<div class="km-room-top"><span>אשראי עד היום</span><b>' + ils(cn) + '</b></div>' +
+        '<div class="km-room-bar"><i style="width:' + Math.round(cn / max * 100) + '%"></i><u style="inset-inline-start:' + Math.round(typ / max * 100) + '%"></u></div>' +
+        '<div class="km-room-sub">בדרך כלל עד היום ' + ils(typ) + '</div>';
+      box.hidden = false;
+      return;
+    }
+    var M = dash.data('months').data || [];
     if (!M.length) { box.hidden = true; return; }
     var p = dash.params(), T = Number(p.transfer) || 0, X = Number(p.vacation) || 0;
     var r = M[0], d = new Date(String(r.month).slice(0, 10) + 'T00:00:00Z');
-    var xFirst = X && (!p.extra_month || p.extra_month === r.month) ? X : 0;
-    var room = r.bal_normal + T - xFirst, limit = Number(I.limit) || -5000;
-    var full = room - limit, free = Math.max(0, room);
-    var cls = room < 0 ? 'bad' : room < 1000 ? 'warn' : 'ok';
-    var day = d.getUTCDate() + '.' + (d.getUTCMonth() + 1);
-    box.className = 'km-card km-room ' + cls;
+    var room = r.bal_normal + T - (X && (!p.extra_month || p.extra_month === r.month) ? X : 0), limit = Number(I.limit) || -5000;
+    var span = room - limit;
+    box.className = 'km-card km-room ' + (room < 0 ? 'bad' : 'ok');
     box.innerHTML =
-      '<div class="km-room-top"><span>מותר להוציא עד ' + day + '</span><small>מעבר לקבועות, בלי לרדת למינוס</small></div>' +
-      '<div class="km-room-big">' + (room < 0 ? '₪0' : ils(room)) + '</div>' +
-      '<div class="km-room-bar"><i style="width:' + (full > 0 ? Math.round(free / full * 100) : 0) + '%"></i></div>' +
-      '<div class="km-room-sub">' + (room < 0
-        ? 'כבר בתוך המינוס: ' + ils(-room) + '. עד המסגרת נשארו ' + ils(Math.max(0, full)) + '.'
-        : 'אחר כך מתחיל המינוס. כולל טיול, קניות לטיול וכל מה שרשום בצפוי.') + '</div>';
+      '<div class="km-room-top"><span>בנק ב' + d.getUTCDate() + '.' + (d.getUTCMonth() + 1) + '</span><b>' + (room < 0 ? '-' : '') + ils(room) + '</b></div>' +
+      '<div class="km-room-bar"><i style="width:' + (span > 0 ? Math.round(Math.max(0, room) / span * 100) : 0) + '%"></i></div>';
     box.hidden = false;
   });
 }
