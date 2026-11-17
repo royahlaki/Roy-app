@@ -233,7 +233,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 
 /* strongest verdict */
 .vd2.S{background:rgba(195,245,60,.14);border-color:var(--neon);box-shadow:0 0 18px rgba(195,245,60,.25)} .vd2.S b{color:var(--neon)}
-.lt.S{background:var(--neon);box-shadow:0 0 10px rgba(195,245,60,.9)}
+.lt.S{background:var(--neon);box-shadow:0 0 10px rgba(195,245,60,.9)} .lt.N{background:#5b6170}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -273,7 +273,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
 <script src="js/core.js?v=12"></script>
-<script src="js/cards.js?v=19"></script>
+<script src="js/cards.js?v=20"></script>
 <script>
 const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
 // tags: il = ישראלית, spec = ספקולטיבית, etf = קרן סל. "בתיק" comes from the encrypted data.
@@ -534,7 +534,7 @@ function chartSrc(k){
     backgroundColor:"rgba(30,38,34,1)",gridColor:"rgba(255,255,255,0.05)"});
   return "https://s.tradingview.com/widgetembed/?"+q.toString();
 }
-function money(v){ const a=Math.abs(v); return (v<0?"−":"")+(a>=1000?"$"+(a/1000).toFixed(1)+"B":"$"+Math.round(a)+"M"); }
+function money(v,c){ const a=Math.abs(v), u=c||"$"; return (v<0?"−":"")+(a>=1000?u+(a/1000).toFixed(1)+"B":u+Math.round(a)+"M"); }
 function segHtml(c){
   let seg=c.seg.slice().sort((a,b)=>b[1]-a[1]);
   if(seg.length>4){ const rest=seg.slice(3).reduce((a,x)=>a+x[1],0); seg=seg.slice(0,3).concat([["אחר",rest]]); }
@@ -547,9 +547,9 @@ function flowHtml(c){
   const o=c.out; if(!o) return "";
   const rev=c.rev||c.seg.reduce((a,x)=>a+x[1],0), spend=rev-o.net, m=Math.round(o.net/rev*100);
   return `<div class="mini"><h5>הרבעון במספרים</h5>
-    <div class="ln"><span>הכנסות</span><b>${money(rev)}</b></div>
-    <div class="ln"><span>הוצאות</span><b>${money(spend)}</b></div>
-    <div class="ln tot ${o.net<0?"neg":"pos"}"><span>${o.net<0?"הפסד":"רווח נקי"}</span><b>${money(o.net)}</b></div>
+    <div class="ln"><span>הכנסות</span><b>${money(rev,c.cur)}</b></div>
+    <div class="ln"><span>הוצאות</span><b>${money(spend,c.cur)}</b></div>
+    <div class="ln tot ${o.net<0?"neg":"pos"}"><span>${o.net<0?"הפסד":"רווח נקי"}</span><b>${money(o.net,c.cur)}</b></div>
     <div class="ln" style="color:var(--mut)"><span>שולי רווח נקי</span><b style="color:var(--mut)">${m}%</b></div></div>`;
 }
 function openSheet(k,noteOpen){
@@ -558,11 +558,11 @@ function openSheet(k,noteOpen){
   let card="";
   if(c){
     const V=cardVerdict(c);
-    card=`<div class="vd2 ${V.cls}"><div class="r"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך 4 בירוק · ${c.q}</span></div></div>
+    card=`<div class="vd2 ${V.cls}"><div class="r"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך ${V.lights.filter(x=>x!=="N").length} בירוק · ${c.q}</span></div></div>
      <div class="tk2"><div class="take">${c.take}</div>${(c.warn||[]).map(x=>`<div class="wl">⚠ <b>${x[0]}:</b> ${x[1]}</div>`).join("")}</div>
      <div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>
      <div class="duo">${segHtml(c)}${flowHtml(c)}</div>
-     <div class="m4">${CARD_TESTS.map((t,i)=>{ const val=t.v(c[t.k]), tx=/[א-ת]/.test(val);
+     <div class="m4">${CARD_TESTS.map((t,i)=>{ const val=c[t.k]==="na"?"לא רלוונטי":t.v(c[t.k]), tx=/[א-ת]/.test(val);
        return `<div><i class="lt ${V.lights[i]}"></i><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div>`; }).join("")}</div>`;
   } else {
     card=`${st[2]?`<div class="sh-d">${esc(st[2])}</div>`:`<div class="sh-d" style="color:var(--mut);font-size:12.5px">עוד אין ניתוח למניה הזו. בקש מ־Claude לנתח אותה.</div>`}<div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>`;
