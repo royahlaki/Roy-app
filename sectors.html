@@ -127,6 +127,25 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 #note{display:none}
 #note.on{display:block}
 .acts .btn{padding:12px;font-size:14px}
+
+/* sheet v3 */
+.hd{display:flex;align-items:center;gap:10px}
+.hd .tk{font:700 26px Oswald;color:var(--neon);direction:ltr;line-height:1}
+.hd .nm{font-weight:800;font-size:16px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hd .x{margin-inline-start:auto;flex:none;background:none;border:1px solid var(--line2);color:var(--txt);border-radius:999px;width:30px;height:30px;cursor:pointer;font-size:15px}
+.hd .tag{flex:none}
+.sheet .stt{margin-top:10px}
+.met .v{text-align:right}
+.wr{margin-top:8px;display:flex;gap:8px;align-items:flex-start;background:rgba(255,92,122,.08);border:1px solid rgba(255,92,122,.35);border-radius:11px;padding:7px 10px;font-size:12.5px;line-height:1.45}
+.wr b{color:var(--spec);flex:none}
+.flow{display:grid;grid-template-columns:52px 1fr;gap:6px 8px;align-items:center}
+.flow .fl{font-size:11.5px;color:var(--mut)}
+.flow .fb{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;background:rgba(255,255,255,.05)}
+.flow .fb i{display:block;height:100%}
+.fleg{margin-top:7px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.fleg div{display:flex;align-items:center;gap:6px;font-size:12.5px}
+.fleg i{width:8px;height:8px;border-radius:3px;flex:none}
+.fleg b{font:600 12.5px Oswald;direction:ltr;color:var(--mut)}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -166,7 +185,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
 <script src="js/core.js?v=11"></script>
-<script src="js/cards.js?v=1"></script>
+<script src="js/cards.js?v=2"></script>
 <script>
 const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
 // tags: il = ישראלית, spec = ספקולטיבית, etf = קרן סל. "בתיק" comes from the encrypted data.
@@ -422,29 +441,44 @@ function segHtml(c){
     <div class="sbar">${seg.map((x,i)=>`<i style="width:${x[1]/tot*100}%;background:${SEGC[i]}"></i>`).join("")}</div>
     <div class="slist">${seg.map((x,i)=>`<div><i style="background:${SEGC[i]}"></i>${x[0]} <b>${Math.round(x[1]/tot*100)}%</b></div>`).join("")}</div></div>`;
 }
+function flowHtml(c){
+  const o=c.out; if(!o) return "";
+  const rev=c.seg.reduce((a,x)=>a+x[1],0), spend=o.cost+o.opex+o.other, max=Math.max(rev,spend);
+  const fmt=v=>{v=Math.abs(v); return v>=1000?"$"+(v/1000).toFixed(1)+"B":"$"+Math.round(v)+"M";};
+  const parts=[["עלות המוצר",o.cost,"#6B7A70"],["הוצאות תפעול",o.opex,"#FFB020"],["מס, ריבית ואחר",o.other,"#4DA3FF"]].filter(x=>x[1]>0.5);
+  if(o.net>0) parts.push(["רווח נקי",o.net,"#C3F53C"]);
+  const pct=v=>(v/max*100)+"%";
+  return `<div class="blk2"><h4>לאן הכסף הולך</h4>
+   <div class="flow">
+    <span class="fl">הכנסות</span><div class="fb"><i style="width:${pct(rev)};background:#3DDCC0"></i></div>
+    <span class="fl">${o.net<0?"הוצאות":"מתחלק ל"}</span><div class="fb">${parts.map(x=>`<i style="width:${pct(x[1])};background:${x[2]}"></i>`).join("")}</div>
+   </div>
+   <div class="fleg">${parts.map(x=>`<div><i style="background:${x[2]}"></i>${x[0]} <b>${Math.round(x[1]/rev*100)}%</b></div>`).join("")}
+    ${o.net<0?`<div style="color:var(--spec)"><i style="background:var(--spec)"></i>הפסד <b style="color:var(--spec)">${fmt(o.net)}</b></div>`:""}</div></div>`;
+}
 function openSheet(k,noteOpen){
-  const {st,r}=find(k), tg=st[3]||[], w=watch.get(k), own=isOwn(st), c=CARDS[k];
-  const tags=[own?'<span class="tag own">בתיק</span>':"",tg.includes("il")?'<span class="tag il">ישראלית</span>':"",tg.includes("spec")?'<span class="tag spec">ספקולטיבית</span>':"",tg.includes("etf")?'<span class="tag etf">קרן סל</span>':""].join("");
+  const {st}=find(k), tg=st[3]||[], w=watch.get(k), own=isOwn(st), c=CARDS[k];
+  const tags=[own?'<span class="tag own">בתיק</span>':"",tg.includes("il")?'<span class="tag il">ישראלית</span>':"",tg.includes("spec")?'<span class="tag spec">ספקולטיבית</span>':""].join("");
   let card="";
   if(c){
     const V=cardVerdict(c);
     card=`<div class="vd ${V.cls}"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך 4 בירוק · ${c.q}</span></div>
+     ${(c.warn||[]).map(x=>`<div class="wr"><b>⚠ ${x[0]}</b><span>${x[1]}</span></div>`).join("")}
      <div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>
      ${segHtml(c)}
-     <div class="blk2"><h4>4 הבדיקות</h4><div class="mgrid">${CARD_TESTS.map((t,i)=>{ const val=t.v(c[t.k]), tx=/[א-ת]/.test(val);
-       return `<div class="met"><div><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div><i class="lt ${V.lights[i]}"></i></div>`; }).join("")}</div>
-     ${(c.warn||[]).map(x=>`<div class="warn"><i class="lt R"></i>${x}</div>`).join("")}</div>
+     ${flowHtml(c)}
+     <div class="blk2"><div class="mgrid">${CARD_TESTS.map((t,i)=>{ const val=t.v(c[t.k]), tx=/[א-ת]/.test(val);
+       return `<div class="met"><div style="flex:1"><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div><i class="lt ${V.lights[i]}"></i></div>`; }).join("")}</div></div>
      <div class="take">${c.take}</div>`;
   } else {
     card=`<div class="sh-d">${st[2]}</div><div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>`;
   }
   const hasNote=!!(w&&w.n&&w.n.trim());
   document.getElementById("sheet").innerHTML=`
-    <div class="sh-top"><div class="tk">${k}</div><div><div class="sh-nm">${st[1]}</div><div class="sh-row">${r.t}</div></div><button class="x" id="x">✕</button></div>
-    ${tags?`<div class="tags">${tags}</div>`:""}
-    ${card}
+    <div class="hd"><span class="tk">${k}</span><span class="nm">${st[1]}</span>${tags}<button class="x" id="x">✕</button></div>
     <div class="stt">${STATUS.map(s=>`<button class="sb ${SCLS[s]}${w&&w.s===s?" on":""}" data-s="${s}">${s}</button>`).join("")}<button class="addn${hasNote?" has":""}" id="addn">${hasNote?"ההערה שלי":"+ הערה"}</button></div>
     <textarea id="note" class="${noteOpen||hasNote?"on":""}" placeholder="למה היא מעניינת אותך? מה צריך לבדוק">${esc(w?w.n:"")}</textarea>
+    ${card}
     <div class="acts"><button class="btn pri" id="tolab">למעבדה</button></div>`;
   const sh=document.getElementById("sheet"); sh.scrollTop=0;
   document.getElementById("ov").classList.add("on");
