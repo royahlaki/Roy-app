@@ -125,6 +125,38 @@ ul.al li.more{justify-content:center;color:var(--blu);font-size:13px;font-weight
   ul.tl .del{color:#545458}
   .hb.on{box-shadow:none}
 }
+
+/* ===== Theme v2: dark navy with teal and green, matches the app icon (same in light and dark mode) ===== */
+:root{--card:rgba(255,255,255,.055);--line:rgba(255,255,255,.08);--soft:rgba(255,255,255,.06);--fg:#EEF2FF;--mut:#8A93B5;
+  --blu:#2DD4BF;--blu-bg:rgba(45,212,191,.16);--sep:rgba(255,255,255,.07);--fill:rgba(255,255,255,.07);
+  --acc:linear-gradient(135deg,#22D3EE,#4ADE80);--sh:0 1px 0 rgba(255,255,255,.04) inset,0 10px 30px rgba(0,0,0,.35)}
+body{background:radial-gradient(120% 60% at 50% 0%,#1B2550 0%,rgba(11,15,30,0) 60%),radial-gradient(90% 50% at 100% 100%,rgba(34,211,238,.10) 0%,rgba(0,0,0,0) 60%),#070A16;background-attachment:fixed;color:var(--fg)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(165deg,#1B1F3B 0%,#0E1330 100%);border-radius:0 0 32px 32px;padding-bottom:62px}
+.hero::before{content:"";position:absolute;inset:auto -20% -70% -20%;height:180%;background:radial-gradient(50% 40% at 50% 60%,rgba(74,222,128,.5),rgba(34,211,238,.25) 45%,transparent 70%);pointer-events:none}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(74,222,128,.5),rgba(34,211,238,.5),transparent)}
+.hero h1,.hero .dt{position:relative}
+.hero h1{font-size:30px;background:linear-gradient(90deg,#FFFFFF,#BFF7E4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .dt{color:#9AA6CC}
+h2,.hh h2{color:#AEB7D6}
+.lists,.alerts{background:rgba(22,27,52,.72);border:1px solid var(--line);box-shadow:var(--sh);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
+.seg{background:var(--fill)}
+.seg button{color:var(--mut)}
+.seg button.on{background:rgba(255,255,255,.12);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.seg b,.seg button.on b{background:var(--acc);color:#05261A;font-weight:700}
+.add input{background:var(--fill);color:var(--fg)}
+.add input::placeholder{color:#5F6890}
+.add input:focus{box-shadow:0 0 0 3px rgba(45,212,191,.28)}
+.add button{background:var(--acc);color:#05261A;font-weight:700;box-shadow:0 4px 14px rgba(45,212,191,.35)}
+ul.tl input[type=checkbox]{border-color:#4A5378}
+ul.tl input[type=checkbox]:checked{background:var(--acc);border-color:transparent}
+ul.tl li.done .tx{color:#5F6890}
+ul.tl .del{color:#4A5378}
+.al-h{color:#FBBF24}
+ul.al .i{background:#FBBF24;box-shadow:0 0 8px rgba(251,191,36,.6)}
+ul.al li.red .i{background:#F87171;box-shadow:0 0 8px rgba(248,113,113,.6)}
+ul.al li.blu .i{background:#22D3EE;box-shadow:0 0 8px rgba(34,211,238,.6)}
+.strip a{background:rgba(22,27,52,.72);border:1px solid var(--line);color:var(--fg);box-shadow:none}
+.strip a:active{background:rgba(45,212,191,.16)}
 </style>
 </head>
 <body data-tab="home">
@@ -148,8 +180,6 @@ ul.al li.more{justify-content:center;color:var(--blu);font-size:13px;font-weight
     <div class="al-h">שים לב</div>
     <ul class="al" id="al-list"></ul>
   </section>
-  <div class="hh"><h2>היום</h2><a class="sys" href="https://docs.google.com/document/d/114oNvKnNHfBQTZwwgLMcO-XR9J41g7PAHYYeFPj5fN0/edit">המערכת שלי ‹</a></div>
-  <div class="habits" id="habits"></div>
   <h2>ReadUp</h2>
   <div class="strip ru">
     <a href="https://docs.google.com/document/d/1ENPRI8dql8X7vPu65kqR5UhF4Dbbo3kFHUxQIOFDys4/edit"><span>🗓️</span>תוכנית פרסום</a>
@@ -244,28 +274,6 @@ ul.al li.more{justify-content:center;color:var(--blu);font-size:13px;font-weight
     L.tasks.rows = Array.isArray(t) ? t : (data.tasks || []).map(function (x) { return Object.assign({}, x); });
     render();
   }, function () { msg.textContent = 'הרשימות לא נטענו. נסה לרענן.'; });
-})();
-
-(function () {
-  var box = document.getElementById('habits'); if (!box) return;
-  var d = new Date(), day = d.getDay();
-  var key = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-  var list = [['💧', 'מים'], ['🧘', 'מדיטציה'], ['📖', 'קריאה'], ['✍️', 'כתיבה'], ['🔤', 'אנגלית']];
-  if (day === 1 || day === 3 || day === 6) list.push(['🏋️', 'אימון']);
-  var store = {};
-  try { store = JSON.parse(localStorage.getItem('roy-habits') || '{}') || {}; } catch (e) {}
-  var done = store[key] || [];
-  list.forEach(function (h) {
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'hb' + (done.indexOf(h[1]) > -1 ? ' on' : '');
-    b.textContent = h[0] + ' ' + h[1];
-    b.addEventListener('click', function () {
-      var i = done.indexOf(h[1]); if (i > -1) done.splice(i, 1); else done.push(h[1]);
-      b.classList.toggle('on', i < 0);
-      var keep = {}; keep[key] = done;
-      try { localStorage.setItem('roy-habits', JSON.stringify(keep)); } catch (e) {}
-    });
-    box.appendChild(b);
-  });
 })();
 
 /* Attention card: portfolio alerts and upcoming renewals. Hidden when there is nothing to do. */
