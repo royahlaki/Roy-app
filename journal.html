@@ -177,6 +177,18 @@ tr.tot td{font-weight:700;border-top:1.5px solid var(--fg)}
 
   Roy.data().then(function (d) {
     var J = (d.finance && d.finance.journal) || { months: [], rows: [] };
+    var EX = (d.finance && d.finance.expenses) || [];
+    if (EX.length && J.budget) {
+      var MAP = [[/הלווא|קוברה/, 'רכב'], [/^ביטוח רכב$/, 'ביטוח רכב'], [/מאוחדת/, 'בריאות וטיפוח'], [/עמלות|דמי כרטיס/, 'עמלות'],
+        [/אימונים|תספורת/, 'אימונים ותספורת'], [/גלובס|Claude|טלפון|Netflix|Office|Apple/, 'מנויים'], [/^(אוכל|דלק|סיגריות ואלכוהול)$/, null]];
+      var nb = {};
+      EX.forEach(function (e) {
+        if (e.starts || !(Number(e.amount) > 0)) return;
+        var c = null; MAP.some(function (m) { if (m[0].test(e.name)) { c = m[1] || e.name; return true; } });
+        if (c && c in J.budget) nb[c] = (nb[c] || 0) + Number(e.amount);
+      });
+      Object.keys(nb).forEach(function (k) { J.budget[k] = nb[k]; });
+    }
     if (J.months.length && J.months[0].r) {
       var rs = [];
       J.months = J.months.map(function (mm) {
