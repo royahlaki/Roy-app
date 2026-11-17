@@ -228,8 +228,12 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 .lbl h3 .badge{flex:none}
 .lbl p{white-space:normal;overflow:visible;text-overflow:clip;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
 .t .nm{white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
-.row.hot{border:1px solid rgba(255,176,32,.75);box-shadow:0 0 0 1px rgba(255,176,32,.18),0 0 22px rgba(255,176,32,.14),inset 0 0 18px rgba(255,176,32,.05);
-  background:linear-gradient(135deg,rgba(255,176,32,.07),transparent 55%),var(--card)}
+.row.hot{border:1px solid rgba(255,176,32,.75);box-shadow:0 0 0 1px rgba(255,176,32,.18),0 0 22px rgba(255,176,32,.14);
+}
+
+/* strongest verdict */
+.vd2.S{background:rgba(195,245,60,.14);border-color:var(--neon);box-shadow:0 0 18px rgba(195,245,60,.25)} .vd2.S b{color:var(--neon)}
+.lt.S{background:var(--neon);box-shadow:0 0 10px rgba(195,245,60,.9)}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -269,7 +273,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
 <script src="js/core.js?v=12"></script>
-<script src="js/cards.js?v=7"></script>
+<script src="js/cards.js?v=8"></script>
 <script>
 const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
 // tags: il = ישראלית, spec = ספקולטיבית, etf = קרן סל. "בתיק" comes from the encrypted data.

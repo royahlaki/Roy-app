@@ -123,10 +123,13 @@ var CARD_TESTS = [
   { k: "pe", l: "מכפיל רווח", f: function (v) { return v == null ? "R" : v < 20 ? "G" : v < 35 ? "Y" : "R"; }, v: function (v) { return v == null ? "אין רווח" : "~" + v; } }
 ];
 
-/* Score: green 2, yellow 1, red 0. 6+ worth researching, 4-5 borderline, else not now. */
+/* Score: green 2, yellow 1, red 0 (max 8).
+   7+ and no warning: strong candidate. 6+: worth researching (so no opportunity is lost).
+   4-5: borderline. Below 4: not now. */
 function cardVerdict(c) {
   var L = CARD_TESTS.map(function (t) { return t.f(c[t.k]); });
   var pts = L.reduce(function (a, x) { return a + (x === "G" ? 2 : x === "Y" ? 1 : 0); }, 0);
-  var v = pts >= 6 ? ["G", "שווה לחקור"] : pts >= 4 ? ["Y", "גבולי"] : ["R", "לא עכשיו"];
+  var warned = (c.warn || []).length > 0;
+  var v = (pts >= 7 && !warned) ? ["S", "מועמדת חזקה"] : pts >= 6 ? ["G", "שווה לחקור"] : pts >= 4 ? ["Y", "גבולי"] : ["R", "לא עכשיו"];
   return { lights: L, cls: v[0], label: v[1], greens: L.filter(function (x) { return x === "G"; }).length };
 }
