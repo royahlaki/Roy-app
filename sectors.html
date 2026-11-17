@@ -191,7 +191,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
   .sheet{max-width:960px;border-radius:20px 20px 0 0;padding:18px 22px calc(var(--nav-h,0px) + 14px)}
   .lay{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);column-gap:18px;row-gap:8px;align-items:start;
     grid-template-areas:"hd chart" "seg chart" "note chart" "vd chart" "m4 duo" "acts duo";grid-template-rows:auto auto auto 1fr auto auto}
-  .lay>*{margin-top:0!important}
+  .lay:not(.addf)>*{margin-top:0!important}
   .lay .hd{grid-area:hd} .lay .seg4{grid-area:seg} .lay #note{grid-area:note} .lay .vd2,.lay .sh-d{grid-area:vd}
   .lay .chart{grid-area:chart;height:auto;min-height:200px;align-self:stretch} .lay .duo{grid-area:duo} .lay .m4{grid-area:m4} .lay .acts{grid-area:acts}
 }
@@ -209,6 +209,18 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
   .lay{grid-template-areas:"hd chart" "seg chart" "note chart" "vd chart" "tk2 chart" "m4 duo" "acts duo";grid-template-rows:auto auto auto auto 1fr auto auto}
   .lay .tk2{grid-area:tk2}
 }
+
+/* על הכוונת */
+.sec.mine .sec-h h2{color:var(--neon);text-shadow:0 0 14px rgba(195,245,60,.35)}
+.row.mrow{border-color:rgba(195,245,60,.45);background:linear-gradient(135deg,rgba(195,245,60,.10),rgba(61,220,192,.05)),var(--card);box-shadow:0 0 0 1px rgba(195,245,60,.12),0 0 24px rgba(195,245,60,.08)}
+.t.add{border:1px dashed rgba(195,245,60,.6);background:rgba(195,245,60,.06)}
+.t.add .tk{color:var(--neon);font-size:18px}
+.t.add .nm{color:var(--neon)}
+.addf input{width:100%;margin-top:10px;background:var(--bg);border:1px solid var(--line2);border-radius:10px;color:var(--txt);font:16px Heebo;padding:9px 12px;outline:none}
+.addf input:focus{border-color:var(--neon-dim)}
+.addf #ntk{font-family:Oswald;letter-spacing:.04em;text-align:right}
+.lay.addf{display:block;max-width:480px;margin:0 auto}
+.btn.rmv{flex:0 0 auto;min-width:0;border-color:var(--line2);color:var(--mut);background:transparent}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -247,7 +259,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
-<script src="js/core.js?v=11"></script>
+<script src="js/core.js?v=12"></script>
 <script src="js/cards.js?v=4"></script>
 <script>
 const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
@@ -444,6 +456,10 @@ const S = [
 
 const YAHOO_TA = {TASE:"TASE.TA",POLI:"POLI.TA",LUMI:"LUMI.TA",DSCT:"DSCT.TA",MZTF:"MZTF.TA",NXSN:"NXSN.TA",NWMD:"NWMD.TA",RHM:"RHM.DE"};
 const STATUS=["לחקור","בבדיקה","מתאימה","נפסלה"];
+/* "על הכוונת": stocks Roy adds himself, [ticker, name, note]. Synced through the sheet. */
+const MINE_ROW={t:"על הכוונת",p:"מניות שהוספת בעצמך"};
+let mine=[]; try{ mine=JSON.parse(localStorage.getItem("roy-mine")||"[]")||[]; }catch(e){}
+function saveMine(){ try{ localStorage.setItem("roy-mine",JSON.stringify(mine)); }catch(e){} }
 const SCLS={"לחקור":"s0","בבדיקה":"s1","מתאימה":"s2","נפסלה":"s3"};
 let filter="all", query="", watch=new Map(), ownSet=new Set();
 try{ const o=JSON.parse(localStorage.getItem("themeWatch")||"null"); if(o) watch=new Map(o); }catch(e){}
@@ -462,8 +478,21 @@ function match(st,row){
   return true;
 }
 
+function tile(st){
+  const tg=st[3]||[], own=isOwn(st), w=watch.get(st[0]), sc=w?SCLS[w.s]:"";
+  const dots=(own?'<i class="d-own"></i>':"")+(tg.includes("il")?'<i class="d-il"></i>':"")+(tg.includes("spec")?'<i class="d-spec"></i>':"")+(w?`<i class="d-${sc}"></i>`:"");
+  return `<button class="t${own?" own":""}${w?" w "+sc:""}" data-k="${st[0]}"><div class="dots">${dots}</div><div class="tk">${st[0]}</div><div class="nm">${esc(st[1])}</div></button>`;
+}
+function mineHtml(){
+  const items=mine.filter(st=>match(st,MINE_ROW));
+  if(filter!=="all" && !items.length) return "";
+  if(query && !items.length) return "";
+  return `<section class="sec mine"><div class="sec-h"><h2>על הכוונת</h2><span class="en">MY WATCHLIST</span></div>
+    <div class="row mrow"><div class="lbl"><h3>מניות שהוספת</h3><p>כל מניה, גם אם היא לא במפה.</p></div>
+    <div class="tiles">${items.map(tile).join("")}${filter==="all"&&!query?'<button class="t add" id="addst"><div class="tk">+</div><div class="nm">הוסף מניה</div></button>':""}</div></div></section>`;
+}
 function render(){
-  const app=document.getElementById("app"); let html="", n=0, any=false;
+  const app=document.getElementById("app"); let html=mineHtml(), n=0, any=!!html;
   S.forEach(sec=>{
     let rows="";
     sec.rows.forEach(r=>{
@@ -475,21 +504,17 @@ function render(){
         <div class="lbl">
           <h3><span class="num">${String(n).padStart(2,"0")}</span>${r.t}${r.hot?'<span class="badge hot">חם</span>':""}</h3>
           <p>${r.p}</p></div>
-        <div class="tiles">${items.map(st=>{
-          const tg=st[3]||[], own=isOwn(st), w=watch.get(st[0]), sc=w?SCLS[w.s]:"";
-          const dots=(own?'<i class="d-own"></i>':"")+(tg.includes("il")?'<i class="d-il"></i>':"")+(tg.includes("spec")?'<i class="d-spec"></i>':"")+(w?`<i class="d-${sc}"></i>`:"");
-          return `<button class="t${own?" own":""}${w?" w "+sc:""}" data-k="${st[0]}"><div class="dots">${dots}</div><div class="tk">${st[0]}</div><div class="nm">${st[1]}</div></button>`;
-        }).join("")}</div></div>`;
+        <div class="tiles">${items.map(tile).join("")}</div></div>`;
     });
     if(rows) html+=`<section class="sec"><div class="sec-h"><h2>${sec.h}</h2><span class="en">${sec.en}</span></div>${rows}</section>`;
   });
   app.innerHTML=any?html:`<div class="empty">${filter==="watch"?"עוד אין מניות במעקב. לחץ על מניה ותן לה סטטוס.":"לא נמצאו מניות."}</div>`;
 }
 
-function find(k){ for(const sec of S) for(const r of sec.rows) for(const st of r.s) if(st[0]===k) return {st,r,sec}; }
+function find(k){ for(const st of mine) if(st[0]===k) return {st,r:MINE_ROW,sec:null,mine:1}; for(const sec of S) for(const r of sec.rows) for(const st of r.s) if(st[0]===k) return {st,r,sec}; }
 const SEGC=["#C3F53C","#3DDCC0","#4DA3FF","#FFB020"];
 const TV_EX={ESLT:"NASDAQ:ESLT",RHM:"XETR:RHM"};
-function tvSym(k){ if(TV_EX[k]) return TV_EX[k]; if(YAHOO_TA[k]&&YAHOO_TA[k].endsWith(".TA")) return "TASE:"+k; return k; }
+function tvSym(k){ if(TV_EX[k]) return TV_EX[k]; if(/\.TA$/.test(k)) return "TASE:"+k.replace(/\.TA$/,""); if(YAHOO_TA[k]&&YAHOO_TA[k].endsWith(".TA")) return "TASE:"+k; return k; }
 function chartSrc(k){
   const q=new URLSearchParams({symbol:tvSym(k),interval:"D",range:"12M",theme:"dark",style:"1",locale:"he_IL",timezone:"Asia/Jerusalem",
     hide_top_toolbar:"1",hide_side_toolbar:"1",hide_legend:"1",hide_volume:"1",withdateranges:"0",allow_symbol_change:"0",save_image:"0",
@@ -515,7 +540,7 @@ function flowHtml(c){
     <div class="ln" style="color:var(--mut)"><span>שולי רווח נקי</span><b style="color:var(--mut)">${m}%</b></div></div>`;
 }
 function openSheet(k,noteOpen){
-  const {st}=find(k), tg=st[3]||[], w=watch.get(k), own=isOwn(st), c=CARDS[k];
+  const f=find(k), {st}=f, tg=st[3]||[], w=watch.get(k), own=isOwn(st), c=CARDS[k];
   const tags=[own?'<span class="tag own">בתיק</span>':"",tg.includes("il")?'<span class="tag il">ישראלית</span>':"",tg.includes("spec")?'<span class="tag spec">ספקולטיבית</span>':""].join("");
   let card="";
   if(c){
@@ -527,7 +552,7 @@ function openSheet(k,noteOpen){
      <div class="m4">${CARD_TESTS.map((t,i)=>{ const val=t.v(c[t.k]), tx=/[א-ת]/.test(val);
        return `<div><i class="lt ${V.lights[i]}"></i><div class="v${tx?" tx":""}">${val}</div><div class="l">${t.l}</div></div>`; }).join("")}</div>`;
   } else {
-    card=`<div class="sh-d">${st[2]}</div><div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>`;
+    card=`${st[2]?`<div class="sh-d">${esc(st[2])}</div>`:`<div class="sh-d" style="color:var(--mut);font-size:12.5px">עוד אין ניתוח למניה הזו. בקש מ־Claude לנתח אותה.</div>`}<div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>`;
   }
   const hasNote=!!(w&&w.n&&w.n.trim());
   document.getElementById("sheet").innerHTML=`<div class="lay">
@@ -535,10 +560,11 @@ function openSheet(k,noteOpen){
     <div class="seg4"><div class="sg">${STATUS.map(s=>`<button class="sb ${SCLS[s]}${w&&w.s===s?" on":""}" data-s="${s}">${s}</button>`).join("")}</div><button class="nb${hasNote?" has":""}" id="addn" title="הערה">✎</button></div>
     <textarea id="note" class="${noteOpen||hasNote?"on":""}" placeholder="למה היא מעניינת אותך? מה צריך לבדוק">${esc(w?w.n:"")}</textarea>
     ${card}
-    <div class="acts"><button class="btn pri" id="tolab">למעבדה</button></div></div>`;
+    <div class="acts"><button class="btn pri" id="tolab">למעבדה</button>${f.mine?'<button class="btn rmv" id="rmv">הסר מהכוונת</button>':""}</div></div>`;
   const sh=document.getElementById("sheet"); sh.scrollTop=0;
   document.getElementById("ov").classList.add("on");
   document.getElementById("x").onclick=closeSheet;
+  if(f.mine) document.getElementById("rmv").onclick=()=>{ mine=mine.filter(x=>x[0]!==k); saveMine(); closeSheet(); render(); };
   document.getElementById("tolab").onclick=()=>{ closeSheet(); Roy.go("lab",(own?"#h-":"#t-")+k); };
   document.getElementById("addn").onclick=()=>{ const n=document.getElementById("note"); n.classList.toggle("on"); if(n.classList.contains("on")) n.focus(); };
   document.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{
@@ -553,7 +579,27 @@ function openSheet(k,noteOpen){
 }
 function closeSheet(){ document.getElementById("ov").classList.remove("on"); }
 document.getElementById("ov").addEventListener("click",e=>{ if(e.target.id==="ov") closeSheet(); });
-document.getElementById("app").addEventListener("click",e=>{ const b=e.target.closest(".t"); if(b) openSheet(b.dataset.k); });
+function openAdd(){
+  document.getElementById("sheet").innerHTML=`<div class="lay addf">
+    <div class="hd"><span class="nm" style="font-size:18px">הוסף מניה לכוונת</span><button class="x" id="x">✕</button></div>
+    <input id="ntk" placeholder="סימול, למשל PLTR או POLI.TA" autocomplete="off" autocapitalize="characters" dir="ltr">
+    <input id="nnm" placeholder="שם החברה (לא חובה)" autocomplete="off">
+    <div class="acts"><button class="btn pri" id="nadd">הוסף</button></div>
+    <div class="sh-row" id="nmsg"></div></div>`;
+  document.getElementById("ov").classList.add("on");
+  document.getElementById("x").onclick=closeSheet;
+  const tk=document.getElementById("ntk"); setTimeout(()=>tk.focus(),50);
+  const go=()=>{
+    const k=tk.value.trim().toUpperCase().replace(/[^A-Z0-9.-]/g,""), nm=document.getElementById("nnm").value.trim();
+    if(!k){ document.getElementById("nmsg").textContent="צריך סימול."; return; }
+    if(find(k)){ openSheet(k); return; }
+    mine.unshift([k,nm||k,""]); saveMine(); render(); openSheet(k);
+  };
+  document.getElementById("nadd").onclick=go;
+  tk.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+  document.getElementById("nnm").addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+}
+document.getElementById("app").addEventListener("click",e=>{ if(e.target.closest("#addst")){ openAdd(); return; } const b=e.target.closest(".t"); if(b) openSheet(b.dataset.k); });
 document.querySelectorAll(".f").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".f").forEach(x=>x.classList.remove("on")); b.classList.add("on"); filter=b.dataset.f; render(); });
 document.getElementById("q").addEventListener("input",e=>{ query=e.target.value.trim(); render(); });
 render();
