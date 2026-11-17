@@ -144,17 +144,14 @@ function financeAnalysis(f) {
     var sorted = tiles.map(function (t) { return t.total; }).sort(function (a, b) { return a - b; });
     var med = sorted[Math.floor(sorted.length / 2)];
     var heavy = tiles.filter(function (t) { return t.total > med * 1.12; }).length;
-    p4 = '<div class="an-p"><div class="an-h">החודשים הכבדים</div>' +
-      '<div class="an-big">' + heavy + ' חודשים</div><div class="an-sub">ב־12 החודשים הבאים יוצא בהם יותר מהרגיל. לא להתחייב לפניהם.</div>' +
+    p4 = '<div class="an-p an-months"><div class="an-h">חודשים</div>' +
       '<div class="an-cal">' + tiles.map(function (t) {
         var r = t.total / med, cls = r > 1.25 ? 'h3' : r > 1.12 ? 'h2' : r < 0.85 ? 'lt' : '';
         var mo = Number(t.ym.slice(5, 7)), yr = t.ym.slice(2, 4);
         var uniq = t.notes.filter(function (x, i, a) { return x && a.indexOf(x) === i; }).slice(0, 2);
-        return '<div class="an-tile ' + cls + '"><div class="an-tm">' + MON[mo - 1] + ' ' + (mo === 1 || t === tiles[0] ? yr : '') + '</div><div class="an-ta">' + nf.format(Math.round(t.total / 100) * 100) + '</div>' +
-          (uniq.length ? '<div class="an-tn">' + uniq.map(esc).join('<br>') + '</div>' : '') + '</div>';
+        return '<div class="an-tile ' + cls + '"><div class="an-tm">' + MON[mo - 1] + ' ' + (mo === 1 || t === tiles[0] ? yr : '') + '</div><div class="an-ta">' + nf.format(Math.round(t.total / 100) * 100) + '</div></div>';
       }).join('') + '</div>' +
-      '<div class="an-leg"><span class="h3"></span>כבד מאוד<span class="h2"></span>כבד<span class="lt"></span>קל</div>' +
-      '<div class="an-note">לפי רשימת ההוצאות הקבועות והחד פעמיים הידועים. ההוצאה בפועל גבוהה יותר, ראה הדליפה.</div></div>';
+      '<div class="an-leg"><i><span class="h3"></span>כבד מאוד</i><i><span class="h2"></span>כבד</i><i><span class="lt"></span>קל</i></div></div>';
   }
 
   /* ---------- the way out: what each step does to the monthly result ---------- */
