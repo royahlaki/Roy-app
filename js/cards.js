@@ -1,5 +1,6 @@
 /* Stock quick cards: the shared data for the sectors sheet (and the map links to it).
    One entry per stock, updated by Claude after each quarterly report.
+   rev: total revenue when segments include intersegment sales.
    seg: revenue by segment [name, $M] for the quarter.
    g: revenue growth YoY %, fcf: free cash flow margin % (null = negative), roic: return on capital % (null = negative),
    pe: forward P/E (null = no profit). warn: short warnings shown only when they matter.
@@ -13,7 +14,7 @@ var CARDS = {
   NOC: { q: "רבעון 3, 2026",
     seg: [["מטוסים (B‑21)", 3575], ["מערכות משימה", 3155], ["חלל", 2749], ["מערכות הגנה", 2307]],
     g: 7, fcf: 7.5, roic: 13, pe: 19, warn: [],
-    out: { cost: 8775, opex: 1079, other: 144, net: 1124 },
+    rev: 11122, out: { cost: 8775, opex: 1079, other: 144, net: 1124 },
     take: "צמיחה איטית יותר, אבל צבר שיא של 110 מיליארד דולר והמפציץ B‑21 נכנס לייצור." },
   RKLB: { q: "רבעון 3, 2026",
     seg: [["מערכות חלל", 214.8], ["שיגורים", 53.1]],
@@ -23,7 +24,7 @@ var CARDS = {
   ESLT: { q: "רבעון 3, 2026",
     seg: [["יבשה ותחמושת", 758.7], ["אווירונאוטיקה", 498.9], ["מודיעין ול״א", 449.7], ["פעילות בארה״ב", 446.7], ["פיקוד ושליטה וסייבר", 269.7]],
     g: 17, fcf: 5, roic: 12, pe: 40, warn: [],
-    out: { cost: 1681.5, opex: 338.1, other: 54.6, net: 177.9 },
+    rev: 2252.1, out: { cost: 1681.5, opex: 338.1, other: 54.6, net: 177.9 },
     take: "צמיחה חזקה וצבר שיא של 33 מיליארד דולר, 74% ממנו מחו״ל. המחיר כבר יקר מאוד." }
 };
 

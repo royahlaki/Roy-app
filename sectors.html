@@ -202,7 +202,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 .tk2 .take{margin-top:0;font-size:13px}
 .wl{margin-top:6px;font-size:12px;color:var(--spec);padding-inline-start:12px}
 .wl b{font-weight:700}
-.duo{grid-template-columns:repeat(2,max-content);justify-content:start}
+.duo{grid-template-columns:1fr 1fr}
 .mini{min-width:150px}
 .mini .ln b{padding-inline-start:14px}
 @media (min-width:820px){
@@ -248,7 +248,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 
 <script src="js/core.js?v=11"></script>
-<script src="js/cards.js?v=3"></script>
+<script src="js/cards.js?v=4"></script>
 <script>
 const LAB = "https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG";
 // tags: il = ישראלית, spec = ספקולטיבית, etf = קרן סל. "בתיק" comes from the encrypted data.
@@ -507,7 +507,7 @@ function segHtml(c){
 }
 function flowHtml(c){
   const o=c.out; if(!o) return "";
-  const rev=c.seg.reduce((a,x)=>a+x[1],0), spend=rev-o.net, m=Math.round(o.net/rev*100);
+  const rev=c.rev||c.seg.reduce((a,x)=>a+x[1],0), spend=rev-o.net, m=Math.round(o.net/rev*100);
   return `<div class="mini"><h5>הרבעון במספרים</h5>
     <div class="ln"><span>הכנסות</span><b>${money(rev)}</b></div>
     <div class="ln"><span>הוצאות</span><b>${money(spend)}</b></div>
