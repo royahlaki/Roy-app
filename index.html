@@ -88,6 +88,7 @@ nav button[aria-current=page]{font-weight:600}
 <script>
 (function () {
   var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance', 'map', 'entry', 'journal'];
+  var BOOT = Date.now().toString(36);
   var PAGES = { home: 'home.html', portfolio: 'portfolio.html', lab: 'lab.html', sectors: 'sectors.html', finance: 'finance.html', map: 'map.html', entry: 'entry.html', journal: 'journal.html' };
   var frames = {}, current = null, dataP = null;
   var $ = function (id) { return document.getElementById(id); };
@@ -127,7 +128,7 @@ nav button[aria-current=page]{font-weight:600}
   function frame(tab, hash) {
     var f = frames[tab];
     if (!f) { f = document.createElement('iframe'); f.title = tab; frames[tab] = f; f.addEventListener('load', function () { insets(f); }); $('frames').appendChild(f); }
-    if (!f.src || hash) f.src = PAGES[tab] + (hash || '');
+    if (!f.src || hash) f.src = PAGES[tab] + '?b=' + BOOT + (hash || '');
     return f;
   }
   function show(tab, hash) {
