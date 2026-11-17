@@ -348,7 +348,7 @@ dash.calc('networth', {
       const [px] = d3.pointer(ev, svg.node());
       const sx = px * (W / svg.node().getBoundingClientRect().width || 1);
       const r = months[d3.leastIndex(months, (q) => Math.abs(x(q.month) + x.bandwidth() / 2 - sx))];
-      const lines = [['הוצאות', ils(r.exp_normal)], ['נשאר', ils(r.free_normal), 'km-ok'], ['נשאר זהיר', ils(r.free_cautious)]];
+      const lines = [['הוצאות', ils(r.exp_normal)], ['נשאר', ils(r.free_normal), 'km-ok']];
       if (r.ends) lines.push(['אחרון:', r.ends]);
       fillTip(t, 'חיוב ' + dmy(toDate(r.month)), lines);
       const scale = box.clientWidth / W;
@@ -377,7 +377,7 @@ dash.calc('networth', {
     const box = $('exp-list'); box.replaceChildren();
     const isInst = (e) => e.left_after_current !== null && e.left_after_current !== '';
     const now = expenses.filter((e) => !e.starts);
-    const rows = [...now.filter(isInst), ...now.filter((e) => !isInst(e) && Number(e.amount) > 0), ...now.filter((e) => !isInst(e) && Number(e.amount) === 0)];
+    const rows = [...now.filter(isInst), ...now.filter((e) => !isInst(e) && Number(e.amount) > 0)];
     rows.forEach((e) => {
       const r = document.createElement('div'); r.className = 'km-item';
       const n = document.createElement('span'); n.className = 'n'; n.textContent = e.name;
@@ -389,11 +389,7 @@ dash.calc('networth', {
         r.appendChild(p);
       }
       const a = document.createElement('span'); a.className = 'a';
-      if (Number(e.amount) === 0) { const s = document.createElement('small'); s.textContent = 'זהיר ' + ils(e.amount_cautious); a.appendChild(s); }
-      else {
-        a.textContent = ils(e.amount);
-        if (Number(e.amount_cautious) !== Number(e.amount)) { const s = document.createElement('small'); s.textContent = ' עד ' + nf.format(e.amount_cautious); a.appendChild(s); }
-      }
+      a.textContent = ils(e.amount);
       r.appendChild(a); box.appendChild(r);
     });
   }
