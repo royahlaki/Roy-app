@@ -195,6 +195,20 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
   .lay .hd{grid-area:hd} .lay .seg4{grid-area:seg} .lay #note{grid-area:note} .lay .vd2,.lay .sh-d{grid-area:vd}
   .lay .chart{grid-area:chart;height:auto;min-height:200px;align-self:stretch} .lay .duo{grid-area:duo} .lay .m4{grid-area:m4} .lay .acts{grid-area:acts}
 }
+
+/* v5 */
+.vd2{padding:7px 11px}
+.tk2{margin-top:9px}
+.tk2 .take{margin-top:0;font-size:13px}
+.wl{margin-top:6px;font-size:12px;color:var(--spec);padding-inline-start:12px}
+.wl b{font-weight:700}
+.duo{grid-template-columns:repeat(2,max-content);justify-content:start}
+.mini{min-width:150px}
+.mini .ln b{padding-inline-start:14px}
+@media (min-width:820px){
+  .lay{grid-template-areas:"hd chart" "seg chart" "note chart" "vd chart" "tk2 chart" "m4 duo" "acts duo";grid-template-rows:auto auto auto auto 1fr auto auto}
+  .lay .tk2{grid-area:tk2}
+}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -506,8 +520,8 @@ function openSheet(k,noteOpen){
   let card="";
   if(c){
     const V=cardVerdict(c);
-    card=`<div class="vd2 ${V.cls}"><div class="r"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך 4 בירוק · ${c.q}</span></div>
-       <p>${c.take}</p>${(c.warn||[]).map(x=>`<div class="w">⚠ <b style="font-size:12px;color:var(--spec)">${x[0]}:</b> ${x[1]}</div>`).join("")}</div>
+    card=`<div class="vd2 ${V.cls}"><div class="r"><i class="lt ${V.cls}"></i><b>${V.label}</b><span>${V.greens} מתוך 4 בירוק · ${c.q}</span></div></div>
+     <div class="tk2"><div class="take">${c.take}</div>${(c.warn||[]).map(x=>`<div class="wl">⚠ <b>${x[0]}:</b> ${x[1]}</div>`).join("")}</div>
      <div class="chart"><iframe src="${chartSrc(k)}" loading="lazy" title="גרף"></iframe></div>
      <div class="duo">${segHtml(c)}${flowHtml(c)}</div>
      <div class="m4">${CARD_TESTS.map((t,i)=>{ const val=t.v(c[t.k]), tx=/[א-ת]/.test(val);
