@@ -68,12 +68,12 @@ function financeAnalysis(f) {
     fc = '<div class="an-fc">בקצב הזה הבנק עולה בכ־<b class="an-green">' + ils(aRes) + '</b> בחודש.</div>';
   }
   var p1 = '<div class="an-p"><div class="an-h">התוצאה החודשית</div>' +
-    '<div class="an-big ' + (aRes < 0 ? 'an-red' : 'an-green') + '">' + sgn(aRes) + '</div><div class="an-sub">ממוצע לחודש, משכורת פחות כל מה שיצא (' + span + ')</div>' +
+    '<div class="an-big">' + sgn(aRes) + '</div><div class="an-sub">ממוצע לחודש, משכורת פחות כל מה שיצא (' + span + ')</div>' +
     bars(ordered.map(function (x) { return x.res; }), {
       labels: labels,
       bar: function (v, i, x, bw, y) {
         var top = Math.min(y(v), y(0)), h = Math.max(2, Math.abs(y(v) - y(0)));
-        return '<rect x="' + x + '" y="' + top + '" width="' + bw + '" height="' + h + '" rx="4" fill="' + (v < 0 ? '#ff4d63' : '#10A37F') + '"' + (ordered[i].est ? ' opacity=".55"' : '') + '/>' +
+        return '<rect x="' + x + '" y="' + top + '" width="' + bw + '" height="' + h + '" rx="4" fill="' + (v < 0 ? '#F4B4BC' : '#9ED9C3') + '"' + (ordered[i].est ? ' opacity=".55"' : '') + '/>' +
           '<text x="' + (x + bw / 2) + '" y="' + (v < 0 ? top + h + 11 : top - 4) + '" text-anchor="middle" class="an-val">' + (Math.round(v / 100) === 0 ? '0' : (v < 0 ? '-' : '+') + nf.format(Math.abs(Math.round(v / 100) * 100))) + '</text>';
       }
     }) + fc + (months.some(function (x) { return x.est; }) ? '<div class="an-note">עמודה בהירה: המשכורת באותו חודש לא ידועה, נלקחה הרגילה.</div>' : '') + '</div>';
@@ -87,12 +87,12 @@ function financeAnalysis(f) {
     .filter(function (x) { return x.v > 20; }).sort(function (a, b) { return b.v - a.v; }).slice(0, 4);
   var maxLeak = leaks.length ? leaks[0].v : 1;
   var p2 = '<div class="an-p"><div class="an-h">הדליפה</div>' +
-    '<div class="an-big an-red">' + ils(aLeak) + '</div><div class="an-sub">בחודש מעל התכנון של ' + ils(planTotal) + '</div>' +
+    '<div class="an-big">' + ils(aLeak) + '</div><div class="an-sub">בחודש מעל התכנון של ' + ils(planTotal) + '</div>' +
     bars(ordered.map(function (x) { return x.out; }), {
       labels: labels, ref: planTotal, zero: false,
       bar: function (v, i, x, bw, y) {
         var p = Math.min(v, ordered[i].plan), s = '<rect x="' + x + '" y="' + y(p) + '" width="' + bw + '" height="' + (y(0) - y(p)) + '" rx="4" fill="#CFE6DE"/>';
-        if (v > p) s += '<rect x="' + x + '" y="' + y(v) + '" width="' + bw + '" height="' + (y(p) - y(v)) + '" rx="4" fill="#ff4d63"/>';
+        if (v > p) s += '<rect x="' + x + '" y="' + y(v) + '" width="' + bw + '" height="' + (y(p) - y(v)) + '" rx="4" fill="#F4B4BC"/>';
         return s + '<text x="' + (x + bw / 2) + '" y="' + (y(v) - 4) + '" text-anchor="middle" class="an-val">' + nf.format(Math.round(v / 100) * 100) + '</text>';
       }
     }) +
