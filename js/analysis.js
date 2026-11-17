@@ -198,3 +198,32 @@ function financeAnalysis(f) {
   root.innerHTML = '<div class="an-head"><span>ניתוחים</span><small>לפי היומן, ' + span + '</small></div><div class="an-grid">' + p1 + p2 + p3 + p4 + '</div>' + capHtml + way;
   root.hidden = false;
 }
+
+/* Top of the finance page (phone and desktop): how much can be spent until the next card charge
+   without the bank going below zero, beyond the fixed expense list. Follows the what-if fields and expected items. */
+function financeRoom() {
+  var box = document.getElementById('room');
+  if (!box || !window.dash) return;
+  var nf = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+  var ils = function (v) { return '₪' + nf.format(Math.abs(Math.round(v))); };
+  dash.onData(function () {
+    var M = dash.data('months').data || [], I = (dash.data('inputs').data || [])[0] || {};
+    if (!M.length) { box.hidden = true; return; }
+    var p = dash.params(), T = Number(p.transfer) || 0, X = Number(p.vacation) || 0;
+    var r = M[0], d = new Date(String(r.month).slice(0, 10) + 'T00:00:00Z');
+    var xFirst = X && (!p.extra_month || p.extra_month === r.month) ? X : 0;
+    var room = r.bal_normal + T - xFirst, limit = Number(I.limit) || -5000;
+    var full = room - limit, free = Math.max(0, room);
+    var cls = room < 0 ? 'bad' : room < 1000 ? 'warn' : 'ok';
+    var day = d.getUTCDate() + '.' + (d.getUTCMonth() + 1);
+    box.className = 'km-card km-room ' + cls;
+    box.innerHTML =
+      '<div class="km-room-top"><span>מותר להוציא עד ' + day + '</span><small>מעבר לקבועות, בלי לרדת למינוס</small></div>' +
+      '<div class="km-room-big">' + (room < 0 ? '₪0' : ils(room)) + '</div>' +
+      '<div class="km-room-bar"><i style="width:' + (full > 0 ? Math.round(free / full * 100) : 0) + '%"></i></div>' +
+      '<div class="km-room-sub">' + (room < 0
+        ? 'כבר בתוך המינוס: ' + ils(-room) + '. עד המסגרת נשארו ' + ils(Math.max(0, full)) + '.'
+        : 'אחר כך מתחיל המינוס. כולל טיול, קניות לטיול וכל מה שרשום בצפוי.') + '</div>';
+    box.hidden = false;
+  });
+}

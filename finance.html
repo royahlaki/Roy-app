@@ -62,6 +62,8 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
     <button type="button" class="km-jlink" onclick="Roy.go('journal')">יומן הוצאות וניתוח</button>
   </header>
 
+  <section class="km-card km-room" id="room" hidden></section>
+
   <section class="km-card" id="bank">
     <div class="km-label" id="bank-label">בנק עכשיו</div>
     <div class="km-big" id="bank-now">—</div>
@@ -341,6 +343,20 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .an-capc.over .an-capbar i { background: var(--km-red); }
 .an-capl { display: flex; flex-wrap: wrap; gap: 4px; }
 .an-capl span { font-size: 11px; background: var(--color-bg); color: var(--color-fg-muted); border-radius: 99px; padding: 2px 8px; }
+.km-room { padding: 16px 18px; }
+@media (min-width: 1000px) { .km-room { grid-column: 1 / -1; } }
+.km-room-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.km-room-top span { font-size: 15px; font-weight: 700; }
+.km-room-top small { font-size: 12px; color: var(--color-fg-muted); }
+.km-room-big { font-size: 40px; font-weight: 800; line-height: 1.1; margin: 6px 0 10px; }
+.km-room.ok .km-room-big { color: var(--color-ok); }
+.km-room.warn .km-room-big { color: #D97706; }
+.km-room.bad .km-room-big { color: var(--km-red); }
+.km-room.bad { border: 1.5px solid var(--km-red); }
+.km-room-bar { height: 12px; border-radius: 6px; background: color-mix(in srgb, var(--km-red) 18%, transparent); overflow: hidden; }
+.km-room-bar i { display: block; height: 100%; border-radius: 6px; background: var(--color-ok); }
+.km-room.warn .km-room-bar i { background: #F59E0B; }
+.km-room-sub { font-size: 12px; color: var(--color-fg-muted); margin-top: 8px; }
 </style>
 </div>
 
@@ -348,7 +364,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
 <script src="js/finance-page.js?v=11"></script>
-<script src="js/analysis.js?v=4"></script>
+<script src="js/analysis.js?v=5"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
@@ -356,6 +372,7 @@ Roy.data().then(function (d) {
   document.getElementById('boot').hidden = true;
   document.getElementById('dash-root').hidden = false;
   financeMain();
+  try { financeRoom(); } catch (e) { console.error(e); }
   try { financeAnalysis(f); } catch (e) { console.error(e); }
 }, function () { document.getElementById('boot').textContent = 'הכספים לא נטענו. נסה לרענן.'; });
 </script>
