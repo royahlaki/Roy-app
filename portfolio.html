@@ -602,6 +602,26 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 </div>
 </div>
 
+<style id="theme-v2">
+/* ===== Theme v2 light: glow, glass and gradient accents, portfolio keeps its blue to violet ===== */
+html,body{background:#F6F8FD!important}
+.pf,.pf.th-mode{--acc:linear-gradient(135deg,#3B82F6,#8B5CF6);--g-line:rgba(15,23,42,.07);
+  background:radial-gradient(90% 40% at 100% 0%,rgba(59,130,246,.16),transparent 60%),radial-gradient(80% 40% at 0% 35%,rgba(139,92,246,.13),transparent 60%),radial-gradient(90% 45% at 100% 100%,rgba(34,211,238,.10),transparent 60%),#F6F8FD!important;background-attachment:fixed!important}
+.pf .top.hero{position:relative;overflow:hidden;background:linear-gradient(165deg,#FFFFFF 0%,#EEF2FD 100%)!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 10px 30px rgba(15,23,42,.08)!important;border-bottom:1px solid rgba(15,23,42,.05)}
+.pf .top.hero::before{content:"";position:absolute;inset:auto -20% -80% -20%;height:190%;pointer-events:none;
+  background:radial-gradient(50% 40% at 50% 60%,rgba(139,92,246,.32),rgba(59,130,246,.22) 45%,transparent 70%)}
+.pf .top.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,#3B82F6,#8B5CF6,transparent);opacity:.7}
+.pf .top.hero>*{position:relative}
+.pf .top h1{background:linear-gradient(90deg,#0F172A,#3730A3 65%,#7C3AED)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.pf .top .dt{color:#64748B!important}
+.pf .top .tabs{background:rgba(15,23,42,.06)!important;border:0!important}
+.pf .top .tabs button{color:#475569!important}
+.pf .top .tabs button[aria-selected=true]{background:var(--acc)!important;color:#fff!important;box-shadow:0 4px 14px rgba(99,102,241,.35)!important}
+.pf .card,.pf .kpi{background:rgba(255,255,255,.78)!important;border:1px solid rgba(255,255,255,.9)!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 30px rgba(15,23,42,.07)!important;-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
+.pf .total{background:linear-gradient(90deg,#0F172A,#3730A3);-webkit-background-clip:text;background-clip:text;color:transparent}
+</style>
 <script src="js/core.js?v=12"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
