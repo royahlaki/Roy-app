@@ -288,14 +288,15 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .an-mini { font-size: 12px; color: var(--color-fg-muted); margin: 10px 0 4px; }
 .an-row { display: grid; grid-template-columns: 8.5rem 1fr 3.4rem; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; }
 .an-row span i { font-style: normal; font-size: 10px; color: #C08A00; margin-inline-start: 4px; }
-.an-row b { text-align: left; font-weight: 600; color: var(--color-fg); }
+.an-row b { text-align: left; font-weight: 600; color: var(--km-red); }
 .an-track { height: 6px; background: var(--color-border-line); border-radius: 3px; overflow: hidden; }
-.an-track i { display: block; height: 100%; background: #F4B4BC; border-radius: 3px; }
+.an-track i { display: block; height: 100%; background: var(--km-red); border-radius: 3px; }
 .an-hab { margin-top: 8px; }
 .an-hab-t { display: flex; justify-content: space-between; font-size: 13px; }
 .an-hab-t b { font-size: 18px; font-weight: 800; }
 .an-hbar { position: relative; height: 10px; background: var(--color-border-line); border-radius: 5px; margin: 6px 0 4px; }
-.an-hbar i { position: absolute; top: 0; bottom: 0; right: 0; background: #B9D3CA; border-radius: 5px; }
+.an-hbar i { position: absolute; top: 0; bottom: 0; right: 0; background: var(--km-red); border-radius: 5px; }
+.an-hbar em { position: absolute; top: 0; bottom: 0; right: 0; background: #9ED9C3; border-radius: 5px 0 0 5px; border-radius: 0 5px 5px 0; }
 .an-hbar u { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--color-fg); text-decoration: none; }
 .an-hab-s { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-fg-muted); }
 .an-eq { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: auto; padding-top: 14px; }
@@ -304,15 +305,30 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .an-eq span { display: block; font-size: 11px; color: var(--color-fg-muted); line-height: 1.3; margin-top: 2px; }
 .an-cal { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .an-tile { background: #fff; border: 1px solid var(--color-border-line); border-radius: 10px; padding: 7px 8px; min-height: 64px; }
-.an-tile.h2 { background: #FFF6E6; border-color: #F6DDAE; }
-.an-tile.h3 { background: #FDE6D3; border-color: #F2B98C; }
+.an-tile.h2 { background: #FFE3E7; border-color: #FFB3BE; }
+.an-tile.h3 { background: #ff4d63; border-color: #ff4d63; color: #fff; }
 .an-tile.lt { background: #E3F7EF; border-color: #A9E5CF; }
 .an-tm { font-size: 11px; opacity: .75; }
 .an-ta { font-size: 15px; font-weight: 700; }
 .an-tn { font-size: 10px; line-height: 1.3; margin-top: 2px; opacity: .9; }
 .an-leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-fg-muted); margin-top: 8px; }
 .an-leg span { width: 10px; height: 10px; border-radius: 3px; margin-inline-start: 6px; }
-.an-leg span.h3 { background: #FDE6D3; border: 1px solid #F2B98C; } .an-leg span.h2 { background: #FFF6E6; border: 1px solid #F6DDAE; } .an-leg span.lt { background: #E3F7EF; border: 1px solid #A9E5CF; }
+.an-leg span.h3 { background: #ff4d63; } .an-leg span.h2 { background: #FFE3E7; border: 1px solid #FFB3BE; } .an-leg span.lt { background: #E3F7EF; border: 1px solid #A9E5CF; }
+.an-split { display: flex; gap: 14px; font-size: 12px; color: var(--color-fg-muted); margin: -4px 0 8px; }
+.an-split b { font-weight: 700; margin-inline-start: 4px; }
+.an-way { margin-top: 16px; border: 1px solid #A9E5CF; background: linear-gradient(90deg, #F2FBF7, #E3F7EF); border-radius: 14px; padding: 14px 16px; }
+.an-way-h { font-size: 15px; font-weight: 800; margin-bottom: 10px; }
+.an-way-h small { font-size: 12px; font-weight: 400; color: var(--color-fg-muted); margin-inline-start: 8px; }
+.an-steps { display: flex; align-items: stretch; gap: 8px; }
+.an-step { flex: 1; background: #fff; border-radius: 12px; padding: 10px 12px; border: 1.5px solid var(--color-border-line); }
+.an-step span { display: block; font-size: 12px; color: var(--color-fg-muted); }
+.an-step b { display: block; font-size: 22px; font-weight: 800; margin: 2px 0; }
+.an-step small { font-size: 11px; color: var(--color-fg-muted); }
+.an-step.neg b { color: var(--km-red); }
+.an-step.neg:first-child { border-color: var(--km-red); }
+.an-step.pos { border-color: var(--color-ok); background: #F2FBF7; }
+.an-step.pos b { color: var(--color-ok); }
+.an-arr { align-self: center; color: var(--color-fg-muted); font-size: 18px; }
 </style>
 </div>
 
@@ -320,7 +336,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
 <script src="js/finance-page.js?v=11"></script>
-<script src="js/analysis.js?v=2"></script>
+<script src="js/analysis.js?v=3"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
