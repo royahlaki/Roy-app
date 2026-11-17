@@ -176,6 +176,25 @@ function financeAnalysis(f) {
     st.map(function (x, i) {
       return (i ? '<div class="an-arr">←</div>' : '') + '<div class="an-step ' + (x.v < 0 ? 'neg' : 'pos') + '"><span>' + x.t + '</span><b>' + sgn(x.v) + '</b><small>' + esc(x.d) + '</small></div>';
     }).join('') + '</div></div>';
-  root.innerHTML = '<div class="an-head"><span>ניתוחים</span><small>לפי היומן, ' + span + '</small></div><div class="an-grid">' + p1 + p2 + p3 + p4 + '</div>' + way;
+  /* ---------- one-off cap meter: the next three charge months ---------- */
+  var capHtml = '';
+  if (inputs.first_charge) {
+    var f0 = String(inputs.first_charge), cy = Number(f0.slice(0, 4)), cm = Number(f0.slice(5, 7));
+    var cms = [0, 1, 2].map(function (k) {
+      var d = new Date(Date.UTC(cy, cm - 1 + k, 1)), ym = d.toISOString().slice(0, 7), items = [];
+      (f.oneoffs || []).forEach(function (o) { if (o.kind !== 'card_total' && String(o.date).slice(0, 7) === ym && Number(o.amount) < 0) items.push({ n: String(o.name).split(/[:(]/)[0].replace(/,.*$/, '').trim(), a: -Number(o.amount) }); });
+      J.months.forEach(function (m) { if (m.m === ym) (m.r || []).forEach(function (r) { if (r[5] === 'o' && Number(r[2]) < 0) items.push({ n: String(r[1]).split(',')[0], a: -Number(r[2]) }); }); });
+      var used = items.reduce(function (t, x) { return t + x.a; }, 0);
+      return { label: MONL[d.getUTCMonth()], used: used, items: items };
+    });
+    capHtml = '<div class="an-cap"><div class="an-way-h">תקרת חד פעמיים <small>' + ils(CAP) + ' בחודש, כולל הוצאות לא צפויות. לפי חודש החיוב</small></div><div class="an-capm">' +
+      cms.map(function (c) {
+        var left = CAP - c.used, pct = Math.min(100, c.used / CAP * 100), over = left < 0;
+        return '<div class="an-capc' + (over ? ' over' : '') + '"><div class="an-capt"><span>' + c.label + '</span><b>' + (over ? 'חריגה ' + ils(-left) : 'נשאר ' + ils(left)) + '</b></div>' +
+          '<div class="an-capbar"><i style="width:' + pct + '%"></i></div>' +
+          '<div class="an-capl">' + (c.items.length ? c.items.map(function (x) { return '<span>' + esc(x.n) + ' ' + ils(x.a) + '</span>'; }).join('') : '<span>עוד לא נוצל כלום</span>') + '</div></div>';
+      }).join('') + '</div></div>';
+  }
+  root.innerHTML = '<div class="an-head"><span>ניתוחים</span><small>לפי היומן, ' + span + '</small></div><div class="an-grid">' + p1 + p2 + p3 + p4 + '</div>' + capHtml + way;
   root.hidden = false;
 }

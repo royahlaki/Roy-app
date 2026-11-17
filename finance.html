@@ -329,6 +329,18 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 .an-step.pos { border-color: var(--color-ok); background: #F2FBF7; }
 .an-step.pos b { color: var(--color-ok); }
 .an-arr { align-self: center; color: var(--color-fg-muted); font-size: 18px; }
+.an-cap { margin-top: 16px; border: 1px solid var(--color-border-line); background: #F7FCFA; border-radius: 14px; padding: 14px 16px; }
+.an-capm { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.an-capc { background: #fff; border: 1.5px solid var(--color-border-line); border-radius: 12px; padding: 10px 12px; }
+.an-capc.over { border-color: var(--km-red); }
+.an-capt { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 600; }
+.an-capt b { font-size: 16px; font-weight: 800; color: var(--color-ok); }
+.an-capc.over .an-capt b { color: var(--km-red); }
+.an-capbar { height: 10px; background: var(--color-border-line); border-radius: 5px; overflow: hidden; margin: 8px 0 6px; }
+.an-capbar i { display: block; height: 100%; background: var(--color-ok); border-radius: 5px; }
+.an-capc.over .an-capbar i { background: var(--km-red); }
+.an-capl { display: flex; flex-wrap: wrap; gap: 4px; }
+.an-capl span { font-size: 11px; background: var(--color-bg); color: var(--color-fg-muted); border-radius: 99px; padding: 2px 8px; }
 </style>
 </div>
 
@@ -336,7 +348,7 @@ body{font-family:Heebo,system-ui,sans-serif;color:var(--color-fg);min-height:100
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
 <script src="js/finance-page.js?v=11"></script>
-<script src="js/analysis.js?v=3"></script>
+<script src="js/analysis.js?v=4"></script>
 <script>
 Roy.data().then(function (d) {
   var f = d.finance || {};
