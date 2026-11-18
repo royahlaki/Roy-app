@@ -365,6 +365,44 @@ window.pfDraw = () => {
       const sg = v => v === null || v === undefined ? '—' : d3.format('.1f')(Math.abs(v)) + '%';
       const sc = v => v === null || v === undefined ? 'mut' : v > 0 ? 't-grn' : v < 0 ? 't-red' : '';
       const isTrade = h => h.trade === true || h.trade === 'true' || h.tag === 'טרייד';
+      // Financials table. With rev_qs / ni_qs (4 quarters YoY, oldest first) it shows the trend; otherwise the last quarter only.
+      const arr = v => Array.isArray(v) ? v : (typeof v === 'string' && v ? (() => { try { const p = JSON.parse(v); return Array.isArray(p) ? p : null; } catch (e) { return null; } })() : null);
+      const finTable = (h, cls) => {
+        const sgi = v => v === null || v === undefined ? '—' : '⁦' + (v < 0 ? '−' : '+') + d3.format('.0f')(Math.abs(v)) + '%⁩';
+        const rq = arr(h.rev_qs), nq = arr(h.ni_qs), ql = arr(h.q_list);
+        const trend = ql && ql.length > 1 && (rq || nq);
+        const tb = el('table', cls + (trend ? ' trend' : '')), th = el('tr');
+        const corner = el('th', '', '');
+        if (trend) {
+          const s = (rq && rq.filter(v => v !== null && v !== undefined).length > 1) ? rq : nq;
+          const xs = s.filter(v => v !== null && v !== undefined);
+          if (xs.length > 1) {
+            const d = xs[xs.length - 1] - xs[xs.length - 2];
+            const [t, c] = d >= 3 ? ['מאיץ', 'grn'] : d <= -3 ? ['מאט', 'red'] : ['יציב', 'gry'];
+            const pl = el('span', 'pill acc ' + c, t);
+            pl.title = `קצב הצמיחה של ${s === rq ? 'ההכנסות' : 'הרווח'} ברבעון האחרון לעומת הרבעון שלפניו (כל רבעון מושווה לאותו רבעון אשתקד)`;
+            corner.appendChild(pl);
+          }
+        }
+        th.appendChild(corner);
+        const cols = trend ? ql.map((q, i) => [q, i]) : [[`רבעון · ${h.q_period}`, -1]];
+        cols.forEach(([q, i]) => { const c = el('th', i === cols.length - 1 && trend ? 'last' : '', q); th.appendChild(c); });
+        th.appendChild(el('th', 'yr', trend ? h.y_period : `12 חודשים · ${h.y_period}`));
+        const thead = el('thead'); thead.appendChild(th); tb.appendChild(thead);
+        const tbd = el('tbody');
+        const fmt = trend ? sgi : (v => v === null || v === undefined ? '—' : '⁦' + (v < 0 ? '−' : '+') + sg(v) + '⁩');
+        [['הכנסות', rq, h.rev_q, h.rev_y], ['רווח נקי', nq, h.ni_q, h.ni_y]].forEach(([lbl, qs, q, y]) => {
+          if (trend && !qs && (y === null || y === undefined)) return;
+          const tr = el('tr'); tr.appendChild(el('td', '', lbl));
+          if (trend) ql.forEach((_, i) => { const v = qs ? qs[i] : null; tr.appendChild(el('td', 'v2 ' + sc(v) + (i === ql.length - 1 ? ' last' : ''), fmt(v))); });
+          else tr.appendChild(el('td', 'v2 ' + sc(q), fmt(q)));
+          tr.appendChild(el('td', 'v2 yr ' + sc(y), fmt(y)));
+          tbd.appendChild(tr);
+        });
+        tb.appendChild(tbd);
+        if (trend) tb.title = 'כל רבעון מושווה לאותו רבעון בשנה הקודמת (YoY)' + (h.fin_date ? ` · נתון מ-${h.fin_date}` : '');
+        return tb;
+      };
       const sortedH = [...H.data].sort((a, b) => (isTrade(b) - isTrade(a)) || ((a.pnl_pct ?? 1e9) - (b.pnl_pct ?? 1e9)));
       const half = 0, rowsPart = sortedH;
       sortedH.slice(0, half).forEach(h => {
@@ -412,14 +450,7 @@ window.pfDraw = () => {
         } else if (h.rev_q === null && h.ni_q === null && h.rev_y === null && h.ni_y === null) {
           t2.appendChild(el('div', 'cap mut', 'קרן מדד, אין דוחות'));
         } else {
-          const tb = el('table'); const th = el('tr');
-          th.append(el('th', '', ''), el('th', '', `רבעון · ${h.q_period}`), el('th', '', `12 חודשים · ${h.y_period}`));
-          const thead = el('thead'); thead.appendChild(th); tb.appendChild(thead);
-          const tbd = el('tbody');
-          [['הכנסות', h.rev_q, h.rev_y], ['רווח נקי', h.ni_q, h.ni_y]].forEach(([lbl, q, y]) => {
-            const tr = el('tr'); tr.append(el('td', '', lbl), el('td', 'v2 ' + sc(q), sg(q)), el('td', 'v2 ' + sc(y), sg(y))); tbd.appendChild(tr);
-          });
-          tb.appendChild(tbd); t2.appendChild(tb);
+          t2.appendChild(finTable(h, ''));
         }
         tiles.appendChild(t2);
         // tile 3: pros / cons
@@ -467,16 +498,7 @@ window.pfDraw = () => {
           sm.append(nm, val, pn, rq, nq, rp);
           r.appendChild(sm);
           const more = el('div', 'sr-more');
-          if (!noRep) {
-            const tb = el('table', 'sr-fin'), th = el('tr');
-            th.append(el('th', '', ''), el('th', '', `רבעון · ${h.q_period}`), el('th', '', `12 חודשים · ${h.y_period}`));
-            const thead = el('thead'); thead.appendChild(th); tb.appendChild(thead);
-            const tbd = el('tbody');
-            [['הכנסות', h.rev_q, h.rev_y], ['רווח נקי', h.ni_q, h.ni_y]].forEach(([lbl, q, y]) => {
-              const tr = el('tr'); tr.append(el('td', '', lbl), el('td', 'v2 ' + sc(q), q === null || q === undefined ? '—' : sgn(q)), el('td', 'v2 ' + sc(y), y === null || y === undefined ? '—' : sgn(y))); tbd.appendChild(tr);
-            });
-            tb.appendChild(tbd); more.appendChild(tb);
-          }
+          if (!noRep) more.appendChild(finTable(h, 'sr-fin'));
           const pros = asList(h.pros), cons = asList(h.cons);
           if (pros.length || cons.length) {
             const tb = el('table', 'sr-pc'), th = el('tr');
