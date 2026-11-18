@@ -716,7 +716,7 @@ const jForm = () => {
   const f = r ? { ...r, feel: jFeel(r) } : { date: jToday(), side: 'מכירה', ticker: '', name: '', amount_ils: '', price: '', why: '', market: '', expect: '', result: '', by: 'כלל', feel: [] };
   box.innerHTML = '';
   const fld = (lab, node) => { const l = el('label'); l.append(lab, node); return l; };
-  const inp = (k, type, ph) => { const i = el('input'); i.type = type || 'text'; i.value = jt(f[k]); if (ph) i.placeholder = ph; i.oninput = () => { f[k] = i.value; chk(); }; return i; };
+  const inp = (k, type, ph) => { const i = el('input'); if (type === 'number') { i.type = 'text'; i.inputMode = 'decimal'; } else i.type = type || 'text'; i.value = jt(f[k]); if (ph) i.placeholder = ph; i.oninput = () => { f[k] = i.value; chk(); }; return i; };
   const area = (k, ph) => { const i = el('textarea'); i.value = jt(f[k]); i.placeholder = ph || ''; i.oninput = () => { f[k] = i.value; }; return i; };
   const seg = (k, opts) => {
     const g = el('div', 'seg');
