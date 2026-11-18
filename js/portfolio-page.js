@@ -600,6 +600,13 @@ const drawResearch = () => {
   });
   const VC = { 'התזה תקפה': 'grn', 'בבדיקה': 'blu', 'לצמצם': 'red', 'התזה נשברה': 'red', 'עוברת': 'grn', 'לא עוברת': 'red', 'נחתכה, מחכה לכניסה': 'red', 'בתיק': 'gry' };
   const N = v => Number(v) || 0;
+  // Colourful progress bar: fills with research progress, colour runs red, amber, green.
+  const meter = (p, cls) => {
+    p = Math.max(0, Math.min(100, Math.round(p)));
+    const m = el('span', cls), tr = el('span', 'tr'), fl = el('span', 'fl');
+    fl.style.width = p + '%'; if (p) fl.style.backgroundSize = (10000 / p) + '% 100%';
+    tr.appendChild(fl); m.append(tr, el('b', '', p + '%')); return m;
+  };
   // One row per stock. The row shows only the name and one status bubble; a tap opens the details.
   const row = (box, r, held) => {
     const d = el('details', 'srw rsw');
@@ -610,13 +617,14 @@ const drawResearch = () => {
     if (held) nm.appendChild(el('small', over ? 't-red' : 'mut', pct(r.weight) + (over ? ' · מעל התקרה' : ' מהתיק')));
     else nm.appendChild(el('small', 'mut', [r.ticker, r.group].filter(Boolean).join(' · ')));
     if (over) d.classList.add('warn');
+    if (r.fund) d.classList.add('fund');
     const bub = el('span', 'rs-b');
     if (r.fund) bub.appendChild(el('span', 'pill gry', 'קרן מדד'));
     else if (!r.has) bub.appendChild(el('span', 'pill red', 'אין מחקר'));
     else {
       if (N(r.flags)) bub.appendChild(el('span', 'pill red fg', 'דגל ' + N(r.flags)));
-      bub.appendChild(el('span', 'pill ' + (VC[r.verdict] || 'gry'), r.verdict || 'בבדיקה'));
-      bub.appendChild(el('span', 'rs-pc', Math.round(N(r.pct)) + '%'));
+      if (r.verdict && !(held && r.verdict === 'בתיק')) bub.appendChild(el('span', 'pill ' + (VC[r.verdict] || 'gry'), r.verdict));
+      bub.appendChild(meter(N(r.pct), 'rs-m'));
     }
     sm.append(nm, bub); d.appendChild(sm);
     const mo = el('div', 'sr-more rs-more');
@@ -627,9 +635,8 @@ const drawResearch = () => {
       mo.appendChild(go);
     } else {
       // progress
-      const pg = el('div', 'rs-pg'), tr = el('div', 'tr'), fl = el('div', 'fl');
-      fl.style.width = Math.max(0, Math.min(100, N(r.pct))) + '%'; fl.style.background = N(r.pct) >= 80 ? C.grn : C.blu; tr.appendChild(fl);
-      pg.append(el('span', 'k', 'התקדמות'), tr, el('b', '', Math.round(N(r.pct)) + '%'));
+      const pg = el('div', 'rs-pg');
+      pg.append(el('span', 'k', 'התקדמות'), meter(N(r.pct), 'rs-m big'));
       mo.appendChild(pg);
       const st = el('div', 'rs-st');
       [['תקין', N(r.ok), 'grn'], ['לבדוק', N(r.q), 'blu'], ['פוסל', N(r.flags), 'red']].forEach(([k, v, c]) => {
@@ -649,7 +656,7 @@ const drawResearch = () => {
     d.appendChild(mo); box.appendChild(d);
   };
   const own = document.getElementById('rs-own'); own.innerHTML = '';
-  if (RV.status === 'ok') { const box = el('div', 'srows'); RV.data.forEach(r => row(box, r, true)); own.appendChild(box); }
+  if (RV.status === 'ok') { const box = el('div', 'srows'); [...RV.data.filter(r => !r.fund), ...RV.data.filter(r => r.fund)].forEach(r => row(box, r, true)); own.appendChild(box); }
   const oth = document.getElementById('rs-other'); oth.innerHTML = '';
   if (RS.status === 'ok' && H.status === 'ok') {
     const heldS = new Set(H.data.map(h => String(h.ticker).toUpperCase()));
