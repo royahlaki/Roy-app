@@ -145,6 +145,13 @@
     timer = setTimeout(function () { var q = Object.keys(queue).map(function (k) { return queue[k]; }); queue = {}; send(q); }, 1200);
   }
 
+  /* Send whatever is waiting right now (used before a manual refresh) */
+  function flush() {
+    clearTimeout(timer);
+    var q = Object.keys(queue).map(function (k) { return queue[k]; }); queue = {};
+    return send(q);
+  }
+
   function applyPrices(data, prices) {
     var hs = get(data, 'datasets.holdings'), acc = (get(data, 'datasets.account') || [])[0];
     if (!Array.isArray(hs) || !prices) return;
@@ -208,5 +215,5 @@
       .catch(function () { clearTimeout(to); return data; });
   }
 
-  Roy._sync = { push: push, sync: sync };
+  Roy._sync = { push: push, sync: sync, flush: flush };
 })();
