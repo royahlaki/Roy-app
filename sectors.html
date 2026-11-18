@@ -205,6 +205,12 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 .duo{grid-template-columns:1fr 1fr}
 .mini{min-width:150px}
 .mini .ln b{padding-inline-start:14px}
+/* iPhone: wider revenue box, narrower numbers box */
+@media (max-width:819px){
+  .duo{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}
+  .mini{min-width:0}
+  .mini .ln b{padding-inline-start:6px}
+}
 @media (min-width:820px){
   .lay{grid-template-areas:"hd chart" "seg chart" "note chart" "vd chart" "tk2 chart" "m4 duo" "acts duo";grid-template-rows:auto auto auto auto 1fr auto auto}
   .lay .tk2{grid-area:tk2}
