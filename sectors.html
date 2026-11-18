@@ -240,6 +240,22 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 /* strongest verdict */
 .vd2.S{background:rgba(195,245,60,.14);border-color:var(--neon);box-shadow:0 0 18px rgba(195,245,60,.25)} .vd2.S b{color:var(--neon)}
 .lt.S{background:var(--neon);box-shadow:0 0 10px rgba(195,245,60,.9)} .lt.N{background:#5b6170} .vd2.N{background:rgba(140,150,170,.08);border-color:rgba(140,150,170,.4)} .vd2.N b{color:#c9d1e0}
+
+/* bar v2: chips row, then legend + compact ticker search */
+.filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.filters::-webkit-scrollbar{display:none}
+.filters{gap:5px}
+.f{flex:1 0 auto;padding:5px 9px;text-align:center}
+.bar2{display:flex;align-items:center;gap:10px;margin-top:9px;padding-top:9px;border-top:.5px solid var(--line2)}
+.bar2 .legend{flex:1;min-width:0;margin-top:0;display:flex;flex-direction:column;gap:3px}
+.lg-row{display:flex;gap:11px;flex-wrap:wrap;line-height:1.5}
+.legend span{white-space:nowrap}
+.legend i{margin-left:4px;width:7px;height:7px}
+.qbox{flex:none;display:flex;align-items:center;gap:5px;width:92px;background:var(--bg);border:1px solid var(--line2);border-radius:999px;padding:0 10px;color:var(--mut);transition:border-color .15s,width .2s}
+.qbox:focus-within{border-color:var(--neon);color:var(--neon);width:116px}
+#q{flex:1;min-width:0;width:100%;background:transparent;border:0;padding:5px 0;font:600 16px Oswald,Heebo;letter-spacing:.5px;direction:ltr;text-align:left;text-transform:uppercase;color:var(--txt)}
+#q::placeholder{font:500 13px Heebo;letter-spacing:0;text-transform:none;color:var(--mut);text-align:right}
+#q:focus{border:0}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -258,17 +274,13 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
     <button class="f" data-f="il">ישראליות</button>
     <button class="f" data-f="own">בתיק</button>
     <button class="f" data-f="watch">במעקב</button>
-    <input id="q" placeholder="חיפוש טיקר או חברה" autocomplete="off">
   </div>
-  <div class="legend">
-    <span><i class="d-own"></i>בתיק</span>
-    <span><i class="d-il"></i>ישראלית</span>
-    <span><i class="d-spec"></i>ספקולטיבית</span>
-    <span><i class="d-s0"></i>לחקור</span>
-    <span><i class="d-s1"></i>בבדיקה</span>
-    <span><i class="d-s2"></i>מתאימה</span>
-    <span><i class="d-s3"></i>נפסלה</span>
-    <span class="sync">נשמר במכשיר</span>
+  <div class="bar2">
+    <div class="legend">
+      <div class="lg-row"><span><i class="d-own"></i>בתיק</span><span><i class="d-il"></i>ישראלית</span><span><i class="d-spec"></i>ספקולטיבית</span></div>
+      <div class="lg-row"><span><i class="d-s0"></i>לחקור</span><span><i class="d-s1"></i>בבדיקה</span><span><i class="d-s2"></i>מתאימה</span><span><i class="d-s3"></i>נפסלה</span></div>
+    </div>
+    <label class="qbox"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" placeholder="טיקר" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
   </div>
 </div>
 
