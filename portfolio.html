@@ -691,7 +691,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=15"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=23"></script>
+<script src="js/portfolio-page.js?v=24"></script>
 <script>
 /* never let the page sit sideways (iPhone can pan it after typing) */
 window.addEventListener('scroll', function () { if (window.scrollX) window.scrollTo(0, window.scrollY); }, { passive: true });
@@ -818,6 +818,8 @@ html,body{background:#F7F8FD!important}
 .pf .wd .wst-bar .wd-lg{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(27,31,58,.18);
   display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none;font-size:10px;font-weight:700;color:var(--g-sub)}
 .pf .wd-lg img{width:20px;height:20px;object-fit:contain}
+.pf .wd-lg.tv img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.pf .wd .wst-bar .wd-lg.tv{width:32px;height:32px;margin:-16px 0 0 -16px;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(27,31,58,.2)}
 .pf .wd .wst-bar .wd-mid{position:absolute;inset:0;height:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;line-height:1.2;text-align:center}
 .pf .wd-mid b{font-size:26px;font-weight:700;letter-spacing:-.02em}
 .pf .wd-mid small{font-size:12px;color:var(--g-mut)}

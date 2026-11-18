@@ -14,6 +14,10 @@ const C = { red: '#E0566A', grn: '#1FAE7A', amb: '#E8A23A', blu: '#8E8CF2', gry:
 const LOGO = [[/אלביט|ESLT/i, 'elbitsystems.com'], [/נקסט|NXSN/i, 'nextvision-sys.com'], [/בורסה|TASE/i, 'tase.co.il'], [/פועלים|POLI/i, 'bankhapoalim.co.il'],
   [/לאומי|LUMI/i, 'leumi.co.il'], [/נייקי|NKE/i, 'nike.com'], [/נביוס|NBIS/i, 'nebius.com'], [/TSM|טאיוואן/i, 'tsmc.com'], [/NVDA|אנבידיה/i, 'nvidia.com'],
   [/AVGO|ברודקום/i, 'broadcom.com'], [/VST|ויסטרה/i, 'vistracorp.com'], [/CEG|קונסטליישן/i, 'constellationenergy.com'], [/VRT|ורטיב/i, 'vertiv.com'], [/DLR|דיג'יטל ריאלטי/i, 'digitalrealty.com']];
+/* TradingView logos (the same round logos as on TradingView); a holding's own "tv" field wins */
+const TV = [[/אלביט|ESLT/i, 'elbit-systems'], [/נקסט|NXSN/i, 'next-vision-stabil'], [/בורסה|TASE/i, 'tel-aviv-stock-exchange-ltd'], [/פועלים|POLI/i, 'bank-hapoalim'],
+  [/לאומי|LUMI/i, 'leumi'], [/נייקי|NKE/i, 'nike'], [/קסם|KSM|125/i, 'ksm-etf']];
+const tvOf = h => { if (h.tv) return h.tv; const k = `${h.ticker} ${h.name}`; const m = TV.find(([re]) => re.test(k)); return m ? `https://s3-symbol-logo.tradingview.com/${m[1]}--big.svg` : null; };
 const logoOf = h => { if (h.domain) return h.domain; const k = `${h.ticker} ${h.name}`; const m = LOGO.find(([re]) => re.test(k)); return m ? m[1] : null; };
 const badgeOf = h => /125/.test(h.name || '') ? '125' : String(h.ticker || h.name || '').slice(0, 4);
 const riskCol = v => v >= 7 ? C.red : v >= 4 ? C.amb : C.grn;
@@ -268,9 +272,11 @@ window.pfDraw = () => {
         const b = el('div', 'wd-lg'); b.style.left = (x / sz * 100) + '%'; b.style.top = (y / sz * 100) + '%';
         if (d.data.cash) b.textContent = '₪';
         else {
-          const dom = logoOf(d.data.h);
-          if (dom) { const im = el('img'); im.alt = d.data.n; im.src = `https://www.google.com/s2/favicons?domain=${dom}&sz=64`; im.onerror = () => { b.innerHTML = ''; b.textContent = badgeOf(d.data.h); }; b.appendChild(im); }
-          else b.textContent = badgeOf(d.data.h);
+          const tv = tvOf(d.data.h), dom = logoOf(d.data.h);
+          const badge = () => { b.innerHTML = ''; b.classList.remove('tv'); b.textContent = badgeOf(d.data.h); };
+          const fav = () => { if (!dom) return badge(); b.innerHTML = ''; b.classList.remove('tv'); const im = el('img'); im.alt = d.data.n; im.src = `https://www.google.com/s2/favicons?domain=${dom}&sz=64`; im.onerror = badge; b.appendChild(im); };
+          if (tv) { b.classList.add('tv'); const im = el('img'); im.alt = d.data.n; im.src = tv; im.onerror = fav; b.appendChild(im); }
+          else fav();
         }
         wbar.appendChild(b);
       });
