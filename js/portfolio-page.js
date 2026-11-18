@@ -612,7 +612,7 @@ const drawResearch = () => {
     const wl = el('div', 'w' + (over ? ' t-red' : ''), pct(r.weight) + ' מהתיק' + (r.max_w !== null ? ` · תקרה ${r.max_w}%` : ''));
     nm.append(el('div', '', r.name), wl);
     if (!r.fund && r.has) {
-      const VC = { 'התזה תקפה': 'grn', 'בבדיקה': 'blu', 'לצמצם': 'red', 'התזה נשברה': 'red' };
+      const VC = { 'התזה תקפה': 'grn', 'בבדיקה': 'blu', 'לצמצם': 'red', 'התזה נשברה': 'red', 'עוברת': 'grn', 'לא עוברת': 'red', 'נחתכה, מחכה לכניסה': 'red', 'בתיק': 'gry' };
       const ps = el('div', 'rsp');
       if (r.verdict) ps.appendChild(el('span', 'pill ' + (VC[r.verdict] || 'gry'), r.verdict));
       const old = !r.review_date || (Date.now() - new Date(r.review_date + 'T00:00:00').getTime()) / 864e5 > 90;

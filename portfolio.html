@@ -391,7 +391,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 <section class="card" id="rs-card">
   <div class="row"><h2>מחקר לכל אחזקה</h2><a class="rs-open" href="https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG">פתח את המעבדה</a></div>
   <div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px">
-    <div class="kpi"><div class="v t-red" data-source="research_kpi" data-field="weight_missing" data-row="0">—</div><div class="l">מהתיק בלי מחקר מלא (פחות מ-80% נבדק)</div></div>
+    <div class="kpi"><div class="v t-red" data-source="research_kpi" data-field="weight_missing" data-row="0">—</div><div class="l">מהתיק בלי מחקר מלא (פחות מ 80% מהליבה)</div></div>
     <div class="kpi"><div class="v" data-source="research_kpi" data-field="flags" data-row="0">—</div><div class="l">דגלים אדומים בתיק</div></div>
   </div>
   <div class="rsl" id="rs-own" data-source="research_view"></div>
@@ -400,7 +400,7 @@ html,body{margin:0;padding:0;background:#FFFFFF}
   <h2>מחקרים על מניות שלא בתיק</h2>
   <div class="rsl" id="rs-other" data-source="research holdings"></div>
 </section>
-<p class="note" style="text-align:center">מסמנים במעבדה. הלשונית מתעדכנת בבריף הבוקר.</p>
+<p class="note" style="text-align:center">מסמנים במעבדה. הלשונית מתעדכנת מהמעבדה אוטומטית.</p>
 </div>
 
 <div id="page-journal" class="wrap" style="max-width:none" hidden>
@@ -640,10 +640,10 @@ html,body{background:#F6F8FD!important}
 .pf .srw[open] summary,.pf .srw[open] .sr-more{background:linear-gradient(180deg,#F7F5FF,#FFFFFF)}
 .pf .srw[open] .sr-more{background:#FFFFFF}
 </style>
-<script src="js/core.js?v=12"></script>
+<script src="js/core.js?v=13"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=14"></script>
+<script src="js/portfolio-page.js?v=15"></script>
 <script>
 Roy.data().then(function (d) {
   window.PF_CFG = d.config || {};

@@ -199,7 +199,7 @@ ul.al li.blu .i{background:#22D3EE;box-shadow:0 0 8px rgba(34,211,238,.6)}
     <a class="t" href="https://drive.google.com/drive/folders/16RkMin2mCPJ3xnP5W9EWGUcYknGN4M4Y">99 ארכיון</a>
   </div>
 </div>
-<script src="js/core.js?v=12"></script>
+<script src="js/core.js?v=13"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -305,6 +305,7 @@ ul.al li.blu .i{background:#22D3EE;box-shadow:0 0 8px rgba(34,211,238,.6)}
       var x = document.createElement('span'); x.className = 'x'; x.textContent = it.text;
       li.append(i, x);
       if (it.w) { var w = document.createElement('span'); w.className = 'w'; w.textContent = it.w; li.appendChild(w); }
+      if (it.go && window.Roy && Roy.go) { li.style.cursor = 'pointer'; li.addEventListener('click', function () { Roy.go('lab', '#' + it.go); }); }
       list.appendChild(li);
     };
     shown.forEach(add);
@@ -319,8 +320,33 @@ ul.al li.blu .i{background:#22D3EE;box-shadow:0 0 8px rgba(34,211,238,.6)}
     var items = [];
     RENEW.forEach(function (r) { var n = days(r[0]); if (n >= 0 && n <= r[2]) items.push({ rank: 2, n: n, text: r[1], w: when(n), cls: 'blu' }); });
     var ds = (data && data.datasets) || {}, hs = ds.holdings || [], acc = (ds.account || [])[0] || {}, total = Number(acc.total_ils) || 0;
+    var rd = function (k) { try { return JSON.parse(localStorage.getItem(k)) || null; } catch (e) { return null; } };
+    var peaks = rd('roy-peaks') || {}, lab = rd('srl-data-v1') || {}, ent = rd('roy-entry') || {}, prices = (data && data._prices) || {}, labAck = {};
+    /* Highest live price seen while holding: kept on the device and synced, used for the 25% from peak check */
+    if (data) {
+      var pch = false, held = {};
+      hs.forEach(function (h) { var tk = String(h.ticker).toUpperCase(), p = Number(h.price); held[tk] = 1; if (p && h.price_date === 'חי' && (!peaks[tk] || p > peaks[tk].p)) { peaks[tk] = { p: p, d: new Date().toISOString().slice(0, 10) }; pch = true; } });
+      Object.keys(peaks).forEach(function (tk) { if (!held[tk]) { delete peaks[tk]; pch = true; } });
+      if (pch) try { localStorage.setItem('roy-peaks', JSON.stringify(peaks)); } catch (e) {}
+    }
+    (lab.stocks || []).forEach(function (s) {
+      var tk = String(s.tk).toUpperCase(); if (s.peakAck) labAck[tk] = s.peakAck;
+      if (s.status !== 'cut' || !data) return;
+      /* Stock I cut: alert when the entry calculator says it is in the buy zone */
+      var it = (ent.items || []).filter(function (x) { return String(x.tk).toUpperCase() === tk; })[0], lp = prices[tk];
+      var price = lp && lp.price ? Number(lp.price) : it && Number(it.price), eps = it && Number(it.eps), g = it && Number(it.g), pe = it && Number(it.pe);
+      if (!it || !(price > 0) || !(eps > 0) || !isFinite(g) || !(pe > 0)) return;
+      var req = (Number(ent.req) || 10) / 100, m = (ent.m == null ? 25 : Number(ent.m)) / 100;
+      var buy = eps * Math.pow(1 + g / 100, 5) * pe / Math.pow(1 + req, 5) * (1 - m);
+      if (price <= buy) items.push({ rank: 1, n: 0, go: 't-' + tk, text: (s.nm || tk) + ' שחתכת הגיעה לאזור הקנייה. לבדוק כניסה מחדש.' });
+    });
     hs.forEach(function (h) {
-      if (h.pnl_pct !== null && h.pnl_pct !== undefined && Number(h.pnl_pct) <= -8) items.push({ rank: 0, n: 0, cls: 'red', text: h.name + ' ירדה ' + pct(-Number(h.pnl_pct)) + '% משער הקנייה. לפי הכלל: יוצאים.' });
+      var pl = h.pnl_pct === null || h.pnl_pct === undefined ? null : Number(h.pnl_pct);
+      if (pl !== null && pl <= -10) items.push({ rank: 0, n: -1, cls: 'red', go: 'h-' + h.ticker, text: h.name + ' ירדה ' + pct(-pl) + '% משער הקנייה, מעבר לקו האדום של 10%. לחתוך עכשיו.' });
+      else if (pl !== null && pl <= -8) items.push({ rank: 0, n: 0, cls: 'red', go: 'h-' + h.ticker, text: h.name + ' ירדה ' + pct(-pl) + '% משער הקנייה. לחתוך את ההפסד.' });
+      var pk = peaks[String(h.ticker).toUpperCase()], ack = labAck[String(h.ticker).toUpperCase()] || 0, pr = Number(h.price);
+      if (pk && pr && Number(h.cost_ils) && pr <= pk.p * 0.75 && Number(h.value_ils) * pk.p / pr > Number(h.cost_ils) && ack < pk.p)
+        items.push({ rank: 1, n: 0, go: 'h-' + h.ticker, text: h.name + ' ירדה ' + pct((1 - pr / pk.p) * 100) + '% מהשיא. לבדוק: תיקון או שינוי מגמה?' });
       if (h.next_report_date) { var n = days(h.next_report_date); if (n >= 0 && n <= 3) items.push({ rank: 1, n: n, text: 'דוח רבעוני של ' + h.name + '. לא פותחים פוזיציה חדשה יום לפני.', w: when(n) }); }
     });
     if (total) {
