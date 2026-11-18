@@ -9,7 +9,13 @@ const CONC_MAX = 23, DEF_MAX = 19;
 /* concentration rule (10.11.2026): the two largest of the top-3 group, combined target 23% */
 const concOf = hs => CFG.conc || TOP3.map(t => hs.find(h => h.ticker === t)).filter(Boolean).sort((a, b) => Number(b.value_ils) - Number(a.value_ils)).slice(0, 2).map(h => h.ticker);
 /* Color carries meaning only: red = over a limit / high risk, amber = medium, green = fine, teal = cash and the app accent, slate = neutral. */
-const C = { red: '#E5484D', grn: '#12A877', amb: '#E8930C', blu: '#0D9488', gry: '#A3ADBF', fg: '#0F172A', mut: '#64748B', line: 'rgba(15,23,42,.14)', soft: 'rgba(15,23,42,.05)', band: 'rgba(13,148,136,.10)' };
+const C = { red: '#E0566A', grn: '#1FAE7A', amb: '#E8A23A', blu: '#8E8CF2', gry: '#B9BFDC', fg: '#1B1F3A', mut: '#757B9C', line: 'rgba(27,31,58,.14)', soft: 'rgba(27,31,58,.05)', band: 'rgba(142,140,242,.10)' };
+/* company logos for the weights donut: a domain per holding (a "domain" field on the holding wins), or a short text badge */
+const LOGO = [[/אלביט|ESLT/i, 'elbitsystems.com'], [/נקסט|NXSN/i, 'nextvision-sys.com'], [/בורסה|TASE/i, 'tase.co.il'], [/פועלים|POLI/i, 'bankhapoalim.co.il'],
+  [/לאומי|LUMI/i, 'leumi.co.il'], [/נייקי|NKE/i, 'nike.com'], [/נביוס|NBIS/i, 'nebius.com'], [/TSM|טאיוואן/i, 'tsmc.com'], [/NVDA|אנבידיה/i, 'nvidia.com'],
+  [/AVGO|ברודקום/i, 'broadcom.com'], [/VST|ויסטרה/i, 'vistracorp.com'], [/CEG|קונסטליישן/i, 'constellationenergy.com'], [/VRT|ורטיב/i, 'vertiv.com'], [/DLR|דיג'יטל ריאלטי/i, 'digitalrealty.com']];
+const logoOf = h => { if (h.domain) return h.domain; const k = `${h.ticker} ${h.name}`; const m = LOGO.find(([re]) => re.test(k)); return m ? m[1] : null; };
+const badgeOf = h => /125/.test(h.name || '') ? '125' : String(h.ticker || h.name || '').slice(0, 4);
 const riskCol = v => v >= 7 ? C.red : v >= 4 ? C.amb : C.grn;
 const riskCls = v => v === null || v === undefined ? '' : v >= 7 ? 't-red' : v >= 4 ? 't-amb' : 't-grn';
 const MAX_W = 10;
@@ -230,26 +236,43 @@ window.pfDraw = () => {
   }
 
   if (window.pfTab === 'portfolio') {
-    // weights: donut. Red only for the concentration pair when it is over its limit; the rest neutral; cash in teal.
+    // weights: donut with a logo inside each slice; tap a slice for its name and weight.
+    // Red only for the concentration pair when it is over its limit; the rest soft neutral; cash in soft violet.
     const wbar = document.getElementById('wst-bar'), wleg = document.getElementById('wst-leg');
     wbar.innerHTML = ''; wleg.innerHTML = '';
     if (W.status === 'ok' && S.status === 'ok') {
-      const CC = H.status === 'ok' ? concOf(H.data) : TOP3;
+      const CC = H.status === 'ok' ? concOf(H.data) : TOP3, HD = H.status === 'ok' ? H.data : [];
       const top = W.data.filter(d => CC.includes(d.ticker)), rest = W.data.filter(d => !CC.includes(d.ticker));
       const concPct = S.data[0].conc_pct, over = concPct > CONC_MAX;
-      const HOT = over ? ['#E5484D', '#F07C7F'] : ['#475569', '#64748B'], SLATE = ['#94A3B8', '#A9B6C8', '#BCC7D6', '#CBD4E1', '#D9E0EA'];
-      const segs = [...top.map((d, i) => ({ n: d.name, w: d.weight, c: HOT[i % 2] })), ...rest.map((d, i) => ({ n: d.name, w: d.weight, c: SLATE[i % SLATE.length] })), { n: 'מזומן', w: S.data[0].cash_pct, c: C.blu }];
-      const sz = 172, R = sz / 2, ir = R - 22;
+      const HOT = over ? ['#E0566A', '#EC8A98'] : ['#7E86B8', '#959CC6'], SOFT = ['#AEB5DA', '#BCC2E1', '#C9CEE8', '#D5D9EE', '#E0E3F3'];
+      const full = d => HD.find(h => h.ticker === d.ticker) || d;
+      const segs = [...top.map((d, i) => ({ n: d.name, w: d.weight, c: HOT[i % 2], h: full(d) })), ...rest.map((d, i) => ({ n: d.name, w: d.weight, c: SOFT[i % SOFT.length], h: full(d) })),
+        { n: 'מזומן', w: S.data[0].cash_pct, c: C.blu, cash: true }];
+      const sz = 260, R = sz / 2, ir = R - 44, mr = (R + ir) / 2;
       const svg = d3.select(wbar).append('svg').attr('viewBox', `0 0 ${sz} ${sz}`).attr('class', 'wd-svg');
       const g = svg.append('g').attr('transform', `translate(${R},${R})`);
-      const arcs = d3.pie().sort(null).value(d => d.w).padAngle(.018)(segs);
-      g.selectAll('path').data(arcs).join('path').attr('d', d3.arc().innerRadius(ir).outerRadius(R).cornerRadius(3)).attr('fill', d => d.data.c)
-        .append('title').text(d => `${d.data.n}: ${pct(d.data.w)}`);
+      const arcs = d3.pie().sort(null).value(d => d.w).padAngle(.014)(segs);
       const mid = el('div', 'wd-mid');
-      mid.append(el('b', over ? 't-red' : 't-grn', pct(concPct)), el('small', '', 'שתי הגדולות'), el('small', 'lim', `תקרה ${CONC_MAX}%`));
-      wbar.appendChild(mid);
-      segs.forEach(sg => {
-        const it = el('span'); const sw = el('i'); sw.style.background = sg.c; it.append(sw, el('em', '', sg.n), el('b', '', pct(sg.w))); wleg.appendChild(it);
+      const showConc = () => { mid.innerHTML = ''; mid.append(el('b', over ? 't-red' : 't-grn', pct(concPct)), el('small', '', 'שתי הגדולות'), el('small', 'lim', `תקרה ${CONC_MAX}%`)); };
+      let sel = null;
+      const paths = g.selectAll('path').data(arcs).join('path').attr('d', d3.arc().innerRadius(ir).outerRadius(R).cornerRadius(4)).attr('fill', d => d.data.c)
+        .on('click', (ev, d) => {
+          sel = sel === d.index ? null : d.index;
+          svg.classed('sel', sel !== null); paths.classed('on', x => x.index === sel);
+          if (sel === null) showConc(); else { mid.innerHTML = ''; mid.append(el('b', '', pct(d.data.w)), el('small', '', d.data.n)); }
+        });
+      showConc(); wbar.appendChild(mid);
+      arcs.forEach(d => {
+        if (d.endAngle - d.startAngle < 0.2) return; // too thin for a logo; the name shows on tap
+        const a = (d.startAngle + d.endAngle) / 2, x = R + mr * Math.sin(a), y = R - mr * Math.cos(a);
+        const b = el('div', 'wd-lg'); b.style.left = (x / sz * 100) + '%'; b.style.top = (y / sz * 100) + '%';
+        if (d.data.cash) b.textContent = '₪';
+        else {
+          const dom = logoOf(d.data.h);
+          if (dom) { const im = el('img'); im.alt = d.data.n; im.src = `https://www.google.com/s2/favicons?domain=${dom}&sz=64`; im.onerror = () => { b.innerHTML = ''; b.textContent = badgeOf(d.data.h); }; b.appendChild(im); }
+          else b.textContent = badgeOf(d.data.h);
+        }
+        wbar.appendChild(b);
       });
     }
 
