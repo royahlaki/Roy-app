@@ -796,10 +796,11 @@ const drawJournal = () => {
     if (amt) sn.appendChild(el('span', '', amt));
     if (mv !== null) { sn.appendChild(el('span', '', '·')); sn.append('מאז '); sn.appendChild(el('b', '', (mv >= 0 ? '↑ ' : '↓ ') + Math.abs(mv).toFixed(1) + '%')); }
     d.appendChild(sn);
-    const more = el('div', 'more');
+    const more = el('div', 'more'), tb = el('div', 'jtab');
     [['למה', r.why], ['הרגשה', r.feeling], ['שוק', r.market], ['ציפייה', r.expect], ['בפועל', r.result]].forEach(([k, v]) => {
-      if (jt(v)) { const ln = el('div', 'ln'); ln.append(el('i', '', k), String(v)); more.appendChild(ln); }
+      if (jt(v)) { const ln = el('div', 'ln'); ln.append(el('i', '', k), el('span', '', String(v))); tb.appendChild(ln); }
     });
+    if (tb.childNodes.length) more.appendChild(tb);
     const ed = el('button', 'edit', 'עריכה'); ed.type = 'button';
     ed.onclick = e => { e.stopPropagation(); jEdit = i; jForm(); jBtn(); document.getElementById('jf').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     more.appendChild(ed); d.appendChild(more);
@@ -848,8 +849,8 @@ const drawJournal = () => {
     if (jt(r.result)) b.appendChild(el('div', 'res', r.result));
     sm.appendChild(b); d.appendChild(sm);
     if (has) {
-      const m = el('div', 'jdm');
-      [['למה', r.why], ['ציפייה', r.expect]].forEach(([k, v]) => { if (jt(v)) { const ln = el('div', 'ln'); ln.append(el('i', '', k), String(v)); m.appendChild(ln); } });
+      const m = el('div', 'jdm jtab');
+      [['למה', r.why], ['ציפייה', r.expect]].forEach(([k, v]) => { if (jt(v)) { const ln = el('div', 'ln'); ln.append(el('i', '', k), el('span', '', String(v))); m.appendChild(ln); } });
       d.appendChild(m);
     }
     jd.appendChild(d);

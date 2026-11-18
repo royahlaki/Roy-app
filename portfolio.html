@@ -689,7 +689,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=13"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=20"></script>
+<script src="js/portfolio-page.js?v=21"></script>
 <script>
 /* never let the page sit sideways (iPhone can pan it after typing) */
 window.addEventListener('scroll', function () { if (window.scrollX) window.scrollTo(0, window.scrollY); }, { passive: true });
@@ -737,7 +737,8 @@ Roy.data().then(function (d) {
 .pf .jr{cursor:pointer;border-radius:12px;padding:12px 4px}
 .pf .jr .since{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--g-mut);margin-top:2px}
 .pf .jr .since b{font-size:13px;font-weight:700;color:var(--g-sub)}
-.pf .jr .more{display:none;flex-direction:column;gap:4px;margin-top:4px}
+.pf .jr .more{display:none;flex-direction:column;gap:0;margin-top:8px}
+.pf .jr .more .jtab{margin:0}
 .pf .jr.open{background:#FAF9FD}
 .pf .jr.open .more{display:flex}
 .pf .jr .edit{align-self:flex-start;border:0;background:var(--blu-bg);color:var(--blu);font:inherit;font-size:12px;font-weight:600;border-radius:999px;padding:5px 12px;margin-top:6px;cursor:pointer}
@@ -754,9 +755,12 @@ Roy.data().then(function (d) {
 .pf #jd .jds::-webkit-details-marker{display:none}
 .pf #jd summary.jds::after{content:"";width:6px;height:6px;border-right:1.5px solid var(--g-mut);border-bottom:1.5px solid var(--g-mut);transform:rotate(45deg);margin-top:5px;transition:transform .2s}
 .pf #jd details[open] summary.jds::after{transform:rotate(-135deg);margin-top:9px}
-.pf #jd .jdm{display:flex;flex-direction:column;gap:4px;padding:0 0 10px 0;padding-inline-start:calc(3.2rem + 8px)}
-.pf #jd .jdm .ln{font-size:12.5px;line-height:1.5;color:var(--g-mut)}
-.pf #jd .jdm .ln i{font-style:normal;font-size:11.5px;margin-inline-end:6px;opacity:.8}
+.pf .jtab{display:grid;grid-template-columns:auto 1fr;margin:0 0 12px;background:#F8F7FD;border:1px solid var(--g-soft);border-radius:12px;overflow:hidden}
+.pf .jtab .ln{display:contents}
+.pf .jtab .ln i{font-style:normal;font-size:12px;font-weight:600;color:var(--g-mut);padding:9px 12px;white-space:nowrap;border-inline-end:1px solid var(--g-soft);background:#F2F0FA}
+.pf .jtab .ln span{font-size:13px;line-height:1.5;color:var(--g-sub);padding:9px 12px;overflow-wrap:anywhere;min-width:0}
+.pf .jtab .ln + .ln i,.pf .jtab .ln + .ln span{border-top:1px solid var(--g-soft)}
+.pf #jd .jdm{margin:0}
 .pf #jd .act{font-size:13.5px;line-height:1.45}
 .pf #jd .dr .why{font-size:12px;color:var(--g-mut);margin-top:2px}
 .pf .jd-more{border:0;background:none;font:inherit;font-size:13px;font-weight:600;color:var(--blu);padding:8px 0 0;cursor:pointer}
