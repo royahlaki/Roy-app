@@ -125,6 +125,12 @@ nav button[aria-current=page]{font-weight:600}
     });
   }
   window.addEventListener('resize', function () { sizeApp(); insets(); });
+  /* Back after a long break (the iPhone keeps the app alive in the background): reload so data and pages are fresh */
+  var hiddenAt = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (hiddenAt && Date.now() - hiddenAt > 10 * 60 * 1000) location.reload();
+  });
   function frame(tab, hash) {
     var f = frames[tab];
     if (!f) { f = document.createElement('iframe'); f.title = tab; frames[tab] = f; f.addEventListener('load', function () { insets(f); }); $('frames').appendChild(f); }

@@ -475,6 +475,7 @@ window.pfDraw = () => {
         const asList = v => Array.isArray(v) ? v : (typeof v === 'string' && v ? (() => { try { const p = JSON.parse(v); return Array.isArray(p) ? p : [v]; } catch (e) { return [v]; } })() : []);
         rowsPart.forEach(h => {
           const r = el('details', 'srw');
+          r.addEventListener('toggle', () => { if (r.open) box.querySelectorAll('details.srw[open]').forEach(o => { if (o !== r) o.open = false; }); });
           const sm = el('summary', 'sr');
           const nm = el('span', 'c0'); nm.append(el('b', '', h.name), el('small', 'mut', h.sector || ''));
           if (isTrade(h)) nm.appendChild(el('small', 't-red', 'טרייד'));
