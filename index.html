@@ -19,7 +19,7 @@
 html,body{margin:0;height:var(--app-h,100%);background:#0b0f1e;color:#EEF2FF;font-family:Heebo,system-ui,sans-serif;overflow:hidden;overscroll-behavior:none}
 #probe{position:fixed;visibility:hidden;pointer-events:none;top:0;left:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 #frames{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%)}
-#frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:transparent;opacity:0;visibility:hidden;transition:opacity .28s ease,visibility 0s linear .28s}
+#frames iframe{position:absolute;inset:0;width:1px;min-width:100%;max-width:100%;height:100%;border:0;display:block;background:transparent;opacity:0;visibility:hidden;transition:opacity .28s ease,visibility 0s linear .28s}
 #frames iframe.on{opacity:1;visibility:visible;transition:opacity .28s ease,visibility 0s}
 nav{position:fixed;left:10px;right:10px;--gap:max(6px,calc(env(safe-area-inset-bottom) - 12px));top:calc(var(--app-h,100vh) - 52px - var(--gap));height:52px;
   display:flex;border-radius:22px;z-index:3;overflow:hidden;

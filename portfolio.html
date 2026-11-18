@@ -8,7 +8,8 @@
 <style>
 :root{--font-anthropic-sans:Heebo,system-ui,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;background:#FFFFFF}
+html,body{margin:0;padding:0;background:#FFFFFF;overflow-x:hidden;max-width:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{position:relative}
 #dash-root{min-height:100vh}
 #boot{padding-top:calc(var(--top-h,0px) + 60px)}
 #boot{color:#7A80AE;text-align:center;padding:60px 20px;font-family:Heebo,system-ui,sans-serif}
@@ -700,7 +701,14 @@ Roy.data().then(function (d) {
 }, function () { document.getElementById('boot').textContent = 'התיק לא נטען. נסה לרענן.'; });
 </script>
 <style id="journal-v2">
+.pf{max-width:100%;overflow-x:clip}
+.pf #page-journal,.pf #page-journal>*{min-width:0;max-width:100%}
 .pf .jk{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.pf .jk .kpi{min-width:0;overflow:hidden}
+.pf .jr .jh{min-width:0}
+.pf .jr .jh b{min-width:0;overflow-wrap:anywhere}
+.pf .jr .since{flex-wrap:wrap;row-gap:2px}
+.pf .jr .ln,.pf #jd .dr>div{overflow-wrap:anywhere;min-width:0}
 .pf .j-add{border:0;font:inherit;font-size:13px;font-weight:700;color:#fff;background:var(--acc,#6366F1);border-radius:999px;padding:7px 14px;min-height:34px;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,.28)}
 .pf .j-add.off{background:var(--g-soft);color:var(--g-sub);box-shadow:none}
 .pf .jf{display:flex;flex-direction:column;gap:12px;margin:14px 0 6px;padding:16px;border-radius:16px;background:linear-gradient(180deg,#F7F5FF,#FFFFFF);box-shadow:0 0 0 1.5px rgba(139,92,246,.35)}
