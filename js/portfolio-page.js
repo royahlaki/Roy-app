@@ -820,18 +820,18 @@ const drawJournal = () => {
     const sold = q.filter(r => r.side === 'מכירה').map(r => jSince(r)).filter(v => v !== null);
     const up = sold.filter(v => v > 0).length, avg = sold.length ? sold.reduce((s, v) => s + v, 0) / sold.length : null;
     const g = el('div', 'rv-g');
-    [[String(q.length), `קניות ${buys} · מכירות ${sells}`], [qj.length ? Math.round(qr / qj.length * 100) + '%' : '—', 'לפי כלל'], [avg === null ? '—' : (avg >= 0 ? '↑ ' : '↓ ') + Math.abs(avg).toFixed(1) + '%', 'המכירות מאז, בממוצע']]
+    [[String(q.length), !buys ? 'מכירות' : !sells ? 'קניות' : `${buys} קניות, ${sells} מכירות`], [qj.length ? Math.round(qr / qj.length * 100) + '%' : '—', 'לפי כלל'], [avg === null ? '—' : (avg >= 0 ? '↑ ' : '↓ ') + Math.abs(avg).toFixed(1) + '%', 'ממוצע מאז מכירה']]
       .forEach(([v, l]) => { const t = el('div', 'rv-t'); t.append(el('b', '', v), el('small', '', l)); g.appendChild(t); });
     rv.appendChild(g);
     const ul = el('ul', 'rv-l'), li = t => ul.appendChild(el('li', '', t));
-    if (sold.length) li(`${up} מתוך ${sold.length} מכירות עלו אחרי שמכרת. מכירה לפי כלל נמדדת לפי הכלל, לא לפי המחיר.`);
+    if (sold.length) li(`${up} מתוך ${sold.length} מכירות עלו אחר כך. מכירה לפי כלל נמדדת בכלל, לא במחיר.`);
     const cnt = {}; q.forEach(r => jFeel(r).forEach(f => { cnt[f] = (cnt[f] || 0) + 1; }));
     const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
     if (top) li(`הרגש שחוזר הכי הרבה: ${top} (${cnt[top]} מתוך ${q.length}).`);
     const fomo = q.filter(r => r.side === 'קנייה' && jFeel(r).includes('חשש להחמיץ')).length;
     if (buys) li(fomo ? `${fomo} קניות נעשו מתוך חשש להחמיץ.` : 'אף קנייה לא נעשתה מתוך חשש להחמיץ.');
     const open = q.filter(r => !jt(r.result) && jt(r.expect)).length;
-    if (open) li(`ב־${open} עסקאות עוד לא כתבת מה קרה בפועל מול הציפייה.`);
+    if (open) li(`ב־${open} עסקאות חסר "בפועל".`);
     rv.appendChild(ul);
   }
 
@@ -841,11 +841,18 @@ const drawJournal = () => {
   document.getElementById('j-dn').textContent = dr.length ? String(dr.length) : '—';
   if (!dr.length) jd.appendChild(el('div', 'mut cap', 'עוד אין החלטות.'));
   (jDecAll ? dr : dr.slice(0, 4)).forEach(r => {
-    const d = el('div', 'dr'); d.appendChild(el('span', 'd', dmy(r.date)));
-    const b = el('div'); b.appendChild(el('div', '', r.action));
-    if (jt(r.why)) b.appendChild(el('div', 'why', r.why));
+    const has = jt(r.why) || jt(r.expect);
+    const d = el(has ? 'details' : 'div', 'dr jdr'), sm = el(has ? 'summary' : 'div', 'jds');
+    sm.appendChild(el('span', 'd', dmy(r.date)));
+    const b = el('div'); b.appendChild(el('div', 'act', r.action));
     if (jt(r.result)) b.appendChild(el('div', 'res', r.result));
-    d.appendChild(b); jd.appendChild(d);
+    sm.appendChild(b); d.appendChild(sm);
+    if (has) {
+      const m = el('div', 'jdm');
+      [['למה', r.why], ['ציפייה', r.expect]].forEach(([k, v]) => { if (jt(v)) { const ln = el('div', 'ln'); ln.append(el('i', '', k), String(v)); m.appendChild(ln); } });
+      d.appendChild(m);
+    }
+    jd.appendChild(d);
   });
   if (dr.length > 4) { const m = el('button', 'jd-more', jDecAll ? 'פחות' : `עוד ${dr.length - 4}`); m.type = 'button'; m.onclick = () => { jDecAll = !jDecAll; drawJournal(); }; jd.appendChild(m); }
 };
