@@ -562,7 +562,10 @@ const _pfDraw0 = window.pfDraw;
 window.pfDraw = () => { _pfDraw0(); drawThesis(); };
 
 /* ---------- research page ---------- */
-const LAB = 'https://claude.ai/artifact/UYAXtgDzYJbvNJLVkYaQsG';
+const openLab = (tk, held) => {
+  const h = '#' + (held ? 'h-' : 't-') + String(tk || '').toUpperCase().replace(/[^A-Z0-9-]/g, '');
+  if (window.Roy && Roy.inShell()) Roy.go('lab', tk ? h : ''); else location.href = './#lab';
+};
 dash.calc('research_view', {
   title: 'סטטוס מחקר לכל אחזקה',
   description: 'לכל אחזקה: משקל מהתיק, ומהמעבדה אחוז הבדיקה, שאלות פתוחות ודגלים.',
@@ -576,6 +579,7 @@ dash.calc('research_view', {
       return { ticker: h.ticker, name: h.name, weight: Math.round(Number(h.value_ils) / T * 1000) / 10, fund, has: !!r,
         pct: r ? Number(r.pct) : 0, flags: r ? Number(r.flags) : 0, q: r ? Number(r.q) : 0, verdict: r ? r.verdict : '',
         review_date: r ? (r.review_date || '') : '',
+        ok: r ? Number(r.ok) || 0 : 0, done: r ? Number(r.done) || 0 : 0, total: r ? Number(r.total) || 7 : 7, type: r ? (r.type || '') : '',
         why: r ? (r.why || '') : '', sell_if: r ? (r.sell_if || '') : '', max_w: r && r.max_w !== null && r.max_w !== '' && r.max_w !== undefined ? Number(r.max_w) : null };
     }).sort((a, b) => b.weight - a.weight);
   }
@@ -594,51 +598,68 @@ const drawResearch = () => {
   document.querySelectorAll('[data-source="research_kpi"][data-field]').forEach(x => {
     x.textContent = RK.status === 'ok' ? (x.dataset.field === 'weight_missing' ? pct(RK.data[0].weight_missing) : String(RK.data[0].flags)) : '—';
   });
-  const link = (tk, txt, held) => { const a = el('a', '', txt); a.href = LAB + (held ? '#h-' : '#t-') + String(tk).toUpperCase().replace(/[^A-Z0-9-]/g, ''); return a; };
-  const status = (has, p, f, q, fund) => {
-    const b = el('div', 'rsb');
-    if (fund) { b.appendChild(el('span', 'pill gry', 'קרן מדד, לא נדרש')); return b; }
-    if (!has) { b.appendChild(el('span', 'pill red', 'אין מחקר')); return b; }
-    const tr = el('div', 'tr'), fl = el('div', 'fl'); fl.style.width = Math.max(0, Math.min(100, p)) + '%'; fl.style.background = p >= 80 ? C.grn : C.blu; tr.appendChild(fl);
-    b.append(tr, el('span', '', Math.round(p) + '%'));
-    if (f) b.appendChild(el('span', 't-red', 'דגלים ' + f));
-    if (q) b.appendChild(el('span', '', 'שאלות ' + q));
-    return b;
+  const VC = { 'התזה תקפה': 'grn', 'בבדיקה': 'blu', 'לצמצם': 'red', 'התזה נשברה': 'red', 'עוברת': 'grn', 'לא עוברת': 'red', 'נחתכה, מחכה לכניסה': 'red', 'בתיק': 'gry' };
+  const N = v => Number(v) || 0;
+  // One row per stock. The row shows only the name and one status bubble; a tap opens the details.
+  const row = (box, r, held) => {
+    const d = el('details', 'srw rsw');
+    d.addEventListener('toggle', () => { if (d.open) box.querySelectorAll('details.rsw[open]').forEach(o => { if (o !== d) o.open = false; }); });
+    const sm = el('summary', 'rs-s'), nm = el('span', 'rs-n');
+    nm.appendChild(el('b', '', r.name || r.ticker));
+    const over = held && r.max_w !== null && r.weight > r.max_w;
+    if (held) nm.appendChild(el('small', over ? 't-red' : 'mut', pct(r.weight) + (over ? ' · מעל התקרה' : ' מהתיק')));
+    else nm.appendChild(el('small', 'mut', [r.ticker, r.group].filter(Boolean).join(' · ')));
+    if (over) d.classList.add('warn');
+    const bub = el('span', 'rs-b');
+    if (r.fund) bub.appendChild(el('span', 'pill gry', 'קרן מדד'));
+    else if (!r.has) bub.appendChild(el('span', 'pill red', 'אין מחקר'));
+    else {
+      if (N(r.flags)) bub.appendChild(el('span', 'pill red fg', 'דגל ' + N(r.flags)));
+      bub.appendChild(el('span', 'pill ' + (VC[r.verdict] || 'gry'), r.verdict || 'בבדיקה'));
+      bub.appendChild(el('span', 'rs-pc', Math.round(N(r.pct)) + '%'));
+    }
+    sm.append(nm, bub); d.appendChild(sm);
+    const mo = el('div', 'sr-more rs-more');
+    if (r.fund) mo.appendChild(el('p', 'rs-t mut', 'קרן מדד. לא צריך מחקר על חברה בודדת.'));
+    else if (!r.has) {
+      mo.appendChild(el('p', 'rs-t mut', 'עוד לא בדקת את המניה הזו. המחקר עובר על שער הכניסה ושבע שאלות הליבה.'));
+      const go = el('button', 'rs-go', 'התחל מחקר'); go.type = 'button'; go.addEventListener('click', () => openLab(r.ticker, held));
+      mo.appendChild(go);
+    } else {
+      // progress
+      const pg = el('div', 'rs-pg'), tr = el('div', 'tr'), fl = el('div', 'fl');
+      fl.style.width = Math.max(0, Math.min(100, N(r.pct))) + '%'; fl.style.background = N(r.pct) >= 80 ? C.grn : C.blu; tr.appendChild(fl);
+      pg.append(el('span', 'k', 'התקדמות'), tr, el('b', '', Math.round(N(r.pct)) + '%'));
+      mo.appendChild(pg);
+      const st = el('div', 'rs-st');
+      [['תקין', N(r.ok), 'grn'], ['לבדוק', N(r.q), 'blu'], ['פוסל', N(r.flags), 'red']].forEach(([k, v, c]) => {
+        const t = el('div', 'rs-tile'); t.append(el('b', v ? 't-' + c : 'mut', String(v)), el('small', 'mut', k)); st.appendChild(t);
+      });
+      const old = !r.review_date || (Date.now() - new Date(r.review_date + 'T00:00:00').getTime()) / 864e5 > 90;
+      const rv = el('div', 'rs-tile'); rv.append(el('b', old ? 't-red' : '', r.review_date ? dmy(r.review_date) : '—'), el('small', old ? 't-red' : 'mut', old ? 'לבדוק שוב' : 'נבדק'));
+      st.appendChild(rv);
+      mo.appendChild(st);
+      const blk = (k, v) => { const b = el('div', 'rs-q'); b.append(el('div', 'k', k), el('p', 'rs-t' + (v ? '' : ' miss'), v || 'עוד לא נכתב')); mo.appendChild(b); };
+      blk('למה אני מחזיק', r.why);
+      blk('מוכר אם', r.sell_if);
+      if (r.max_w !== null && r.max_w !== undefined && r.max_w !== '') blk('תקרת משקל', r.max_w + '% מהתיק');
+      const go = el('button', 'rs-go', 'פתח מחקר'); go.type = 'button'; go.addEventListener('click', () => openLab(r.ticker, held));
+      mo.appendChild(go);
+    }
+    d.appendChild(mo); box.appendChild(d);
   };
   const own = document.getElementById('rs-own'); own.innerHTML = '';
-  if (RV.status === 'ok') RV.data.forEach(r => {
-    const row = el('div', 'rsr'), nm = el('div');
-    const over = r.max_w !== null && r.weight > r.max_w;
-    const wl = el('div', 'w' + (over ? ' t-red' : ''), pct(r.weight) + ' מהתיק' + (r.max_w !== null ? ` · תקרה ${r.max_w}%` : ''));
-    nm.append(el('div', '', r.name), wl);
-    if (!r.fund && r.has) {
-      const VC = { 'התזה תקפה': 'grn', 'בבדיקה': 'blu', 'לצמצם': 'red', 'התזה נשברה': 'red', 'עוברת': 'grn', 'לא עוברת': 'red', 'נחתכה, מחכה לכניסה': 'red', 'בתיק': 'gry' };
-      const ps = el('div', 'rsp');
-      if (r.verdict) ps.appendChild(el('span', 'pill ' + (VC[r.verdict] || 'gry'), r.verdict));
-      const old = !r.review_date || (Date.now() - new Date(r.review_date + 'T00:00:00').getTime()) / 864e5 > 90;
-      ps.appendChild(el('span', 'cap ' + (old ? 't-red' : 'mut'), r.review_date ? 'נבדק ' + dmy(r.review_date) + (old ? ' · לבדוק שוב' : '') : 'לא נבדק · לבדוק'));
-      nm.appendChild(ps);
-    }
-    row.append(nm, status(r.has, r.pct, r.flags, r.q, r.fund), r.fund ? el('span') : link(r.ticker, r.has ? 'פתח מחקר' : 'התחל מחקר', true));
-    if (!r.fund) {
-      const th = el('div', 'rsth');
-      [['למה', r.why], ['מוכר אם', r.sell_if]].forEach(([k, v]) => { const ln = el('div', 'ln' + (v ? '' : ' miss')); ln.append(el('i', '', k), v || 'חסר'); th.appendChild(ln); });
-      row.appendChild(th);
-    }
-    own.appendChild(row);
-  });
+  if (RV.status === 'ok') { const box = el('div', 'srows'); RV.data.forEach(r => row(box, r, true)); own.appendChild(box); }
   const oth = document.getElementById('rs-other'); oth.innerHTML = '';
   if (RS.status === 'ok' && H.status === 'ok') {
-    const held = new Set(H.data.map(h => String(h.ticker).toUpperCase()));
-    const rows = RS.data.filter(r => !held.has(String(r.ticker).toUpperCase()));
+    const heldS = new Set(H.data.map(h => String(h.ticker).toUpperCase()));
+    const rows = RS.data.filter(r => !heldS.has(String(r.ticker).toUpperCase()));
     if (!rows.length) oth.appendChild(el('div', 'mut cap', 'אין כרגע'));
-    rows.forEach(r => {
-      const row = el('div', 'rsr'), nm = el('div');
-      nm.append(el('div', '', r.name || r.ticker), el('div', 'w', r.ticker + (r.group ? ' · ' + r.group : '') + (r.verdict ? ' · ' + r.verdict : '')));
-      row.append(nm, status(true, Number(r.pct), Number(r.flags), Number(r.q), false), link(r.ticker, 'פתח מחקר'));
-      if (r.why) { const th = el('div', 'rsth'); const ln = el('div', 'ln'); ln.append(el('i', '', 'למה'), r.why); th.appendChild(ln); row.appendChild(th); }
-      oth.appendChild(row);
-    });
+    else {
+      const box = el('div', 'srows');
+      rows.forEach(r => row(box, { ...r, has: true, fund: false, max_w: (r.max_w === null || r.max_w === '' || r.max_w === undefined) ? null : Number(r.max_w) }, false));
+      oth.appendChild(box);
+    }
   }
 };
 const _pfDraw1 = window.pfDraw;
