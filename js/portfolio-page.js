@@ -8,9 +8,10 @@ const CFG = window.PF_CFG || {}; const TOP3 = CFG.top3 || []; const DEF = CFG.de
 const CONC_MAX = 23, DEF_MAX = 19;
 /* concentration rule (10.11.2026): the two largest of the top-3 group, combined target 23% */
 const concOf = hs => CFG.conc || TOP3.map(t => hs.find(h => h.ticker === t)).filter(Boolean).sort((a, b) => Number(b.value_ils) - Number(a.value_ils)).slice(0, 2).map(h => h.ticker);
-const C = { red: '#E8435F', grn: '#12B07B', blu: '#8B6FE0', gry: '#A3A8CC', fg: '#17142B', mut: '#7E7A96', line: 'rgba(23,20,43,.14)', soft: 'rgba(23,20,43,.05)', band: 'rgba(139,111,224,.12)' };
-const riskCol = v => v >= 7 ? C.red : v >= 4 ? C.blu : C.grn;
-const riskCls = v => v === null || v === undefined ? '' : v >= 7 ? 't-red' : v >= 4 ? 't-blu' : 't-grn';
+/* Color carries meaning only: red = over a limit / high risk, amber = medium, green = fine, teal = cash and the app accent, slate = neutral. */
+const C = { red: '#E5484D', grn: '#12A877', amb: '#E8930C', blu: '#0D9488', gry: '#A3ADBF', fg: '#0F172A', mut: '#64748B', line: 'rgba(15,23,42,.14)', soft: 'rgba(15,23,42,.05)', band: 'rgba(13,148,136,.10)' };
+const riskCol = v => v >= 7 ? C.red : v >= 4 ? C.amb : C.grn;
+const riskCls = v => v === null || v === undefined ? '' : v >= 7 ? 't-red' : v >= 4 ? 't-amb' : 't-grn';
 const MAX_W = 10;
 window.pfC = C;
 
@@ -198,7 +199,7 @@ window.pfDraw = () => {
   if (S.status === 'ok') {
     const kc = document.getElementById('kpi-conc'), kd = document.getElementById('kpi-def');
     if (kc) kc.className = 'v ' + (S.data[0].conc_pct > CONC_MAX ? 't-red' : 't-grn');
-    if (kd) kd.className = 'v ' + (S.data[0].defense_pct > DEF_MAX ? 't-red' : 't-blu');
+    if (kd) kd.className = 'v ' + (S.data[0].defense_pct > DEF_MAX ? 't-red' : 't-grn');
   }
   const al = document.getElementById('alert8'), AL = D('alerts8');
   al.innerHTML = '';
@@ -229,16 +230,26 @@ window.pfDraw = () => {
   }
 
   if (window.pfTab === 'portfolio') {
-    // weights: one stacked bar
+    // weights: donut. Red only for the concentration pair when it is over its limit; the rest neutral; cash in teal.
     const wbar = document.getElementById('wst-bar'), wleg = document.getElementById('wst-leg');
     wbar.innerHTML = ''; wleg.innerHTML = '';
     if (W.status === 'ok' && S.status === 'ok') {
-      const REDS = ['#FF4D6D', '#FF7A90', '#FFADBB'], GRAYS = ['#A8B4D8', '#8794BC', '#6B77A0', '#535E84', '#3F4868'];
-      const CC = H.status === 'ok' ? concOf(H.data) : TOP3; const top = W.data.filter(d => CC.includes(d.ticker)), rest = W.data.filter(d => !CC.includes(d.ticker));
-      const segs = [...top.map((d, i) => ({ n: d.name, w: d.weight, c: REDS[i] })), ...rest.map((d, i) => ({ n: d.name, w: d.weight, c: GRAYS[i % GRAYS.length] })), { n: 'מזומן', w: S.data[0].cash_pct, c: C.blu }];
+      const CC = H.status === 'ok' ? concOf(H.data) : TOP3;
+      const top = W.data.filter(d => CC.includes(d.ticker)), rest = W.data.filter(d => !CC.includes(d.ticker));
+      const concPct = S.data[0].conc_pct, over = concPct > CONC_MAX;
+      const HOT = over ? ['#E5484D', '#F07C7F'] : ['#475569', '#64748B'], SLATE = ['#94A3B8', '#A9B6C8', '#BCC7D6', '#CBD4E1', '#D9E0EA'];
+      const segs = [...top.map((d, i) => ({ n: d.name, w: d.weight, c: HOT[i % 2] })), ...rest.map((d, i) => ({ n: d.name, w: d.weight, c: SLATE[i % SLATE.length] })), { n: 'מזומן', w: S.data[0].cash_pct, c: C.blu }];
+      const sz = 172, R = sz / 2, ir = R - 22;
+      const svg = d3.select(wbar).append('svg').attr('viewBox', `0 0 ${sz} ${sz}`).attr('class', 'wd-svg');
+      const g = svg.append('g').attr('transform', `translate(${R},${R})`);
+      const arcs = d3.pie().sort(null).value(d => d.w).padAngle(.018)(segs);
+      g.selectAll('path').data(arcs).join('path').attr('d', d3.arc().innerRadius(ir).outerRadius(R).cornerRadius(3)).attr('fill', d => d.data.c)
+        .append('title').text(d => `${d.data.n}: ${pct(d.data.w)}`);
+      const mid = el('div', 'wd-mid');
+      mid.append(el('b', over ? 't-red' : 't-grn', pct(concPct)), el('small', '', 'שתי הגדולות'), el('small', 'lim', `תקרה ${CONC_MAX}%`));
+      wbar.appendChild(mid);
       segs.forEach(sg => {
-        const b = el('div'); b.style.flex = `${sg.w} 1 0`; b.style.background = sg.c; b.title = `${sg.n}: ${pct(sg.w)}`; wbar.appendChild(b);
-        const it = el('span'); const sw = el('i'); sw.style.background = sg.c; it.append(sw, sg.n, el('b', '', pct(sg.w))); wleg.appendChild(it);
+        const it = el('span'); const sw = el('i'); sw.style.background = sg.c; it.append(sw, el('em', '', sg.n), el('b', '', pct(sg.w))); wleg.appendChild(it);
       });
     }
 

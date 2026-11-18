@@ -295,10 +295,12 @@ body{position:relative}
 
 <section class="card" id="weights-card" style="padding:14px 18px">
   <h2>משקל כל אחזקה</h2>
-  <div class="wst" id="wbars" data-source="weights">
-    <div class="wst-bar" id="wst-bar"></div>
+  <div class="wd">
+    <div class="wst" id="wbars" data-source="weights">
+      <div class="wst-bar" id="wst-bar"></div>
+    </div>
+    <div class="wst-leg" id="wst-leg" data-source="weights"></div>
   </div>
-  <div class="wst-leg" id="wst-leg" data-source="weights"></div>
 </section>
 
 <section class="card" id="cash-card" style="padding:14px 18px">
@@ -689,7 +691,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=13"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=21"></script>
+<script src="js/portfolio-page.js?v=22"></script>
 <script>
 /* never let the page sit sideways (iPhone can pan it after typing) */
 window.addEventListener('scroll', function () { if (window.scrollX) window.scrollTo(0, window.scrollY); }, { passive: true });
@@ -770,6 +772,58 @@ Roy.data().then(function (d) {
   .pf #j-trades{grid-area:t}.pf #j-review{grid-area:r}.pf #j-dec{grid-area:d}
 }
 @media (max-width:420px){.pf .jf{padding:12px}.pf .rv-t b{font-size:16px}}
+</style>
+
+<style id="theme-teal">
+/* ===== Nov 18 2026: same teal to green language as the home page; color only where it means something ===== */
+.pf,.pf.th-mode{--acc:linear-gradient(135deg,#14B8A6,#22C55E);--blu:#0D9488;--blu-bar:#14B8A6;--blu-bg:#E6F7F4;--amb:#C2760A;--red:#D93A40;--grn:#0E9F6E;
+  --g-fg:#0F172A;--g-sub:#334155;--g-mut:#64748B;--g-line:rgba(15,23,42,.07);--g-soft:#F1F5F4;
+  background:radial-gradient(90% 40% at 100% 0%,rgba(20,184,166,.14),transparent 60%),radial-gradient(80% 40% at 0% 35%,rgba(34,197,94,.08),transparent 60%),radial-gradient(90% 45% at 100% 100%,rgba(34,211,238,.08),transparent 60%),#F6F9F8!important;background-attachment:fixed!important}
+html,body{background:#F6F9F8!important}
+.pf .top.hero{background:linear-gradient(165deg,#FFFFFF 0%,#EEF8F5 100%)!important}
+.pf .top.hero::before{background:radial-gradient(50% 40% at 50% 60%,rgba(20,184,166,.30),rgba(34,197,94,.18) 45%,transparent 70%)!important}
+.pf .top.hero::after{background:linear-gradient(90deg,transparent,#14B8A6,#22C55E,transparent)!important}
+.pf .top h1{background:linear-gradient(90deg,#0F172A,#0F766E 65%,#16A34A)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.pf .top .tabs button[aria-selected=true]{background:var(--acc)!important;color:#fff!important;box-shadow:0 4px 14px rgba(20,184,166,.35)!important}
+.pf .total{background:linear-gradient(90deg,#0F172A,#0F766E)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;-webkit-text-fill-color:transparent!important}
+/* neutral numbers stay neutral; amber for medium */
+.pf .t-blu,.pf .kpis .kpi .v.t-blu{color:var(--g-fg)!important}
+.pf .t-amb{color:var(--amb)}
+.pf .kpis .kpi .v.t-grn{color:var(--grn)}
+/* open stock row and journal: teal instead of violet */
+.pf .srw[open]{box-shadow:0 0 0 2px #14B8A6,0 12px 28px rgba(20,184,166,.18)!important}
+.pf .srw[open] summary{background:linear-gradient(180deg,#F0FAF7,#FFFFFF)!important}
+.pf .jf{background:linear-gradient(180deg,#F0FAF7,#FFFFFF)!important;box-shadow:0 0 0 1.5px rgba(20,184,166,.35)!important}
+.pf .jf input:focus,.pf .jf select:focus,.pf .jf textarea:focus{border-color:#14B8A6!important;box-shadow:0 0 0 3px rgba(20,184,166,.15)!important}
+.pf .chips button[aria-pressed=true]{border-color:#14B8A6!important;background:#E6F7F4!important;color:#0F766E!important}
+.pf .j-add{box-shadow:0 4px 14px rgba(20,184,166,.28)!important}
+.pf .rv-l li::before{background:var(--acc)!important}
+.pf .pill.rep{border-color:#14B8A6!important}
+/* weights donut */
+.pf .wd{display:flex;align-items:center;gap:18px;margin-top:12px}
+.pf .wd .wst{flex:none;width:172px;margin:0}
+.pf .wd .wst-bar{display:block;height:auto;position:relative;gap:0}
+.pf .wd .wd-svg{display:block;width:172px;height:172px}
+.pf .wd-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;line-height:1.15}
+.pf .wd-mid b{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.pf .wd-mid small{font-size:11px;color:var(--g-mut)}
+.pf .wd-mid small.lim{font-size:10px;margin-top:2px}
+.pf .wd .wst-leg{flex:1;min-width:0;max-width:300px;display:flex!important;flex-direction:column;gap:7px;margin:0;font-size:13px}
+.pf .wd .wst-leg span{display:flex;justify-content:flex-start;align-items:center;gap:8px;padding:0!important;border:0!important;white-space:nowrap}
+.pf .wd .wst-leg em{font-style:normal;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--g-sub)}
+.pf .wd .wst-leg i{width:10px;height:10px;border-radius:50%}
+.pf .wd .wst-leg b{font-weight:600;color:var(--g-fg)}
+@media (max-width:380px){.pf .wd{flex-direction:column}.pf .wd .wst-leg{width:100%}}
+/* leftover violet tints to neutral */
+.pf{--g-bg:#EEF2F1}
+.pf .top .dt,.pf .top .dt span{color:#64748B!important}
+.pf .ctile,.pf .plt,.pf .sq,.pf .tile,.pf .dv,.pf .th{background:#F8FAFA!important}
+.pf th,.pf tfoot td{background:#F3F6F5!important}
+.pf .srw summary:hover{background:#F8FAFA}
+.pf .sr-more{background:#FFFFFF!important}
+.pf table.trend td.last,.pf table.trend th.last{background:#F0FAF7!important}
+.pf table.trend th.last{color:#0F766E!important}
+.pf .jtab{background:#F8FAFA!important}
 </style>
 </body>
 </html>
