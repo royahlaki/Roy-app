@@ -69,11 +69,14 @@ nav button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #ptr.spin{opacity:1}
 #ptr.spin svg{animation:ptrspin .8s linear infinite}
 @keyframes ptrspin{to{transform:rotate(360deg)}}
+  #live{position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translateX(-50%);z-index:50;font:600 12px -apple-system,system-ui,sans-serif;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.92);color:#8a5a00;box-shadow:0 2px 10px rgba(0,0,0,.12);direction:rtl;white-space:nowrap}
+  #live.ok{color:#0a7a45}
 </style>
 </head>
 <body>
 <div id="probe"></div>
 <div id="boot">טוען…</div>
+<div id="live" hidden></div>
 <div id="frames"></div>
 <div id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></div>
 
@@ -96,7 +99,7 @@ nav button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
   </form>
 </div>
 
-<script src="js/core.js?v=14"></script>
+<script src="js/core.js?v=15"></script>
 <script>
 (function () {
   var TABS = ['home', 'portfolio', 'lab', 'sectors', 'finance', 'map', 'entry', 'journal'];
@@ -226,8 +229,29 @@ nav button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
     b.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   });
 
+  /* Live data: if Google did not answer in time, show what is saved, keep trying, and refresh the pages once it answers */
+  var liveTries = 0;
+  function liveTag(txt, ok) {
+    var t = $('live'); if (!t) return;
+    t.textContent = txt; t.className = ok ? 'ok' : ''; t.hidden = !txt;
+    if (ok) setTimeout(function () { t.hidden = true; }, 2500);
+  }
+  function retryLive(data) {
+    if (data._live || liveTries >= 6) { if (!data._live) liveTag('אין חיבור לנתונים החיים. משוך למטה לרענון', false); return; }
+    liveTries++;
+    setTimeout(function () {
+      Roy.load().then(Roy._sync.sync).then(function (fresh) {
+        if (!fresh._live) return retryLive(fresh);
+        dataP = Promise.resolve(fresh);
+        BOOT = Date.now().toString(36);
+        TABS.forEach(function (t) { var f = frames[t]; if (f && f.src) f.src = PAGES[t] + '?b=' + BOOT; });
+        liveTag('נתונים חיים ✓', true);
+      }, function () { retryLive(data); });
+    }, 4000);
+  }
   function start(data) {
     dataP = Promise.resolve(data);
+    if (data && data._live === false) { liveTag('מתחבר לנתונים חיים…', false); retryLive(data); }
     $('lock').hidden = true; $('boot').hidden = true; $('nav').hidden = false;
     var first = location.hash.slice(1);
     if (TABS.indexOf(first) === -1) { try { first = localStorage.getItem('roy-tab') || 'home'; } catch (e) { first = 'home'; } }

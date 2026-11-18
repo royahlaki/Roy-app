@@ -184,16 +184,22 @@
   }
 
   /* Shell only: pull from the sheet, merge into the bundle data, seed what the sheet lacks. */
+  /* One pull from the sheet, with a time limit. Google's script can be slow to wake up, so a miss is retried. */
+  function pull(ms) {
+    var ctl = window.AbortController ? new AbortController() : null;
+    var to = setTimeout(function () { if (ctl) ctl.abort(); }, ms);
+    var o = { cache: 'no-store' }; if (ctl) o.signal = ctl.signal;
+    return fetch(cfg.url + '?t=' + encodeURIComponent(cfg.token) + '&_=' + Date.now(), o)
+      .then(function (r) { return r.json(); })
+      .then(function (res) { clearTimeout(to); if (!res || !res.data) throw new Error('empty'); return res; },
+            function (e) { clearTimeout(to); throw e; });
+  }
   function sync(data) {
     cfg = data && data.config && data.config.sync;
     if (!cfg || !cfg.url) return Promise.resolve(data);
-    var ctl = window.AbortController ? new AbortController() : null;
-    var to = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
-    return fetch(cfg.url + '?t=' + encodeURIComponent(cfg.token), ctl ? { signal: ctl.signal } : {})
-      .then(function (r) { return r.json(); })
+    if (data) data._live = false;
+    return pull(20000).catch(function () { return pull(25000); })
       .then(function (res) {
-        clearTimeout(to);
-        if (!res || !res.data) return data;
         var sheet = res.data, seed = [];
         DATA_PATHS.forEach(function (p) {
           var row = sheet['d:' + p];
@@ -210,9 +216,10 @@
         if (res.prices) data._prices = res.prices;
         if (seed.length) send(seed);
         data._synced = res.at;
+        data._live = true;
         return data;
       })
-      .catch(function () { clearTimeout(to); return data; });
+      .catch(function () { return data; });
   }
 
   Roy._sync = { push: push, sync: sync, flush: flush };
