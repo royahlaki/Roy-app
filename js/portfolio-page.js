@@ -673,29 +673,181 @@ const _pfDraw1 = window.pfDraw;
 window.pfDraw = () => { _pfDraw1(); drawResearch(); };
 
 /* ---------- journal page ---------- */
+const J_FEEL = ['רגוע', 'הקלה', 'חשש להחמיץ', 'פחד', 'התלהבות', 'פסימיות', 'לחץ'];
+const J_CAP = { ESLT: 11, TASE: 12, NXSN: 8 };
+const J_REVIEW0 = '2026-12-07';
+let jOpen = null, jEdit = null, jDecAll = false;
+const jt = v => (v === null || v === undefined) ? '' : String(v).trim();
+const jNum = v => { const n = parseFloat(String(v === null || v === undefined ? '' : v).replace(/[^\d.\-]/g, '')); return isFinite(n) ? n : null; };
+const jToday = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const jSync = () => { try { if (window.parent !== window && window.parent.Roy && window.parent.Roy._sync) return window.parent.Roy._sync; } catch (e) {} return window.Roy && Roy._sync; };
+const jRows = () => { const TR = dash.data('trades'); return TR.status === 'ok' ? TR.data : null; };
+const jSave = rows => {
+  const s = jSync(); if (s) s.push([{ k: 'd:datasets.trades', v: JSON.stringify(rows), ts: Date.now() }]);
+  window.pfDraw();
+};
+/* Today's price per share in ₪, from the holding (value ÷ quantity), so agorot and dollars need no special case */
+const jNow = tk => { const h = (dash.data('holdings').data || []).find(x => String(x.ticker).toUpperCase() === String(tk || '').toUpperCase()); return h && Number(h.qty) ? Number(h.value_ils) / Number(h.qty) : null; };
+const jSince = r => { const now = jNow(r.ticker), was = jNum(r.price); return now && was ? (now / was - 1) * 100 : null; };
+const jFeel = r => J_FEEL.filter(f => jt(r.feeling).includes(f) || (f === 'חשש להחמיץ' && /FOMO/i.test(jt(r.feeling))));
+const jP = v => '\u2068' + v + '%\u2069';
+const jNextReview = () => { const d = new Date(J_REVIEW0 + 'T00:00:00'), t = new Date(); t.setHours(0, 0, 0, 0); while (d < t) d.setMonth(d.getMonth() + 3); return d; };
+
+/* Rule check for the form: works on what's typed, before anything is saved */
+const jCheck = f => {
+  const out = [], A = (dash.data('account').data || [])[0] || {}, T = Number(A.total_ils) || 0, cash = Number(A.cash_ils) || 0;
+  const H = (dash.data('holdings').data || []).find(h => h.ticker === f.ticker), amt = jNum(f.amount_ils) || 0;
+  const cap = J_CAP[f.ticker] || MAX_W, buy = f.side === 'קנייה';
+  if (!T) return out;
+  const w = ((H ? Number(H.value_ils) : 0) + (buy ? amt : -amt)) / T * 100;
+  if (f.ticker && amt) out.push([w <= cap + 0.05 ? 'ok' : 'bad', `משקל אחרי העסקה ${jP(w.toFixed(1))} · תקרה ${jP(cap)}`]);
+  else if (f.ticker && H) out.push(['inf', `משקל היום ${jP((Number(H.value_ils) / T * 100).toFixed(1))} · תקרה ${jP(cap)}`]);
+  if (amt) { const c = (cash + (buy ? -amt : amt)) / T * 100; out.push([c >= 25 ? 'ok' : 'bad', `מזומן אחרי העסקה ${jP(c.toFixed(1))} · מינימום ${jP(25)}`]); }
+  if (!buy && H && Number(H.pnl_pct) <= -8) out.push(['ok', `ירידה של ${jP(Math.abs(Number(H.pnl_pct)).toFixed(1))} מהקנייה: יציאה לפי כלל העצירה`]);
+  if (buy) out.push(['inf', 'עצירה: יוצאים בירידה של 8% משער הקנייה']);
+  if (buy && f.feel.includes('חשש להחמיץ')) out.push(['bad', 'קנייה מתוך חשש להחמיץ. כדאי לחכות יום ולבדוק שוב']);
+  if (buy && f.feel.includes('התלהבות')) out.push(['bad', 'התלהבות לפני קנייה: לבדוק שהמחקר במעבדה גמור']);
+  return out;
+};
+
+const jForm = () => {
+  const box = document.getElementById('jf'), rows = jRows() || [], r = jEdit !== null ? rows[jEdit] : null;
+  const HS = [...(dash.data('holdings').data || [])].sort((a, b) => Number(b.value_ils) - Number(a.value_ils));
+  const f = r ? { ...r, feel: jFeel(r) } : { date: jToday(), side: 'מכירה', ticker: '', name: '', amount_ils: '', price: '', why: '', market: '', expect: '', result: '', by: 'כלל', feel: [] };
+  box.innerHTML = '';
+  const fld = (lab, node) => { const l = el('label'); l.append(lab, node); return l; };
+  const inp = (k, type, ph) => { const i = el('input'); i.type = type || 'text'; i.value = jt(f[k]); if (ph) i.placeholder = ph; i.oninput = () => { f[k] = i.value; chk(); }; return i; };
+  const area = (k, ph) => { const i = el('textarea'); i.value = jt(f[k]); i.placeholder = ph || ''; i.oninput = () => { f[k] = i.value; }; return i; };
+  const seg = (k, opts) => {
+    const g = el('div', 'seg');
+    opts.forEach(o => { const b = el('button', '', o); b.type = 'button'; b.setAttribute('aria-pressed', f[k] === o); b.onclick = () => { f[k] = o; g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); chk(); }; g.appendChild(b); });
+    return g;
+  };
+  box.appendChild(seg('side', ['קנייה', 'מכירה']));
+  const sel = el('select');
+  [['', 'בחירת מניה'], ...HS.map(h => [h.ticker, h.name]), ['_', 'מניה אחרת']].forEach(([v, t]) => { const o = el('option', '', t); o.value = v; sel.appendChild(o); });
+  const other = inp('name', 'text', 'שם המניה'), otherT = inp('ticker', 'text', 'טיקר');
+  const og = el('div', 'g2'); og.append(fld('שם', other), fld('טיקר', otherT));
+  const known = HS.some(h => h.ticker === f.ticker);
+  sel.value = !f.ticker ? '' : known ? f.ticker : '_'; og.hidden = sel.value !== '_';
+  sel.onchange = () => {
+    og.hidden = sel.value !== '_';
+    if (sel.value && sel.value !== '_') { const h = HS.find(x => x.ticker === sel.value); f.ticker = h.ticker; f.name = h.name; const p = jNow(h.ticker); if (p && !jt(f.price)) { f.price = '₪' + p.toFixed(2); pr.value = f.price; } }
+    else { f.ticker = ''; f.name = ''; other.value = ''; otherT.value = ''; }
+    chk();
+  };
+  otherT.oninput = () => { f.ticker = otherT.value.trim().toUpperCase(); chk(); };
+  const g1 = el('div', 'g2'); g1.append(fld('מניה', sel), fld('תאריך', inp('date', 'date')));
+  const pr = inp('price', 'text', '₪0.00');
+  const g2 = el('div', 'g2'); g2.append(fld('סכום ב־₪', inp('amount_ils', 'number', '0')), fld('מחיר', pr));
+  box.append(g1, og, g2, fld('למה', area('why', 'הסיבה במשפט אחד')));
+  const ch = el('div', 'chips');
+  J_FEEL.forEach(x => { const b = el('button', '', x); b.type = 'button'; b.setAttribute('aria-pressed', f.feel.includes(x)); b.onclick = () => { f.feel = f.feel.includes(x) ? f.feel.filter(y => y !== x) : [...f.feel, x]; b.setAttribute('aria-pressed', f.feel.includes(x)); chk(); }; ch.appendChild(b); });
+  box.appendChild(fld('איך אני מרגיש', ch));
+  box.append(fld('לפי', seg('by', ['כלל', 'רגש'])), fld('מה אני מצפה שיקרה', area('expect')), fld('מה קורה בשוק', area('market')));
+  if (r) box.appendChild(fld('בפועל', area('result', 'מה קרה בסוף')));
+  const ck = el('div', 'jchk');
+  const chk = () => {
+    ck.innerHTML = ''; const list = jCheck(f);
+    ck.hidden = !list.length; ck.appendChild(el('div', 'k', 'בדיקת כללים'));
+    list.forEach(([c, t]) => { const d = el('div', c); d.append(el('i', '', c === 'ok' ? '✓' : c === 'bad' ? '!' : '·'), t); ck.appendChild(d); });
+  };
+  box.appendChild(ck); chk();
+  const acts = el('div', 'acts'), sv = el('button', 'save', r ? 'שמירה' : 'הוספה ליומן'), cn = el('button', 'ghost', 'ביטול');
+  sv.type = 'submit'; cn.type = 'button';
+  cn.onclick = () => { jEdit = null; box.hidden = true; jBtn(); };
+  acts.append(sv, cn);
+  if (r) { const dl = el('button', 'ghost del', 'מחיקה'); dl.type = 'button'; dl.onclick = () => { if (!confirm('למחוק את העסקה מהיומן?')) return; rows.splice(jEdit, 1); jEdit = null; box.hidden = true; jBtn(); jSave(rows); }; acts.appendChild(dl); }
+  box.appendChild(acts);
+  box.onsubmit = e => {
+    e.preventDefault();
+    if (!f.ticker && !jt(f.name)) { sel.focus(); return; }
+    const p = jNum(f.price);
+    const out = { date: f.date || jToday(), side: f.side, name: jt(f.name) || f.ticker, ticker: f.ticker, amount_ils: jNum(f.amount_ils), price: p === null ? jt(f.price) : '₪' + p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      why: jt(f.why), market: jt(f.market), feeling: f.feel.join(', '), expect: jt(f.expect), result: jt(f.result), by: f.by };
+    if (r) rows[jEdit] = out; else rows.push(out);
+    jEdit = null; box.hidden = true; jBtn(); jSave(rows);
+  };
+  box.hidden = false;
+};
+const jBtn = () => { const b = document.getElementById('j-add'), open = !document.getElementById('jf').hidden; b.textContent = open ? 'סגירה' : '+ עסקה'; b.classList.toggle('off', open); };
+document.getElementById('j-add').addEventListener('click', () => {
+  const box = document.getElementById('jf');
+  if (!box.hidden) { box.hidden = true; jEdit = null; } else { jEdit = null; jForm(); }
+  jBtn();
+});
+
 const drawJournal = () => {
-  const TR = dash.data('trades'), jl = document.getElementById('jl');
-  const t = v => (v === null || v === undefined) ? '' : String(v).trim();
+  const all = jRows() || [], jl = document.getElementById('jl');
   jl.innerHTML = '';
-  const rows = TR.status === 'ok' ? [...TR.data].sort((a, b) => a.date < b.date ? 1 : -1) : [];
-  const judged = rows.filter(r => r.by === 'כלל' || r.by === 'רגש'), rule = judged.filter(r => r.by === 'כלל').length;
-  document.getElementById('j-n').textContent = String(rows.length);
+  const rows = all.map((r, i) => ({ r, i })).sort((a, b) => a.r.date < b.r.date ? 1 : a.r.date > b.r.date ? -1 : b.i - a.i);
+  const judged = all.filter(r => r.by === 'כלל' || r.by === 'רגש'), rule = judged.filter(r => r.by === 'כלל').length;
+  document.getElementById('j-n').textContent = String(all.length);
   document.getElementById('j-rule').textContent = judged.length ? Math.round(rule / judged.length * 100) + '%' : '—';
-  if (!rows.length) { jl.appendChild(el('div', 'mut cap', 'עוד אין עסקאות.')); return; }
-  rows.forEach(r => {
-    const d = el('div', 'jr'), hd = el('div', 'jh');
+  if (!rows.length) jl.appendChild(el('div', 'mut cap', 'עוד אין עסקאות.'));
+  rows.forEach(({ r, i }) => {
+    const d = el('div', 'jr' + (jOpen === i ? ' open' : '')), hd = el('div', 'jh');
     hd.append(el('span', 'd', dmy(r.date)), el('b', '', r.name || r.ticker || ''));
-    if (t(r.side)) hd.appendChild(el('span', 'pill ' + (r.side === 'קנייה' ? 'blu' : 'gry'), r.side));
-    const amt = [t(r.amount_ils) ? ils(Number(r.amount_ils)) : '', t(r.price) ? 'במחיר ' + r.price : ''].filter(Boolean).join(' · ');
-    if (amt) hd.appendChild(el('span', 'cap mut', amt));
-    if (t(r.feeling)) hd.appendChild(el('span', 'pill gry', r.feeling));
-    if (t(r.by)) hd.appendChild(el('span', 'pill ' + (r.by === 'כלל' ? 'grn' : 'red'), 'לפי ' + r.by));
+    if (jt(r.side)) hd.appendChild(el('span', 'pill ' + (r.side === 'קנייה' ? 'blu' : 'gry'), r.side));
+    if (jt(r.by)) hd.appendChild(el('span', 'pill ' + (r.by === 'כלל' ? 'grn' : 'red'), 'לפי ' + r.by));
     d.appendChild(hd);
-    [['למה', r.why], ['שוק', r.market], ['ציפייה', r.expect], ['בפועל', r.result]].forEach(([k, v]) => {
-      if (t(v)) { const ln = el('div', 'ln'); ln.append(el('i', '', k), String(v)); d.appendChild(ln); }
+    const amt = [jt(r.amount_ils) ? ils(Number(r.amount_ils)) : '', jt(r.price) ? 'במחיר ' + r.price : ''].filter(Boolean).join(' · ');
+    const mv = jSince(r), sn = el('div', 'since');
+    if (amt) sn.appendChild(el('span', '', amt));
+    if (mv !== null) { sn.appendChild(el('span', '', '·')); sn.append('מאז '); sn.appendChild(el('b', '', (mv >= 0 ? '↑ ' : '↓ ') + Math.abs(mv).toFixed(1) + '%')); }
+    d.appendChild(sn);
+    const more = el('div', 'more');
+    [['למה', r.why], ['הרגשה', r.feeling], ['שוק', r.market], ['ציפייה', r.expect], ['בפועל', r.result]].forEach(([k, v]) => {
+      if (jt(v)) { const ln = el('div', 'ln'); ln.append(el('i', '', k), String(v)); more.appendChild(ln); }
     });
+    const ed = el('button', 'edit', 'עריכה'); ed.type = 'button';
+    ed.onclick = e => { e.stopPropagation(); jEdit = i; jForm(); jBtn(); document.getElementById('jf').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    more.appendChild(ed); d.appendChild(more);
+    d.onclick = () => { jOpen = jOpen === i ? null : i; drawJournal(); };
     jl.appendChild(d);
   });
+
+  /* quarterly review, worked out from the journal itself */
+  const nx = jNextReview(), from = new Date(nx); from.setMonth(from.getMonth() - 3);
+  const fromIso = from.toISOString().slice(0, 10);
+  document.getElementById('j-next').textContent = 'הבאה ' + nx.getDate() + '.' + (nx.getMonth() + 1);
+  const rv = document.getElementById('jrv'); rv.innerHTML = '';
+  const q = all.filter(r => r.date >= fromIso);
+  if (!q.length) rv.appendChild(el('div', 'mut cap', 'אין עסקאות ברבעון הזה.'));
+  else {
+    const buys = q.filter(r => r.side === 'קנייה').length, sells = q.length - buys;
+    const qj = q.filter(r => r.by === 'כלל' || r.by === 'רגש'), qr = qj.filter(r => r.by === 'כלל').length;
+    const sold = q.filter(r => r.side === 'מכירה').map(r => jSince(r)).filter(v => v !== null);
+    const up = sold.filter(v => v > 0).length, avg = sold.length ? sold.reduce((s, v) => s + v, 0) / sold.length : null;
+    const g = el('div', 'rv-g');
+    [[String(q.length), `קניות ${buys} · מכירות ${sells}`], [qj.length ? Math.round(qr / qj.length * 100) + '%' : '—', 'לפי כלל'], [avg === null ? '—' : (avg >= 0 ? '↑ ' : '↓ ') + Math.abs(avg).toFixed(1) + '%', 'המכירות מאז, בממוצע']]
+      .forEach(([v, l]) => { const t = el('div', 'rv-t'); t.append(el('b', '', v), el('small', '', l)); g.appendChild(t); });
+    rv.appendChild(g);
+    const ul = el('ul', 'rv-l'), li = t => ul.appendChild(el('li', '', t));
+    if (sold.length) li(`${up} מתוך ${sold.length} מכירות עלו אחרי שמכרת. מכירה לפי כלל נמדדת לפי הכלל, לא לפי המחיר.`);
+    const cnt = {}; q.forEach(r => jFeel(r).forEach(f => { cnt[f] = (cnt[f] || 0) + 1; }));
+    const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+    if (top) li(`הרגש שחוזר הכי הרבה: ${top} (${cnt[top]} מתוך ${q.length}).`);
+    const fomo = q.filter(r => r.side === 'קנייה' && jFeel(r).includes('חשש להחמיץ')).length;
+    if (buys) li(fomo ? `${fomo} קניות נעשו מתוך חשש להחמיץ.` : 'אף קנייה לא נעשתה מתוך חשש להחמיץ.');
+    const open = q.filter(r => !jt(r.result) && jt(r.expect)).length;
+    if (open) li(`ב־${open} עסקאות עוד לא כתבת מה קרה בפועל מול הציפייה.`);
+    rv.appendChild(ul);
+  }
+
+  /* decisions, all of them, newest first */
+  const DC = dash.data('decisions'), jd = document.getElementById('jd'); jd.innerHTML = '';
+  const dr = DC.status === 'ok' ? [...DC.data].sort((a, b) => a.date < b.date ? 1 : -1) : [];
+  document.getElementById('j-dn').textContent = dr.length ? String(dr.length) : '—';
+  if (!dr.length) jd.appendChild(el('div', 'mut cap', 'עוד אין החלטות.'));
+  (jDecAll ? dr : dr.slice(0, 4)).forEach(r => {
+    const d = el('div', 'dr'); d.appendChild(el('span', 'd', dmy(r.date)));
+    const b = el('div'); b.appendChild(el('div', '', r.action));
+    if (jt(r.why)) b.appendChild(el('div', 'why', r.why));
+    if (jt(r.result)) b.appendChild(el('div', 'res', r.result));
+    d.appendChild(b); jd.appendChild(d);
+  });
+  if (dr.length > 4) { const m = el('button', 'jd-more', jDecAll ? 'פחות' : `עוד ${dr.length - 4}`); m.type = 'button'; m.onclick = () => { jDecAll = !jDecAll; drawJournal(); }; jd.appendChild(m); }
 };
 const _pfDraw2 = window.pfDraw;
 window.pfDraw = () => { _pfDraw2(); drawJournal(); };

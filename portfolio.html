@@ -404,12 +404,24 @@ html,body{margin:0;padding:0;background:#FFFFFF}
 </div>
 
 <div id="page-journal" class="wrap" style="max-width:none" hidden>
-<div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-  <div class="kpi"><div class="v" id="j-n" data-source="trades">—</div><div class="l">עסקאות ביומן</div></div>
-  <div class="kpi"><div class="v t-grn" id="j-rule" data-source="trades">—</div><div class="l">לפי כלל, לא לפי רגש</div></div>
+<div class="kpis jk">
+  <div class="kpi"><div class="v" id="j-n" data-source="trades">—</div><div class="l">עסקאות</div></div>
+  <div class="kpi"><div class="v t-grn" id="j-rule" data-source="trades">—</div><div class="l">לפי כלל</div></div>
+  <div class="kpi"><div class="v" id="j-dn" data-source="decisions">—</div><div class="l">החלטות</div></div>
 </div>
-<section class="card"><h2>קניות ומכירות</h2><div class="dlog" id="jl" data-source="trades"></div></section>
-<section class="card" style="padding:14px 18px"><div class="row"><h2>תובנות רבעוניות</h2><span class="pill blu">בחינה הבאה 7.12</span></div><div class="cap mut" style="margin-top:8px">יתמלא אחרי הבחינה הראשונה.</div></section>
+<section class="card" id="j-trades">
+  <div class="row"><h2>קניות ומכירות</h2><button class="j-add" id="j-add" type="button">+ עסקה</button></div>
+  <form class="jf" id="jf" hidden autocomplete="off"></form>
+  <div class="dlog" id="jl" data-source="trades"></div>
+</section>
+<section class="card" id="j-review">
+  <div class="row"><h2>בחינה רבעונית</h2><span class="pill blu" id="j-next">—</span></div>
+  <div id="jrv"></div>
+</section>
+<section class="card" id="j-dec">
+  <h2>החלטות</h2>
+  <div class="dlog" id="jd" data-source="decisions"></div>
+</section>
 </div>
 
 <footer>זה כלי מיון, לא ייעוץ השקעות</footer>
@@ -676,7 +688,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=13"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=17"></script>
+<script src="js/portfolio-page.js?v=18"></script>
 <script>
 Roy.data().then(function (d) {
   window.PF_CFG = d.config || {};
@@ -687,5 +699,53 @@ Roy.data().then(function (d) {
   pfMain();
 }, function () { document.getElementById('boot').textContent = 'התיק לא נטען. נסה לרענן.'; });
 </script>
+<style id="journal-v2">
+.pf .jk{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.pf .j-add{border:0;font:inherit;font-size:13px;font-weight:700;color:#fff;background:var(--acc,#6366F1);border-radius:999px;padding:7px 14px;min-height:34px;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,.28)}
+.pf .j-add.off{background:var(--g-soft);color:var(--g-sub);box-shadow:none}
+.pf .jf{display:flex;flex-direction:column;gap:12px;margin:14px 0 6px;padding:16px;border-radius:16px;background:linear-gradient(180deg,#F7F5FF,#FFFFFF);box-shadow:0 0 0 1.5px rgba(139,92,246,.35)}
+.pf .jf .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pf .jf label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--g-mut);min-width:0}
+.pf .jf input,.pf .jf select,.pf .jf textarea{font:inherit;font-size:15px;color:var(--g-fg);background:#fff;border:1px solid var(--g-line);border-radius:12px;padding:8px 12px;min-height:42px;width:100%;box-sizing:border-box;-webkit-appearance:none;appearance:none}
+.pf .jf textarea{min-height:64px;resize:vertical;line-height:1.5}
+.pf .jf input:focus,.pf .jf select:focus,.pf .jf textarea:focus{outline:0;border-color:#8B5CF6;box-shadow:0 0 0 3px rgba(139,92,246,.15)}
+.pf .jf .seg{align-self:stretch}
+.pf .jf .seg button{flex:1;font-size:13px;min-height:36px}
+.pf .jf .seg button[aria-pressed=true]{background:var(--acc,#6366F1);color:#fff}
+.pf .chips{display:flex;flex-wrap:wrap;gap:6px}
+.pf .chips button{border:1px solid var(--g-line);background:#fff;font:inherit;font-size:13px;color:var(--g-sub);border-radius:999px;padding:5px 12px;min-height:32px;cursor:pointer}
+.pf .chips button[aria-pressed=true]{border-color:#8B5CF6;background:#F1ECFD;color:#5B3FC4;font-weight:600}
+.pf .jchk{display:flex;flex-direction:column;gap:6px;background:#fff;border-radius:12px;padding:10px 12px;border:1px solid var(--g-soft)}
+.pf .jchk .k{font-size:12px;font-weight:700;color:var(--g-mut)}
+.pf .jchk div{display:flex;gap:8px;align-items:baseline;font-size:13px;line-height:1.45;color:var(--g-sub)}
+.pf .jchk i{font-style:normal;font-weight:800;width:1em;text-align:center;flex-shrink:0}
+.pf .jchk .ok i{color:var(--grn)}.pf .jchk .bad i{color:var(--red)}.pf .jchk .bad{color:var(--red)}.pf .jchk .inf i{color:var(--g-mut)}
+.pf .jf .acts{display:flex;gap:8px;align-items:center}
+.pf .jf .save{flex:1;border:0;font:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--acc,#6366F1);border-radius:999px;min-height:44px;cursor:pointer}
+.pf .jf .ghost{border:0;background:transparent;font:inherit;font-size:14px;color:var(--g-mut);padding:8px 12px;cursor:pointer}
+.pf .jf .del{color:var(--red)}
+.pf .jr{cursor:pointer;border-radius:12px;padding:12px 4px}
+.pf .jr .since{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--g-mut);margin-top:2px}
+.pf .jr .since b{font-size:13px;font-weight:700;color:var(--g-sub)}
+.pf .jr .more{display:none;flex-direction:column;gap:4px;margin-top:4px}
+.pf .jr.open{background:#FAF9FD}
+.pf .jr.open .more{display:flex}
+.pf .jr .edit{align-self:flex-start;border:0;background:var(--blu-bg);color:var(--blu);font:inherit;font-size:12px;font-weight:600;border-radius:999px;padding:5px 12px;margin-top:6px;cursor:pointer}
+.pf .rv-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.pf .rv-t{background:#FAF9FD;border:1px solid var(--g-soft);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.pf .rv-t b{font-size:18px;font-weight:600}.pf .rv-t small{font-size:11.5px;color:var(--g-mut)}
+.pf .rv-l{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.pf .rv-l li{font-size:13.5px;line-height:1.55;color:var(--g-sub);padding-inline-start:14px;position:relative}
+.pf .rv-l li::before{content:"";position:absolute;inset-inline-start:0;top:.6em;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#8B5CF6)}
+.pf #jd .dr .res{font-size:12px;color:var(--grn);margin-top:2px}
+.pf #jd .dr .why{font-size:12px;color:var(--g-mut);margin-top:2px}
+.pf .jd-more{border:0;background:none;font:inherit;font-size:13px;font-weight:600;color:var(--blu);padding:8px 0 0;cursor:pointer}
+@media (min-width:1200px){
+  .pf #page-journal:not([hidden]){grid-template-columns:minmax(0,2fr) minmax(0,1fr)!important;grid-template-areas:"k k" "t r" "t d"}
+  .pf #page-journal>.kpis{grid-area:k;grid-row:auto!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .pf #j-trades{grid-area:t}.pf #j-review{grid-area:r}.pf #j-dec{grid-area:d}
+}
+@media (max-width:420px){.pf .jf{padding:12px}.pf .rv-t b{font-size:16px}}
+</style>
 </body>
 </html>
