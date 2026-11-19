@@ -439,6 +439,16 @@ window.pfDraw = () => {
           tr.appendChild(el('td', 'v2 yr ' + sc(y), fmt(y)));
           tbd.appendChild(tr);
         });
+        // Net margin: the level itself (not growth), neutral grey. Only with the trend and when filled (not for banks).
+        const mq = arr(h.nm_qs);
+        if (trend && mq && mq.some(v => v !== null && v !== undefined)) {
+          const pc = v => v === null || v === undefined ? '—' : '\u2066' + d3.format('.0f')(v) + '%\u2069';
+          const tr = el('tr', 'nm'); tr.appendChild(el('td', '', 'שולי רווח'));
+          ql.forEach((_, i) => tr.appendChild(el('td', 'v2' + (i === ql.length - 1 ? ' last' : ''), pc(mq[i]))));
+          tr.appendChild(el('td', 'v2 yr', pc(h.nm_y)));
+          tr.title = 'רווח נקי חלקי הכנסות: כמה נשאר מכל שקל שנכנס';
+          tbd.appendChild(tr);
+        }
         tb.appendChild(tbd);
         if (trend) tb.title = 'כל רבעון מושווה לאותו רבעון בשנה הקודמת (YoY)' + (h.fin_date ? ` · נתון מ-${h.fin_date}` : '');
         return tb;
