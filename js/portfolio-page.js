@@ -211,6 +211,11 @@ window.pfDraw = () => {
     if (kc) kc.className = 'v ' + (S.data[0].conc_pct > CONC_MAX ? 't-red' : 't-grn');
     if (kd) kd.className = 'v ' + (S.data[0].defense_pct > DEF_MAX ? 't-red' : 't-grn');
   }
+  {
+    const sp = document.getElementById('stale-pill'), m = A.status === 'ok' ? String(A.data[0].as_of || '').match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/) : null;
+    const days = m ? Math.floor((Date.now() - new Date(+m[3], +m[2] - 1, +m[1]).getTime()) / 864e5) : 0;
+    if (sp) { sp.hidden = !(m && days > 5); if (m) sp.textContent = `אחזקות מ-${+m[1]}.${+m[2]}`; }
+  }
   const al = document.getElementById('alert8'), AL = D('alerts8');
   al.innerHTML = '';
   const hit = AL.status === 'ok' && AL.data.length > 0;
@@ -226,17 +231,6 @@ window.pfDraw = () => {
       dpc.textContent = d3.format('.2f')(Math.abs(p)) + '%';
       document.getElementById('pnl-pill').className = 'pill ' + (Number(A.data[0].pnl_total) < 0 ? 'red' : 'grn');
     } else dpc.textContent = '—';
-  }
-
-  // control panel
-  {
-    const lowEl = document.getElementById('ct-low'), lowD = document.getElementById('ct-low-d'), ex = document.getElementById('ct-exp');
-    if (F.status === 'ok' && F.data.length) {
-      const f = F.data[0];
-      lowEl.textContent = (f.bank_after < 0 ? '-' : '') + ils(Math.abs(f.bank_after)); lowEl.className = 'a ' + (f.bank_after < 0 ? 't-red' : 't-grn');
-      lowD.textContent = f.after_date ? 'אחרי ' + dmy(f.after_date) : 'עכשיו';
-      ex.textContent = ils(f.monthly);
-    } else { lowEl.textContent = '—'; lowD.textContent = '—'; ex.textContent = '—'; }
   }
 
   if (window.pfTab === 'portfolio') {
@@ -266,6 +260,15 @@ window.pfDraw = () => {
           if (sel === null) showConc(); else { mid.innerHTML = ''; mid.append(el('b', '', pct(d.data.w)), el('small', '', d.data.n)); }
         });
       showConc(); wbar.appendChild(mid);
+      // per-stock target weight (10.11.2026); red when above target
+      const TGT = CFG.targets || { ESLT: 11, TASE: 12, NXSN: 8 };
+      wleg.className = 'wst-leg tg';
+      Object.keys(TGT).forEach(tk => {
+        const d = W.data.find(x => x.ticker === tk); if (!d) return;
+        const sp = el('span'); sp.title = `${d.name}: ${pct(d.weight)} מהתיק, יעד ${TGT[tk]}%`;
+        sp.append(el('small', '', d.name), el('b', d.weight > TGT[tk] ? 't-red' : 't-grn', pct(d.weight)), el('small', '', `יעד ${TGT[tk]}%`));
+        wleg.appendChild(sp);
+      });
       arcs.forEach(d => {
         if (d.endAngle - d.startAngle < 0.2) return; // too thin for a logo; the name shows on tap
         const a = (d.startAngle + d.endAngle) / 2, x = R + mr * Math.sin(a), y = R - mr * Math.cos(a);
@@ -280,19 +283,6 @@ window.pfDraw = () => {
         }
         wbar.appendChild(b);
       });
-    }
-
-    // progress
-    {
-      const P2 = D('progress'), pr = document.getElementById('pg-rows');
-      pr.innerHTML = '';
-      if (P2.status === 'ok' && P2.data.length) {
-        P2.data.forEach(r => {
-          const d = el('div', 'pg-r'); const rw = el('div', 'rw'); rw.append(el('span', '', r.goal), el('b', '', r.progress + '%'));
-          const tr = el('div', 'tr'); const fl = el('div', 'fl'); fl.style.width = r.progress + '%'; fl.style.background = r.progress >= 100 ? C.grn : C.blu; tr.appendChild(fl);
-          d.append(rw, tr, el('div', 'sub', `${pct(r.now)} · יעד ${r.target}%`)); pr.appendChild(d);
-        });
-      }
     }
 
     // cash card
@@ -346,16 +336,23 @@ window.pfDraw = () => {
       }).on('mousemove', (e, d) => { tip.textContent = `${d.name}: תמחור ${d.risk_price}, מימון ${d.risk_fund}, משקל ${pct(d.weight)}`; placeTip(box, tip, e); })
         .on('mouseleave', () => { tip.style.display = 'none'; });
     }
-    // beta
-    const bzt = document.getElementById('bz-ticks'), bleg = document.getElementById('bz-leg');
-    bzt.innerHTML = ''; bleg.innerHTML = '';
-    if (H.status === 'ok') {
-      const PAL = ['#2563EB', '#DC2626', '#16A34A', '#D97706', '#7C3AED', '#0891B2', '#DB2777', '#4B5563'];
-      H.data.filter(h => h.beta !== null).sort((a, b) => a.beta - b.beta).forEach((h, i) => {
-        const col = PAL[i % PAL.length], pos = Math.max(0, Math.min(100, (Number(h.beta) + 1) / 3 * 100));
-        const tk = el('div', 'bz-t'); tk.style.left = pos + '%'; tk.style.background = col; tk.title = `${h.name}: ${d3.format('.2f')(h.beta)}`; bzt.appendChild(tk);
-        const lg = el('span', '', h.name); lg.style.color = col; bleg.appendChild(lg);
-      });
+    // beta and dividend: one slim row
+    {
+      const mb = document.getElementById('m-beta'), ml = document.getElementById('m-beta-l');
+      const md = document.getElementById('m-div'), my = document.getElementById('m-div-y'), mw = document.getElementById('m-div-w');
+      if (S.status === 'ok') {
+        const b = Number(S.data[0].portfolio_beta);
+        mb.textContent = d3.format('.2f')(b);
+        ml.textContent = b < 0 ? 'הפוך מהשוק' : b < 0.9 ? 'רגוע מהשוק' : b <= 1.1 ? 'כמו השוק' : 'תנודתי מהשוק';
+      }
+      const DV = D('dividends');
+      if (DV.status === 'ok') { md.textContent = ils(DV.data[0].annual_ils); my.textContent = pct(DV.data[0].yield_pct) + ' מהתיק, לפני מס'; }
+      if (H.status === 'ok') {
+        const bt = H.data.filter(h => h.beta !== null && h.beta !== undefined).sort((a, b) => a.beta - b.beta).map(h => `${h.name}: ${d3.format('.2f')(h.beta)}`);
+        document.getElementById('m-beta-w').title = 'כמה התיק זז ביחס לשוק. 1 = כמו השוק.\n' + bt.join('\n');
+        mw.title = H.data.filter(h => h.dividend && Number(h.dividend) > 0).map(h => ({ n: h.name, y: Number(h.dividend), a: Number(h.value_ils) * Number(h.dividend) / 100 }))
+          .sort((p, q) => q.a - p.a).map(r => `${r.n}: ${ils(r.a)} (${d3.format('.1f')(r.y)}%)`).join('\n');
+      }
     }
 
     // performance carousel
@@ -382,21 +379,6 @@ window.pfDraw = () => {
         });
         pfMarquee(car);
       }
-    }
-
-    // dividend bars
-    const db = document.getElementById('divbars'); db.querySelectorAll('.dv:not(.tot)').forEach(x => x.remove());
-    document.querySelectorAll('[data-source="dividends"][data-field]').forEach(x => {
-      const DV = D('dividends'); if (DV.status !== 'ok') { x.textContent = '—'; return; }
-      const v = DV.data[0][x.dataset.field]; x.textContent = x.dataset.field === 'yield_pct' ? pct(v) : ils(v);
-    });
-    if (H.status === 'ok') {
-      const rows = H.data.filter(h => h.dividend && Number(h.dividend) > 0).map(h => ({ n: h.name, y: Number(h.dividend), a: Number(h.value_ils) * Number(h.dividend) / 100 })).sort((p, q) => q.a - p.a);
-      rows.forEach(r => {
-        const c = el('div', 'dv');
-        c.append(el('span', 'n', r.n), el('span', 'a', ils(r.a)), el('span', 'y', d3.format('.1f')(r.y) + '%'));
-        db.appendChild(c);
-      });
     }
 
     // stock rows
@@ -590,14 +572,18 @@ const drawThesis = () => {
       t.append(el('span', 'w', String(r.window).replace(/\s*\(.*?\)/g, '').replace(/^עד /, '')), el('span', 'amt', ils(sumR)), el('span', 'pill ' + st[0], st[1]));
       pls.appendChild(t);
     });
-    const r0 = rows[0], HS = dash.data('holdings').data || [];
+    const HS = dash.data('holdings').data || [];
     const nm = tk => { const h = HS.find(x => x.ticker === tk); return h ? h.name : tk; };
-    const parts = TOP3.filter(tk => r0[tk.toLowerCase()] !== undefined);
-    const sum = parts.reduce((s, tk) => s + Number(r0[tk.toLowerCase()]), 0);
-    each.textContent = `כל מנה ${ils(sum)}: ` + parts.map(tk => `${nm(tk)} ${ils(r0[tk.toLowerCase()])}`).join(' · ');
+    each.innerHTML = '';
+    if (nxt) {
+      const st = String(nxt.status || '');
+      const parts = TOP3.filter(tk => Number(nxt[tk.toLowerCase()]) > 0 && !(st.includes('בוצע') && st.split(',')[0].includes(nm(tk).split(' ')[0])));
+      const win = String(nxt.window).replace(/\s*\(.*?\)/g, '');
+      each.append(el('b', '', 'הפעולה הבאה: '), `מנה ${nxt.step}, ${win}: למכור ` + parts.map(tk => `${nm(tk)} ${ils(Number(nxt[tk.toLowerCase()]))}`).join(' ו') );
+    }
   } else cnt.textContent = '—';
-  const dl = document.getElementById('dlog'); dl.innerHTML = '';
-  if (DC.status === 'ok') {
+  const dl = document.getElementById('dlog'); if (dl) dl.innerHTML = '';
+  if (dl && DC.status === 'ok') {
     const rows = [...DC.data].sort((a, b) => a.date < b.date ? 1 : -1);
     if (!rows.length) dl.appendChild(el('div', 'mut cap', 'עוד אין החלטות'));
     rows.slice(0, 3).forEach(r => {

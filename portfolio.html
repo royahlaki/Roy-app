@@ -266,6 +266,7 @@ body{position:relative}
   <div class="total" data-source="account" data-field="total_ils" data-row="0">—</div>
   <div class="pills">
     <span class="pill grn" id="pnl-pill"><span data-source="account" data-field="pnl_total" data-row="0">—</span> מהקנייה</span>
+    <span class="pill red" id="stale-pill" hidden title="אחזקות, כמויות ומזומן מתעדכנים מצילום מסך">—</span>
     <span class="pill day grn" id="day-pill" title="שינוי יומי"><span data-source="account" data-field="daily_change" data-row="0">—</span> · <span id="day-pct" data-source="account">—</span></span>
   </div>
   <p class="sentence" id="alert8" data-source="alerts8">—</p>
@@ -283,15 +284,7 @@ body{position:relative}
   <div class="pl-each" id="pl-each" data-source="plan"></div>
 </section>
 
-<section class="card" id="dlog-card">
-  <h2>החלטות</h2>
-  <div class="dlog" id="dlog" data-source="decisions"></div>
-</section>
 
-<section class="card" id="progress-card" style="padding:14px 18px">
-  <h2>התקדמות התיק</h2>
-  <div class="pg-rows" style="margin-top:10px" id="pg-rows" data-source="progress"></div>
-</section>
 
 <section class="card" id="weights-card" style="padding:14px 18px">
   <h2>משקל כל אחזקה</h2>
@@ -303,6 +296,12 @@ body{position:relative}
   </div>
 </section>
 
+<section class="card" id="meta-card">
+  <div class="mrow">
+    <div class="mi" id="m-beta-w" title="בטא: כמה התיק זז ביחס לשוק. 1 = כמו השוק, מתחת ל-1 רגוע ממנו."><span class="l">בטא התיק</span><b class="v" id="m-beta">—</b><span class="s" id="m-beta-l">—</span></div>
+    <div class="mi" id="m-div-w"><span class="l">דיבידנד בשנה</span><b class="v" id="m-div">—</b><span class="s" id="m-div-y">—</span></div>
+  </div>
+</section>
 <section class="card" id="cash-card" style="padding:14px 18px">
   <div class="row"><h2>מזומן</h2><span class="pill" id="cash-pill" data-source="summary">—</span></div>
   <div class="cashrow">
@@ -323,15 +322,6 @@ body{position:relative}
   <div class="detail" id="detail"><span class="mut">לחץ על נקודה כדי לראות פרטים.</span></div>
 </section>
 
-<section class="card" id="beta-card" style="padding:10px 16px">
-  <div class="row cap"><span><b style="font-size:13px">בטא התיק</b> <b class="t-blu" style="font-size:13px" data-source="summary" data-field="portfolio_beta" data-row="0">—</b></span></div>
-  <div class="bz" id="bz" data-source="summary" dir="ltr">
-    <div class="bz-labs"><span class="z1">הפוך</span><span class="z2">רגוע מהשוק</span><span class="z3">תנודתי</span></div>
-    <div class="bz-bar"><div class="bz-z z1"></div><div class="bz-z z2"></div><div class="bz-z z3"></div></div>
-    <div id="bz-ticks" data-source="holdings"></div>
-  </div>
-  <div class="bz-leg" id="bz-leg" data-source="holdings"></div>
-</section>
 
 <section class="card" id="perf-card" style="padding:12px 14px">
   <div class="row"><h2>ביצועים</h2>
@@ -345,23 +335,7 @@ body{position:relative}
   <div class="stocks" id="stocks" data-source="holdings"></div>
 </section>
 
-<section class="card" id="div-card" style="padding:14px 18px">
-  <h2>דיבידנד</h2>
-  <p class="note" style="margin-bottom:8px">צפי לשנה לפי השווי היום, לפני מס.</p>
-  <div class="divs" id="divbars" data-source="holdings">
-    <div class="dv tot" id="divtot"><span class="n">סה"כ בשנה</span><span class="a" data-source="dividends" data-field="annual_ils" data-row="0">—</span><span class="y"><span data-source="dividends" data-field="yield_pct" data-row="0">—</span> מהתיק</span></div>
-  </div>
-</section>
 
-<section class="ctrl" id="ctrl">
-  <div class="ctrl-h">לוח בקרה</div>
-  <div class="ctrl-g">
-    <div class="ct"><span class="n">שווי נקי</span><span class="a" data-source="networth" data-field="net" data-row="0">—</span></div>
-    <div class="ct"><span class="n">בנק · אחרי החיובים</span><span class="a" id="ct-low" data-source="projection">—</span><span class="y" id="ct-low-d" data-source="projection">—</span></div>
-    <div class="ct"><span class="n">הלוואת רכב</span><span class="a" data-source="fin_base" data-field="loan_principal" data-row="0">—</span><span class="y">עוד <span data-source="fin_base" data-field="loan_left" data-row="0">—</span> תשלומים</span></div>
-    <div class="ct"><span class="n">הוצאות לחודש</span><span class="a" id="ct-exp" data-source="fin_base">—</span><span class="y">קבועות, כולל הלוואה</span></div>
-  </div>
-</section>
 
 <section class="card" id="scen-card" style="padding:12px 18px">
   <details id="scen-det">
@@ -484,8 +458,6 @@ body{position:relative}
 .pf .sr-pc td + td,.pf .sr-pc th + th{border-inline-start:1px solid var(--g-soft)}
 .pf .sr-pc td.pro:not(:empty)::before{content:"+ ";color:#16A34A;font-weight:800}
 .pf .sr-pc td.con:not(:empty)::before{content:"− ";color:#DC2626;font-weight:800}
-.pf #div-card{display:flex;flex-direction:column}
-.pf #div-card .divs{flex:1;align-content:center}
 </style>
 <style id="research-rows">
 .pf .rsl .srows{margin-top:2px}
@@ -529,30 +501,24 @@ body{position:relative}
       "total total total total total kpis kpis kpis kpis kpis kpis kpis"
       "plan plan plan plan plan plan cash cash cash cash cash cash"
       "risk risk risk risk risk risk risk wts wts wts wts wts"
-      "risk risk risk risk risk risk risk beta beta beta beta beta"
-      "risk risk risk risk risk risk risk prog prog prog prog prog"
-      "perf perf perf perf perf div div div div div div div"
+      "risk risk risk risk risk risk risk meta meta meta meta meta"
+      "perf perf perf perf perf perf perf perf perf perf perf perf"
       "stk stk stk stk stk stk stk stk stk stk stk stk"
-      "ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl"
       "scen scen scen scen scen scen scen scen scen scen scen scen"}
   .pf #total-card{grid-area:total;display:flex;flex-direction:column;justify-content:center}
   .pf #page-portfolio>.kpis{grid-area:kpis;grid-auto-rows:1fr;gap:14px}
   .pf #page-portfolio>.kpis .kpi{justify-content:center;padding:18px}
   .pf #page-portfolio>.kpis .kpi .v{font-size:34px}
   .pf #plan-card{grid-area:plan}
-  .pf #dlog-card{grid-area:dlog}
   .pf #cash-card{grid-area:cash;margin:0}
   .pf #risk-card{grid-area:risk;display:flex;flex-direction:column}
   .pf #risk-card .chart{flex:1}
   .pf #weights-card{grid-area:wts}
-  .pf #beta-card{grid-area:beta}
-  .pf #progress-card{grid-area:prog}
+  .pf #meta-card{grid-area:meta;display:flex;flex-direction:column;justify-content:center}
   .pf #scen-card{grid-area:scen}
   .pf #scen-card .sg{grid-template-columns:repeat(4,minmax(0,1fr))}
   .pf #perf-card{grid-area:perf}
-  .pf #div-card{grid-area:div}
   .pf #stocks-sec{grid-area:stk}
-  .pf #ctrl{grid-area:ctrl;margin-top:0}
   .pf .pls{grid-template-columns:repeat(3,minmax(0,1fr))}
   .pf #page-research:not([hidden]){display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:14px;align-items:start}
   .pf #page-research>p{grid-column:1 / -1}
@@ -643,9 +609,7 @@ body{position:relative}
 .pf .plt{padding:8px 6px;gap:3px}
 .pf .plt .w{font-size:14px}
 .pf .plt .amt{font-size:12px;color:var(--g-mut)}
-.pf #pl-each{display:none}
 .pf .dr{padding:8px 0}
-.pf #dlog-card{display:none !important}
 .pf .total{font-size:38px;font-weight:600;letter-spacing:-.5px}
 .pf #total-card .pills .pill{font-weight:500;font-size:12px}
 .pf .kpis .kpi:has(.v.t-red){border:1.5px solid #FF4D6D;box-shadow:0 0 0 3px rgba(255,77,109,.14),0 0 22px rgba(255,77,109,.18)}
@@ -655,6 +619,24 @@ body{position:relative}
 .pf .top h1{font-weight:700}
 .pf h2{font-weight:600}
 .pf .big,.pf .big2,.pf .pg-big,.pf .tile .v,.pf .pnl-pct,.pf .pnl-ils,.pf .ctile .a,.pf .ct .a,.pf .dv .a,.pf .sq .pv,.pf .plt .w,.pf .stock .nm{font-weight:600}
+/* 20.11.2026: next action, holding targets, beta and dividend row */
+.pf #pl-each{margin-top:12px;padding:9px 12px;border-radius:10px;background:#F1ECFD;color:#48445F;font-size:13px;text-align:center;line-height:1.5}
+.pf #pl-each b{color:#7C5CD6;font-weight:600}
+.pf #pl-each:empty{display:none}
+.pf .wd .wst-leg.tg{display:grid!important;width:100%;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px;padding-top:12px;border-top:1px solid #F3F1F9}
+.pf .wd:has(.wst-leg.tg){flex-wrap:wrap}
+.pf .wst-leg.tg span{flex-direction:column;gap:1px}
+.pf .wst-leg.tg span:nth-child(n){border-inline-start:1px solid var(--g-line)}
+.pf .wst-leg.tg span:first-child{border-inline-start:0}
+.pf .wst-leg.tg b{font-size:15px}
+.pf .wst-leg.tg small{font-size:11px;color:#7E7A96}
+.pf #meta-card{padding:12px 16px}
+.pf .mrow{display:grid;grid-template-columns:1fr 1fr}
+.pf .mi{display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
+.pf .mi+.mi{border-inline-start:1px solid #F3F1F9}
+.pf .mi .l{font-size:12px;color:#7E7A96}
+.pf .mi .v{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:#17142B}
+.pf .mi .s{font-size:11px;color:#7E7A96}
 </style>
 <style id="app-insets">
 .pf{padding-top:0!important;padding-bottom:calc(var(--nav-h,0px) + 20px)!important}
@@ -693,7 +675,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=15"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=25"></script>
+<script src="js/portfolio-page.js?v=26"></script>
 <script>
 /* never let the page sit sideways (iPhone can pan it after typing) */
 window.addEventListener('scroll', function () { if (window.scrollX) window.scrollTo(0, window.scrollY); }, { passive: true });

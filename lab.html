@@ -356,6 +356,7 @@ function redraw() {
 /* ---------- actions ---------- */
 function logDecision(action, why, expect) {
   var arr = ((D.datasets || {}).decisions || []).slice();
+  if (arr.some(function (x) { return x.date === today() && x.action === action; })) return; // no double entries
   arr.push({ date: today(), action: action, why: why || '', expect: expect || '', result: '' });
   pushData('datasets.decisions', arr);
 }
