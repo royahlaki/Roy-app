@@ -918,26 +918,42 @@ dash.calc('scenario_status', {
   inputs: ['scenarios', 'summary', 'alerts8'],
   fn: (scenarios, summary, alerts8) => {
     const s = summary[0];
-    return scenarios.map(r => ({ ...r, active: r.check === 'cash_low' ? s.cash_pct < 25 : r.check === 'loss8' ? alerts8.length > 0 : r.check === 'top3' ? s.conc_pct > CONC_MAX : null }));
+    return scenarios.map(r => ({ ...r, group: r.group || 'now',
+      active: r.check === 'cash_low' ? s.cash_pct < 25 : r.check === 'loss8' ? alerts8.length > 0 : r.check === 'top3' ? s.conc_pct > CONC_MAX : r.check === 'ai' ? s.ai_pct > 15 : null }));
   }
 });
+/* Rules card (20.11.2026): three groups. "now" is checked against the portfolio; "watch" is looked at, not acted on;
+   "build" waits until the portfolio is built and stays folded. */
 const drawScen = () => {
   const SS = dash.data('scenario_status'), box = document.getElementById('scen'), cnt = document.getElementById('scen-cnt');
   box.innerHTML = '';
   if (SS.status !== 'ok') { cnt.className = 'pill gry'; cnt.textContent = '—'; return; }
-  const rows = [...SS.data].sort((a, b) => ((b.active === true) - (a.active === true)) || (Number(a.order) - Number(b.order)));
-  const n = rows.filter(r => r.active === true).length;
+  const now = SS.data.filter(r => r.group === 'now');
+  const n = now.filter(r => r.active === true).length;
   cnt.className = 'pill ' + (n ? 'red' : 'grn');
-  cnt.textContent = n ? `${n} קורים עכשיו` : 'אין תרחיש פעיל';
-  rows.forEach(r => {
+  cnt.textContent = n ? `${n} קורים עכשיו` : 'הכל תקין';
+  const cell = (r, dots) => {
     const d = el('div', 'sc' + (r.active === true ? ' on' : ''));
-    d.title = r.monitor ? 'בודקים: ' + r.monitor : '';
-    const t = el('div', 't'), dot = el('i');
-    dot.style.background = r.active === true ? '#DC2626' : r.active === false ? '#16A34A' : '#9CA3AF';
-    t.append(dot, String(r.trigger));
+    const t = el('div', 't');
+    if (dots) { const dot = el('i'); dot.style.background = r.active === true ? '#D6294A' : r.active === false ? '#0E9F6E' : '#B9B5CC'; t.appendChild(dot); }
+    t.append(String(r.trigger));
     d.append(t, el('div', 'a', String(r.action)));
-    box.appendChild(d);
-  });
+    return d;
+  };
+  const grid = (rows, dots) => { const g = el('div', 'sg'); rows.forEach(r => g.appendChild(cell(r, dots))); return g; };
+  const by = k => SS.data.filter(r => r.group === k).sort((a, b) => Number(a.order) - Number(b.order));
+  const nowRows = [...now].sort((a, b) => ((b.active === true) - (a.active === true)) || (Number(a.order) - Number(b.order)));
+  box.append(el('div', 'sgh', 'פעילים עכשיו'), grid(nowRows, true),
+    el('div', 'sg-leg', ''));
+  box.lastChild.innerHTML = '<span><i style="background:#D6294A"></i>קורה עכשיו</span><span><i style="background:#0E9F6E"></i>לא קורה</span><span><i style="background:#B9B5CC"></i>בודקים בעצמי</span>';
+  const w = by('watch'); if (w.length) box.append(el('div', 'sgh', 'להתבונן, לא לפעול'), grid(w, false));
+  const b = by('build');
+  if (b.length) {
+    const det = document.createElement('details'); det.className = 'sgb'; det.open = !!window._sgbOpen;
+    det.addEventListener('toggle', () => { window._sgbOpen = det.open; });
+    const sm = document.createElement('summary'); sm.append(el('span', '', 'בבניית התיק'), el('small', '', 'לעתיד, דרך שער הכניסה'));
+    det.append(sm, grid(b, false)); box.appendChild(det);
+  }
 };
 const _pfDraw3 = window.pfDraw;
 window.pfDraw = () => { _pfDraw3(); drawScen(); };

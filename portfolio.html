@@ -341,7 +341,6 @@ body{position:relative}
 <section class="card" id="scen-card" style="padding:12px 18px">
   <details id="scen-det">
   <summary class="row scen-sum"><h2>הכללים שלי</h2><span class="pill gry" id="scen-cnt" data-source="scenario_status">—</span></summary>
-  <p class="note">הפעולה נקבעה מראש, כדי שבזמן אמת לא מחליטים מהבטן.</p>
   <style>
   .pf .scen-sum{cursor:pointer;list-style:none}
   .pf .scen-sum::-webkit-details-marker{display:none}
@@ -358,8 +357,7 @@ body{position:relative}
   .pf .sg-leg{display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--g-mut);margin-top:8px}
   .pf .sg-leg i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-inline-end:4px;vertical-align:middle}
   </style>
-  <div class="sg" id="scen" data-source="scenario_status"></div>
-  <div class="sg-leg"><span><i style="background:#DC2626"></i>קורה עכשיו</span><span><i style="background:#16A34A"></i>לא קורה</span><span><i style="background:#9CA3AF"></i>בודקים ידנית</span></div>
+  <div id="scen" data-source="scenario_status"></div>
   </details>
 </section>
 </div>
@@ -654,6 +652,19 @@ body{position:relative}
 .pf .detail .mr b.mut{font-weight:400;color:#7E7A96}
 .pf .detail .mr b.t-red{color:#D6294A}.pf .detail .mr b.t-grn{color:#0E9F6E}.pf .detail .mr b.t-amb{color:#C27A12}
 .pf .detail>.mut{display:block;text-align:center;font-size:12px}
+.pf #scen .sgh{font-size:12px;font-weight:600;color:#7E7A96;margin:14px 2px 6px}
+.pf #scen .sgh:first-child{margin-top:2px}
+.pf #scen .sg .sc{padding:10px 10px}
+.pf #scen .sg-leg{margin-top:8px}
+.pf #scen .sgb{margin-top:14px}
+.pf #scen .sgb summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#7E7A96;padding:0 2px 6px}
+.pf #scen .sgb summary::-webkit-details-marker{display:none}
+.pf #scen .sgb summary::after{content:"\203A";margin-inline-start:auto;color:#B9B5CC}
+.pf #scen .sgb[open] summary::after{content:"\2304"}
+.pf #scen .sgb summary small{font-weight:400;font-size:11px;color:#B9B5CC}
+.pf #scen .sgb .sg{opacity:.75}
+.pf #scen .sg .sc:only-child{grid-column:1 / -1}
+@media (max-width:760px){.pf #scen .sg .sc:last-child:nth-child(odd){grid-column:1 / -1}}
 .pf .mdet .mnote{font-size:11px;color:#7E7A96;text-align:center;margin-top:6px}
 </style>
 <style id="app-insets">
@@ -693,7 +704,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=15"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=28"></script>
+<script src="js/portfolio-page.js?v=29"></script>
 <script>
 /* never let the page sit sideways (iPhone can pan it after typing) */
 window.addEventListener('scroll', function () { if (window.scrollX) window.scrollTo(0, window.scrollY); }, { passive: true });
