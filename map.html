@@ -101,8 +101,9 @@ footer{margin-top:28px;text-align:center;color:var(--mut);font-size:11px;line-he
 .tag.th{color:var(--thesis);border-color:rgba(199,125,255,.5)}
 .tag.il{color:var(--il);border-color:rgba(77,163,255,.5)}
 .close{display:block;width:100%;margin-top:16px;background:transparent;border:1px solid var(--neon);color:var(--neon);font:700 14px Heebo;border-radius:12px;padding:10px;cursor:pointer}
-.tabs{display:flex;gap:2px;background:rgba(118,118,128,.18);border-radius:11px;padding:2px;overflow-x:auto}
-.tabs button{flex:1 0 auto;border:0;background:none;color:var(--mut);font:600 12.5px Heebo;padding:7px 9px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.tabs{display:flex;gap:1px;background:rgba(118,118,128,.18);border-radius:11px;padding:2px;overflow:hidden}
+.tabs button{flex:1 1 0;min-width:0;border:0;background:none;color:var(--mut);font:600 12px Heebo;letter-spacing:-.2px;padding:7px 2px;border-radius:9px;cursor:pointer;white-space:nowrap}
+@media(min-width:600px){.tabs button{font-size:13px;padding:7px 6px}}
 .tabs button.on{background:var(--neon);color:#0a0d08}
 .tools{display:flex;align-items:center;gap:10px;margin-top:8px}
 .tools .legend{margin-top:0;flex:1;justify-content:flex-start;gap:10px}

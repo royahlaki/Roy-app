@@ -256,6 +256,10 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
 #q{flex:1;min-width:0;width:100%;background:transparent;border:0;padding:5px 0;font:600 16px Oswald,Heebo;letter-spacing:.5px;direction:ltr;text-align:left;text-transform:uppercase;color:var(--txt)}
 #q::placeholder{font:500 13px Heebo;letter-spacing:0;text-transform:none;color:var(--mut);text-align:right}
 #q:focus{border:0}
+.qbox{justify-content:center;gap:0}
+#q{flex:0 0 0;width:0}
+.qbox:focus-within,.qbox:has(#q:not(:placeholder-shown)){gap:5px;justify-content:flex-start}
+.qbox:focus-within #q,#q:not(:placeholder-shown){flex:1 1 auto}
 </style>
 <link rel="stylesheet" href="apple.css?v=1">
 </head>
@@ -280,7 +284,7 @@ footer{margin-top:30px;text-align:center;color:var(--mut);font-size:11px}
       <div class="lg-row"><span><i class="d-own"></i>בתיק</span><span><i class="d-il"></i>ישראלית</span><span><i class="d-spec"></i>ספקולטיבית</span></div>
       <div class="lg-row"><span><i class="d-s0"></i>לחקור</span><span><i class="d-s1"></i>בבדיקה</span><span><i class="d-s2"></i>מתאימה</span><span><i class="d-s3"></i>נפסלה</span></div>
     </div>
-    <label class="qbox"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" placeholder="טיקר" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+    <label class="qbox"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" placeholder=" " aria-label="חיפוש טיקר" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
   </div>
 </div>
 
