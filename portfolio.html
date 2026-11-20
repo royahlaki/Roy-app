@@ -298,9 +298,10 @@ body{position:relative}
 
 <section class="card" id="meta-card">
   <div class="mrow">
-    <div class="mi" id="m-beta-w" title="בטא: כמה התיק זז ביחס לשוק. 1 = כמו השוק, מתחת ל-1 רגוע ממנו."><span class="l">בטא התיק</span><b class="v" id="m-beta">—</b><span class="s" id="m-beta-l">—</span></div>
+    <div class="mi" id="m-beta-w"><span class="l">בטא התיק</span><b class="v" id="m-beta">—</b><span class="s" id="m-beta-l">—</span></div>
     <div class="mi" id="m-div-w"><span class="l">דיבידנד בשנה</span><b class="v" id="m-div">—</b><span class="s" id="m-div-y">—</span></div>
   </div>
+  <div class="mdet" id="m-det" hidden></div>
 </section>
 <section class="card" id="cash-card" style="padding:14px 18px">
   <div class="row"><h2>מזומן</h2><span class="pill" id="cash-pill" data-source="summary">—</span></div>
@@ -637,6 +638,16 @@ body{position:relative}
 .pf .mi .l{font-size:12px;color:#7E7A96}
 .pf .mi .v{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:#17142B}
 .pf .mi .s{font-size:11px;color:#7E7A96}
+.pf .mi{cursor:pointer;border-radius:10px;padding:4px 0;-webkit-tap-highlight-color:transparent}
+.pf .mi .l::after{content:" \203A";color:#B9B5CC}
+.pf .mi.on .l::after{content:" \2304"}
+.pf .mi.on{background:#FAF9FD}
+.pf .mdet{margin-top:10px;border-top:1px solid #F3F1F9;padding-top:6px}
+.pf .mdet .mr{display:flex;justify-content:space-between;padding:6px 4px;font-size:13px;color:#48445F;border-bottom:1px solid #F3F1F9}
+.pf .mdet .mr:last-of-type{border-bottom:0}
+.pf .mdet .mr b{font-weight:600;color:#17142B;font-variant-numeric:tabular-nums}
+.pf .mdet .mr b small{font-weight:400;color:#7E7A96;font-size:12px;margin:0 10px;display:inline-block}
+.pf .mdet .mnote{font-size:11px;color:#7E7A96;text-align:center;margin-top:6px}
 </style>
 <style id="app-insets">
 .pf{padding-top:0!important;padding-bottom:calc(var(--nav-h,0px) + 20px)!important}
@@ -675,7 +686,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=15"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=26"></script>
+<script src="js/portfolio-page.js?v=27"></script>
 <script>
 /* never let the page sit sideways (iPhone can pan it after typing) */
 window.addEventListener('scroll', function () { if (window.scrollX) window.scrollTo(0, window.scrollY); }, { passive: true });
@@ -794,18 +805,18 @@ html,body{background:#F7F8FD!important}
 .pf .pill.rep{border-color:#A995F7!important}
 /* weights donut: logos inside the ring, tap a slice for its name */
 .pf .wd{display:flex;justify-content:center;margin-top:10px}
-.pf .wd .wst{flex:none;width:260px;max-width:100%;margin:0}
+.pf .wd .wst{flex:none;width:210px;max-width:100%;margin:0}
 .pf .wd .wst-bar{display:block;height:auto;position:relative;gap:0}
 .pf .wd .wd-svg{display:block;width:100%;height:auto;overflow:visible}
 .pf .wd .wd-svg path{cursor:pointer;transition:opacity .2s}
 .pf .wd .wd-svg.sel path:not(.on){opacity:.35}
-.pf .wd .wst-bar .wd-lg{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(27,31,58,.18);
+.pf .wd .wst-bar .wd-lg{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;font-size:8px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(27,31,58,.18);
   display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none;font-size:10px;font-weight:700;color:var(--g-sub)}
-.pf .wd-lg img{width:20px;height:20px;object-fit:contain}
+.pf .wd-lg img{width:16px;height:16px;object-fit:contain}
 .pf .wd-lg.tv img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.pf .wd .wst-bar .wd-lg.tv{width:32px;height:32px;margin:-16px 0 0 -16px;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(27,31,58,.2)}
+.pf .wd .wst-bar .wd-lg.tv{width:24px;height:24px;margin:-12px 0 0 -12px;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(27,31,58,.2)}
 .pf .wd .wst-bar .wd-mid{position:absolute;inset:0;height:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;line-height:1.2;text-align:center}
-.pf .wd-mid b{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.pf .wd-mid b{font-size:21px;font-weight:600;letter-spacing:-.02em}
 .pf .wd-mid small{font-size:12px;color:var(--g-mut)}
 .pf .wd-mid small.lim{font-size:11px;margin-top:2px}
 .pf .wd .wst-leg{display:none!important}

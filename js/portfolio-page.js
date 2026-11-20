@@ -242,11 +242,11 @@ window.pfDraw = () => {
       const CC = H.status === 'ok' ? concOf(H.data) : TOP3, HD = H.status === 'ok' ? H.data : [];
       const top = W.data.filter(d => CC.includes(d.ticker)), rest = W.data.filter(d => !CC.includes(d.ticker));
       const concPct = S.data[0].conc_pct, over = concPct > CONC_MAX;
-      const HOT = over ? ['#E0566A', '#EC8A98'] : ['#7E86B8', '#959CC6'], SOFT = ['#AEB5DA', '#BCC2E1', '#C9CEE8', '#D5D9EE', '#E0E3F3'];
+      const HOT = ['#9A86E4', '#B1A2EB'], SOFT = ['#C9CEE8', '#D3D7ED', '#DCDFF1', '#E3E6F4', '#EAECF7']; // calm: red only in the numbers
       const full = d => HD.find(h => h.ticker === d.ticker) || d;
       const segs = [...top.map((d, i) => ({ n: d.name, w: d.weight, c: HOT[i % 2], h: full(d) })), ...rest.map((d, i) => ({ n: d.name, w: d.weight, c: SOFT[i % SOFT.length], h: full(d) })),
-        { n: 'מזומן', w: S.data[0].cash_pct, c: C.blu, cash: true }];
-      const sz = 260, R = sz / 2, ir = R - 44, mr = (R + ir) / 2;
+        { n: 'מזומן', w: S.data[0].cash_pct, c: '#E9E4FA', cash: true }];
+      const sz = 260, R = sz / 2, ir = R - 30, mr = (R + ir) / 2;
       const svg = d3.select(wbar).append('svg').attr('viewBox', `0 0 ${sz} ${sz}`).attr('class', 'wd-svg');
       const g = svg.append('g').attr('transform', `translate(${R},${R})`);
       const arcs = d3.pie().sort(null).value(d => d.w).padAngle(.014)(segs);
@@ -347,11 +347,22 @@ window.pfDraw = () => {
       }
       const DV = D('dividends');
       if (DV.status === 'ok') { md.textContent = ils(DV.data[0].annual_ils); my.textContent = pct(DV.data[0].yield_pct) + ' מהתיק, לפני מס'; }
-      if (H.status === 'ok') {
-        const bt = H.data.filter(h => h.beta !== null && h.beta !== undefined).sort((a, b) => a.beta - b.beta).map(h => `${h.name}: ${d3.format('.2f')(h.beta)}`);
-        document.getElementById('m-beta-w').title = 'כמה התיק זז ביחס לשוק. 1 = כמו השוק.\n' + bt.join('\n');
-        mw.title = H.data.filter(h => h.dividend && Number(h.dividend) > 0).map(h => ({ n: h.name, y: Number(h.dividend), a: Number(h.value_ils) * Number(h.dividend) / 100 }))
-          .sort((p, q) => q.a - p.a).map(r => `${r.n}: ${ils(r.a)} (${d3.format('.1f')(r.y)}%)`).join('\n');
+      const det = document.getElementById('m-det'), bw = document.getElementById('m-beta-w');
+      if (H.status === 'ok' && det) {
+        const rowsOf = k => k === 'beta'
+          ? H.data.filter(h => h.beta !== null && h.beta !== undefined).sort((a, b) => b.beta - a.beta).map(h => [h.name, d3.format('.2f')(h.beta)])
+          : H.data.filter(h => h.dividend && Number(h.dividend) > 0).map(h => ({ n: h.name, y: Number(h.dividend), a: Number(h.value_ils) * Number(h.dividend) / 100 }))
+              .sort((p, q) => q.a - p.a).map(r => [r.n, ils(r.a), d3.format('.1f')(r.y) + '%']);
+        const open = k => {
+          det.innerHTML = '';
+          rowsOf(k).forEach(([n, v, y]) => { const r = el('div', 'mr'); const b = el('b', '', v); if (y) b.append(el('small', '', y)); r.append(el('span', '', n), b); det.appendChild(r); });
+          if (k === 'beta') det.appendChild(el('div', 'mnote', '1 = זז כמו השוק. מתחת ל-1 רגוע ממנו.'));
+          det.hidden = false; det.dataset.k = k;
+          bw.classList.toggle('on', k === 'beta'); mw.classList.toggle('on', k === 'div');
+        };
+        const toggle = k => { if (!det.hidden && det.dataset.k === k) { det.hidden = true; det.dataset.k = ''; bw.classList.remove('on'); mw.classList.remove('on'); } else open(k); };
+        bw.onclick = () => toggle('beta'); mw.onclick = () => toggle('div');
+        if (!det.hidden && det.dataset.k) open(det.dataset.k);
       }
     }
 
