@@ -246,7 +246,7 @@ window.pfDraw = () => {
       const full = d => HD.find(h => h.ticker === d.ticker) || d;
       const segs = [...top.map((d, i) => ({ n: d.name, w: d.weight, c: HOT[i % 2], h: full(d) })), ...rest.map((d, i) => ({ n: d.name, w: d.weight, c: SOFT[i % SOFT.length], h: full(d) })),
         { n: 'מזומן', w: S.data[0].cash_pct, c: '#E9E4FA', cash: true }];
-      const sz = 260, R = sz / 2, ir = R - 30, mr = (R + ir) / 2;
+      const sz = 260, R = sz / 2, ir = R - 40, mr = (R + ir) / 2;
       const svg = d3.select(wbar).append('svg').attr('viewBox', `0 0 ${sz} ${sz}`).attr('class', 'wd-svg');
       const g = svg.append('g').attr('transform', `translate(${R},${R})`);
       const arcs = d3.pie().sort(null).value(d => d.w).padAngle(.014)(segs);
@@ -329,10 +329,14 @@ window.pfDraw = () => {
       g.append('text').attr('y', d => r(d.weight) >= 14 ? 4 : (d._n % 2 ? r(d.weight) + 12 : -r(d.weight) - 4)).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-weight', 600)
         .attr('fill', d => r(d.weight) >= 14 ? '#FFFFFF' : C.fg).text(d => d.ticker);
       g.on('click', (e, d) => {
-        const h = byT[d.ticker]; detail.innerHTML = '';
-        detail.appendChild(el('b', '', `${h.name} · ${pct(d.weight)} מהתיק`));
-        detail.appendChild(el('div', '', `תמחור ${h.risk_price} · מימון ${h.risk_fund} · מכפיל עתידי ${num(h.fwd_pe, '.1f')} · מכפיל מכירות ${num(h.ps, '.1f')} · נתון מ-${h.data_date}`));
-        detail.appendChild(el('div', 'mut', h.note));
+        const h = byT[d.ticker];
+        if (detail.dataset.tk === d.ticker) { detail.dataset.tk = ''; detail.innerHTML = ''; detail.appendChild(el('span', 'mut', 'הקש על נקודה כדי לראות פרטים.')); return; }
+        detail.dataset.tk = d.ticker; detail.innerHTML = '';
+        const hd = el('div', 'rd-h'); hd.append(el('b', '', h.name), el('span', 'pill gry', pct(d.weight) + ' מהתיק')); detail.appendChild(hd);
+        const rk = v => v === null || v === undefined ? ['—', ''] : [String(v), riskCls(v)];
+        [['סיכון תמחור', ...rk(h.risk_price)], ['סיכון מימון', ...rk(h.risk_fund)],
+         ['מכפיל רווח עתידי', num(h.fwd_pe, '.1f'), ''], ['מכפיל מכירות', num(h.ps, '.1f'), ''], ['נתון מ-', h.data_date || '—', 'mut']]
+          .forEach(([l, v, c]) => { const r = el('div', 'mr'); r.append(el('span', '', l), el('b', c, v)); detail.appendChild(r); });
       }).on('mousemove', (e, d) => { tip.textContent = `${d.name}: תמחור ${d.risk_price}, מימון ${d.risk_fund}, משקל ${pct(d.weight)}`; placeTip(box, tip, e); })
         .on('mouseleave', () => { tip.style.display = 'none'; });
     }

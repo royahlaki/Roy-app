@@ -320,7 +320,7 @@ body{position:relative}
 <section class="card" id="risk-card">
   <h2>מפת סיכונים</h2>
   <div class="chart tall" id="scatter" data-source="weights"><div class="tip" id="tip"></div></div>
-  <div class="detail" id="detail"><span class="mut">לחץ על נקודה כדי לראות פרטים.</span></div>
+  <div class="detail" id="detail"><span class="mut">הקש על נקודה כדי לראות פרטים.</span></div>
 </section>
 
 
@@ -647,6 +647,13 @@ body{position:relative}
 .pf .mdet .mr:last-of-type{border-bottom:0}
 .pf .mdet .mr b{font-weight:600;color:#17142B;font-variant-numeric:tabular-nums}
 .pf .mdet .mr b small{font-weight:400;color:#7E7A96;font-size:12px;margin:0 10px;display:inline-block}
+.pf .detail .rd-h{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 8px}
+.pf .detail .rd-h b{font-size:15px;font-weight:600;color:#17142B}
+.pf .detail .mr{display:flex;justify-content:space-between;padding:7px 4px;font-size:13px;color:#48445F;border-top:1px solid #F3F1F9}
+.pf .detail .mr b{font-weight:600;color:#17142B;font-variant-numeric:tabular-nums}
+.pf .detail .mr b.mut{font-weight:400;color:#7E7A96}
+.pf .detail .mr b.t-red{color:#D6294A}.pf .detail .mr b.t-grn{color:#0E9F6E}.pf .detail .mr b.t-amb{color:#C27A12}
+.pf .detail>.mut{display:block;text-align:center;font-size:12px}
 .pf .mdet .mnote{font-size:11px;color:#7E7A96;text-align:center;margin-top:6px}
 </style>
 <style id="app-insets">
@@ -686,7 +693,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=15"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=27"></script>
+<script src="js/portfolio-page.js?v=28"></script>
 <script>
 /* never let the page sit sideways (iPhone can pan it after typing) */
 window.addEventListener('scroll', function () { if (window.scrollX) window.scrollTo(0, window.scrollY); }, { passive: true });
@@ -805,16 +812,16 @@ html,body{background:#F7F8FD!important}
 .pf .pill.rep{border-color:#A995F7!important}
 /* weights donut: logos inside the ring, tap a slice for its name */
 .pf .wd{display:flex;justify-content:center;margin-top:10px}
-.pf .wd .wst{flex:none;width:210px;max-width:100%;margin:0}
+.pf .wd .wst{flex:none;width:230px;max-width:100%;margin:0}
 .pf .wd .wst-bar{display:block;height:auto;position:relative;gap:0}
 .pf .wd .wd-svg{display:block;width:100%;height:auto;overflow:visible}
 .pf .wd .wd-svg path{cursor:pointer;transition:opacity .2s}
 .pf .wd .wd-svg.sel path:not(.on){opacity:.35}
-.pf .wd .wst-bar .wd-lg{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;font-size:8px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(27,31,58,.18);
+.pf .wd .wst-bar .wd-lg{position:absolute;width:28px;height:28px;margin:-14px 0 0 -14px;font-size:9px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(27,31,58,.18);
   display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none;font-size:10px;font-weight:700;color:var(--g-sub)}
-.pf .wd-lg img{width:16px;height:16px;object-fit:contain}
+.pf .wd-lg img{width:18px;height:18px;object-fit:contain}
 .pf .wd-lg.tv img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.pf .wd .wst-bar .wd-lg.tv{width:24px;height:24px;margin:-12px 0 0 -12px;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(27,31,58,.2)}
+.pf .wd .wst-bar .wd-lg.tv{width:28px;height:28px;margin:-14px 0 0 -14px;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(27,31,58,.2)}
 .pf .wd .wst-bar .wd-mid{position:absolute;inset:0;height:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;line-height:1.2;text-align:center}
 .pf .wd-mid b{font-size:21px;font-weight:600;letter-spacing:-.02em}
 .pf .wd-mid small{font-size:12px;color:var(--g-mut)}
