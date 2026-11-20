@@ -652,19 +652,24 @@ body{position:relative}
 .pf .detail .mr b.mut{font-weight:400;color:#7E7A96}
 .pf .detail .mr b.t-red{color:#D6294A}.pf .detail .mr b.t-grn{color:#0E9F6E}.pf .detail .mr b.t-amb{color:#C27A12}
 .pf .detail>.mut{display:block;text-align:center;font-size:12px}
-.pf #scen .sgh{font-size:12px;font-weight:600;color:#7E7A96;margin:14px 2px 6px}
-.pf #scen .sgh:first-child{margin-top:2px}
-.pf #scen .sg .sc{padding:10px 10px}
-.pf #scen .sg-leg{margin-top:8px}
-.pf #scen .sgb{margin-top:14px}
-.pf #scen .sgb summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#7E7A96;padding:0 2px 6px}
+.pf #scen .sgh{font-size:12px;font-weight:600;color:#7E7A96;margin:16px 4px 6px}
+.pf #scen .sgh:first-child{margin-top:4px}
+.pf #scen .rl{display:flex;flex-direction:column}
+.pf #scen .ri{padding:11px 4px;border-bottom:1px solid #F3F1F9;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pf #scen .ri:last-child{border-bottom:0}
+.pf #scen .rh{display:flex;align-items:center;gap:10px;font-size:14px;color:#17142B}
+.pf #scen .rh i{flex:none;width:8px;height:8px;border-radius:50%}
+.pf #scen .rh span{flex:1}
+.pf #scen .rh::after{content:"\2039";color:#C9C5DA;font-size:16px;line-height:1}
+.pf #scen .ri.op .rh::after{content:"\2304"}
+.pf #scen .ri.on .rh span{color:#D6294A;font-weight:600}
+.pf #scen .rd{margin:10px 18px 2px 0;padding:10px 12px;background:#FAF9FD;border:1px solid #E6E3F2;border-radius:10px;font-size:13px;line-height:1.6;color:#48445F}
+.pf #scen .sgb{margin-top:16px}
+.pf #scen .sgb summary{list-style:none;cursor:pointer;display:flex;align-items:center;font-size:12px;font-weight:600;color:#7E7A96;padding:0 4px 6px}
 .pf #scen .sgb summary::-webkit-details-marker{display:none}
-.pf #scen .sgb summary::after{content:"\203A";margin-inline-start:auto;color:#B9B5CC}
+.pf #scen .sgb summary::after{content:"\2039";margin-inline-start:auto;color:#C9C5DA;font-size:16px}
 .pf #scen .sgb[open] summary::after{content:"\2304"}
-.pf #scen .sgb summary small{font-weight:400;font-size:11px;color:#B9B5CC}
-.pf #scen .sgb .sg{opacity:.75}
-.pf #scen .sg .sc:only-child{grid-column:1 / -1}
-@media (max-width:760px){.pf #scen .sg .sc:last-child:nth-child(odd){grid-column:1 / -1}}
+.pf #scen .sgb .rh{color:#48445F}
 .pf .mdet .mnote{font-size:11px;color:#7E7A96;text-align:center;margin-top:6px}
 </style>
 <style id="app-insets">
@@ -704,7 +709,7 @@ html,body{background:#F6F8FD!important}
 <script src="js/core.js?v=15"></script>
 <script src="js/d3.min.js"></script>
 <script src="js/dash.js"></script>
-<script src="js/portfolio-page.js?v=29"></script>
+<script src="js/portfolio-page.js?v=30"></script>
 <script>
 /* never let the page sit sideways (iPhone can pan it after typing) */
 window.addEventListener('scroll', function () { if (window.scrollX) window.scrollTo(0, window.scrollY); }, { passive: true });

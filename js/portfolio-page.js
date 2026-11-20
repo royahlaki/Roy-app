@@ -845,7 +845,14 @@ const drawJournal = () => {
     const amt = [jt(r.amount_ils) ? ils(Number(r.amount_ils)) : '', jt(r.price) ? 'במחיר ' + r.price : ''].filter(Boolean).join(' · ');
     const mv = jSince(r), sn = el('div', 'since');
     if (amt) sn.appendChild(el('span', '', amt));
-    if (mv !== null) { sn.appendChild(el('span', '', '·')); sn.append('מאז '); sn.appendChild(el('b', '', (mv >= 0 ? '↑ ' : '↓ ') + Math.abs(mv).toFixed(1) + '%')); }
+    if (mv !== null) {
+      const sell = r.side === 'מכירה', good = sell ? mv < 0 : mv >= 0;
+      sn.appendChild(el('span', '', '·'));
+      if (sell) sn.append('היום ' + ils(jNow(r.ticker)) + ' ');
+      else sn.append('מאז ');
+      sn.appendChild(el('b', good ? 't-grn' : 't-red', (mv >= 0 ? '↑ ' : '↓ ') + Math.abs(mv).toFixed(1) + '%'));
+      if (sell) sn.title = good ? 'המניה ירדה מאז המכירה: המכירה הייתה טובה' : 'המניה עלתה מאז המכירה';
+    }
     d.appendChild(sn);
     const more = el('div', 'more'), tb = el('div', 'jtab');
     [['למה', r.why], ['הרגשה', r.feeling], ['שוק', r.market], ['ציפייה', r.expect], ['בפועל', r.result]].forEach(([k, v]) => {
@@ -932,27 +939,30 @@ const drawScen = () => {
   const n = now.filter(r => r.active === true).length;
   cnt.className = 'pill ' + (n ? 'red' : 'grn');
   cnt.textContent = n ? `${n} קורים עכשיו` : 'הכל תקין';
-  const cell = (r, dots) => {
-    const d = el('div', 'sc' + (r.active === true ? ' on' : ''));
-    const t = el('div', 't');
-    if (dots) { const dot = el('i'); dot.style.background = r.active === true ? '#D6294A' : r.active === false ? '#0E9F6E' : '#B9B5CC'; t.appendChild(dot); }
-    t.append(String(r.trigger));
-    d.append(t, el('div', 'a', String(r.action)));
-    return d;
+  const open = window._scOpen || (window._scOpen = {});
+  const list = (rows, dots) => {
+    const g = el('div', 'rl');
+    rows.forEach(r => {
+      const it = el('div', 'ri' + (r.active === true ? ' on' : '') + (open[r.id] ? ' op' : ''));
+      const hd = el('div', 'rh'), dot = el('i');
+      dot.style.background = !dots ? '#D6D2E6' : r.active === true ? '#D6294A' : r.active === false ? '#0E9F6E' : '#B9B5CC';
+      hd.append(dot, el('span', '', String(r.short || r.trigger)));
+      it.appendChild(hd);
+      if (open[r.id]) it.appendChild(el('div', 'rd', String(r.desc || r.action || '')));
+      it.onclick = () => { open[r.id] = !open[r.id]; drawScen(); };
+      g.appendChild(it);
+    });
+    return g;
   };
-  const grid = (rows, dots) => { const g = el('div', 'sg'); rows.forEach(r => g.appendChild(cell(r, dots))); return g; };
   const by = k => SS.data.filter(r => r.group === k).sort((a, b) => Number(a.order) - Number(b.order));
-  const nowRows = [...now].sort((a, b) => ((b.active === true) - (a.active === true)) || (Number(a.order) - Number(b.order)));
-  box.append(el('div', 'sgh', 'פעילים עכשיו'), grid(nowRows, true),
-    el('div', 'sg-leg', ''));
-  box.lastChild.innerHTML = '<span><i style="background:#D6294A"></i>קורה עכשיו</span><span><i style="background:#0E9F6E"></i>לא קורה</span><span><i style="background:#B9B5CC"></i>בודקים בעצמי</span>';
-  const w = by('watch'); if (w.length) box.append(el('div', 'sgh', 'להתבונן, לא לפעול'), grid(w, false));
+  box.append(el('div', 'sgh', 'פעילים'), list(by('now'), true));
+  const w = by('watch'); if (w.length) box.append(el('div', 'sgh', 'להתבונן'), list(w, false));
   const b = by('build');
   if (b.length) {
     const det = document.createElement('details'); det.className = 'sgb'; det.open = !!window._sgbOpen;
     det.addEventListener('toggle', () => { window._sgbOpen = det.open; });
-    const sm = document.createElement('summary'); sm.append(el('span', '', 'בבניית התיק'), el('small', '', 'לעתיד, דרך שער הכניסה'));
-    det.append(sm, grid(b, false)); box.appendChild(det);
+    const sm = document.createElement('summary'); sm.append(el('span', '', 'בבניית התיק'));
+    det.append(sm, list(b, false)); box.appendChild(det);
   }
 };
 const _pfDraw3 = window.pfDraw;
